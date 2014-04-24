@@ -3,6 +3,6 @@
 
 TEST(TestSome, return_value_of_some_method)
 {
-    ::some s;
+    kodo_python::some s;
     EXPECT_TRUE(s.some_method());
 }
