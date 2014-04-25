@@ -1,9 +1,17 @@
 # encoding: utf-8
 
-bld.stlib(
-    features='cxx',
+bld(
+    features='cxx cxxshlib pyext',
     source=bld.path.ant_glob('**/*.cpp'),
-    target='kodo_python',
-    use=[],
+    target='kodo',
+    use=[
+    'boost_filesystem',
+    'boost_includes',
+    'boost_python',
+    'boost_system',
+    'fifi_includes',
+    'kodo_includes',
+    'sak_includes',
+    ],
     export_includes=['..']
 )
