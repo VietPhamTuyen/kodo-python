@@ -4,6 +4,7 @@
 #include <fifi/default_field.hpp>
 
 #include <kodo/rlnc/full_vector_codes.hpp>
+#include <kodo/rlnc/on_the_fly_codes.hpp>
 #include <kodo/systematic_operations.hpp>
 
 #include <sak/storage.hpp>
@@ -16,14 +17,36 @@ namespace kodo_python
 {
     BOOST_PYTHON_MODULE(kodo)
     {
-        factory<kodo::full_rlnc_encoder<fifi::binary>>("encoder_factory_binary");
-        encoder<kodo::full_rlnc_encoder<fifi::binary>>("encoder_binary");
-        factory<kodo::full_rlnc_decoder<fifi::binary>>("decoder_factory_binary");
-        decoder<kodo::full_rlnc_decoder<fifi::binary>>("decoder_binary");
+        // Full RLNC
+        factory<kodo::full_rlnc_encoder<fifi::binary>>("full_rlnc_encoder_factory_binary");
+        encoder<kodo::full_rlnc_encoder<fifi::binary>>("full_rlnc_encoder_binary");
+        factory<kodo::full_rlnc_decoder<fifi::binary>>("full_rlnc_decoder_factory_binary");
+        decoder<kodo::full_rlnc_decoder<fifi::binary>>("full_rlnc_decoder_binary");
 
-        factory<kodo::full_rlnc_encoder<fifi::binary8>>("encoder_factory_binary8");
-        encoder<kodo::full_rlnc_encoder<fifi::binary8>>("encoder_binary8");
-        factory<kodo::full_rlnc_decoder<fifi::binary8>>("decoder_factory_binary8");
-        decoder<kodo::full_rlnc_decoder<fifi::binary8>>("decoder_binary8");
+        factory<kodo::full_rlnc_encoder<fifi::binary8>>("full_rlnc_encoder_factory_binary8");
+        encoder<kodo::full_rlnc_encoder<fifi::binary8>>("full_rlnc_encoder_binary8");
+        factory<kodo::full_rlnc_decoder<fifi::binary8>>("full_rlnc_decoder_factory_binary8");
+        decoder<kodo::full_rlnc_decoder<fifi::binary8>>("full_rlnc_decoder_binary8");
+
+        factory<kodo::full_rlnc_encoder<fifi::binary16>>("full_rlnc_encoder_factory_binary16");
+        encoder<kodo::full_rlnc_encoder<fifi::binary16>>("full_rlnc_encoder_binary16");
+        factory<kodo::full_rlnc_decoder<fifi::binary16>>("full_rlnc_decoder_factory_binary16");
+        decoder<kodo::full_rlnc_decoder<fifi::binary16>>("full_rlnc_decoder_binary16");
+
+        // On the fly
+        factory<kodo::on_the_fly_encoder<fifi::binary>>("on_the_fly_encoder_factory_binary");
+        encoder<kodo::on_the_fly_encoder<fifi::binary>>("on_the_fly_encoder_binary");
+        factory<kodo::on_the_fly_decoder<fifi::binary>>("on_the_fly_decoder_factory_binary");
+        decoder<kodo::on_the_fly_decoder<fifi::binary>>("on_the_fly_decoder_binary");
+
+        factory<kodo::on_the_fly_encoder<fifi::binary8>>("on_the_fly_encoder_factory_binary8");
+        encoder<kodo::on_the_fly_encoder<fifi::binary8>>("on_the_fly_encoder_binary8");
+        factory<kodo::on_the_fly_decoder<fifi::binary8>>("on_the_fly_decoder_factory_binary8");
+        decoder<kodo::on_the_fly_decoder<fifi::binary8>>("on_the_fly_decoder_binary8");
+
+        factory<kodo::on_the_fly_encoder<fifi::binary16>>("on_the_fly_encoder_factory_binary16");
+        encoder<kodo::on_the_fly_encoder<fifi::binary16>>("on_the_fly_encoder_binary16");
+        factory<kodo::on_the_fly_decoder<fifi::binary16>>("on_the_fly_decoder_factory_binary16");
+        decoder<kodo::on_the_fly_decoder<fifi::binary16>>("on_the_fly_decoder_binary16");
     }
 }
