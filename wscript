@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+import os
+from waflib.TaskGen import feature, before_method, after_method
+
 APPNAME = 'kodo-python'
 VERSION = '0.0.0'
 
@@ -74,7 +77,13 @@ def configure(conf):
         conf.load_external_tool('install_path', 'wurf_install_path')
         conf.load_external_tool('project_gen', 'wurf_project_generator')
 
+        recurse_helper(conf, 'boost')
+        recurse_helper(conf, 'fifi')
+        recurse_helper(conf, 'gauge')
         recurse_helper(conf, 'gtest')
+        recurse_helper(conf, 'kodo')
+        recurse_helper(conf, 'sak')
+        recurse_helper(conf, 'tables')
 
         conf.load('python')
         conf.check_python_headers()
@@ -108,3 +117,21 @@ def build(bld):
         bld.recurse('test')
 
     bld.recurse('src/kodo_python')
+
+
+@feature('pyext')
+@after_method('apply_link')
+def test(self):
+    if self.bld.has_tool_option('run_tests'):
+        self.bld.add_post_fun(exec_test_python)
+
+
+def exec_test_python(bld):
+    path = os.path.join('build', 'src', 'kodo_python')
+    if os.path.exists('test'):
+        for f in os.listdir('test'):
+            if f.endswith('.py'):
+                test = os.path.join('test', f)
+                bld.cmd_and_log(
+                    'PYTHONPATH=$PYTHONPATH:{0} python {1}\n'.format(
+                        path, test))
