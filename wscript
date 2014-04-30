@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import os
-from waflib.TaskGen import feature, before_method, after_method
+from waflib.TaskGen import feature, after_method
 
 APPNAME = 'kodo-python'
 VERSION = '0.0.0'
