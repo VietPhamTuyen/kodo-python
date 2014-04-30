@@ -5,13 +5,13 @@ bld(
     source=bld.path.ant_glob('**/*.cpp'),
     target='kodo',
     use=[
-    'boost_filesystem',
-    'boost_includes',
-    'boost_python',
-    'boost_system',
-    'fifi_includes',
-    'kodo_includes',
-    'sak_includes',
+        'boost_filesystem',
+        'boost_includes',
+        'boost_python',
+        'boost_system',
+        'fifi_includes',
+        'kodo_includes',
+        'sak_includes',
     ],
     export_includes=['..']
 )
