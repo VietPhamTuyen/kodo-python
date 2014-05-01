@@ -9,6 +9,7 @@ project_name = 'kodo-python'
 project_dependencies = \
     [
         'waf-tools',
+        'boost',
         'gtest',
     ]
 

@@ -61,6 +61,7 @@ def options(opt):
         git_repository='github.com/steinwurf/external-waf-tools.git',
         major_version=2))
 
+    opt.load("wurf_configure_output")
     opt.load('wurf_dependency_bundle')
     opt.load('wurf_tools')
     opt.load('python')
@@ -86,9 +87,6 @@ def configure(conf):
         recurse_helper(conf, 'sak')
         recurse_helper(conf, 'tables')
 
-        conf.load('python')
-        conf.check_python_headers()
-
 
 def build(bld):
     # Remove NDEBUG which is added from conf.check_python_headers
@@ -98,7 +96,13 @@ def build(bld):
         while(flag_to_remove in bld.env[define]):
             bld.env[define].remove(flag_to_remove)
 
-    bld.env.append_value('CXXFLAGS', '-fPIC')
+    bld.env['CFLAGS_PYEXT'] = []
+    bld.env['CXXFLAGS_PYEXT'] = []
+
+    CXX = bld.env.get_flat("CXX")
+    # Matches both /usr/bin/g++ and /user/bin/clang++
+    if 'g++' in CXX or 'clang' in CXX:
+        bld.env.append_value('CXXFLAGS', '-fPIC')
 
     if bld.is_toplevel():
 
@@ -128,11 +132,12 @@ def test(self):
 
 
 def exec_test_python(bld):
-    path = os.path.join('build', 'src', 'kodo_python')
+    path = os.path.join(bld.out_dir, 'src', 'kodo_python')
+    custom_env = dict(os.environ)
+    custom_env['PYTHONPATH'] = path
+    print(custom_env['PYTHONPATH'])
     if os.path.exists('test'):
         for f in os.listdir('test'):
             if f.endswith('.py'):
                 test = os.path.join('test', f)
-                bld.cmd_and_log(
-                    'PYTHONPATH=$PYTHONPATH:{0} python {1}\n'.format(
-                        path, test))
+                bld.cmd_and_log('python {0}\n'.format(test), env = custom_env)
