@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+import os
 import sys
 import random
 
@@ -25,39 +26,36 @@ def main():
     # Create some data to encode. In this case we make a buffer
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
-    data_in = bytearray(encoder.block_size())
-
-    # Just for fun - fill the data with random data
-    for i in range(len(data_in)):
-        data_in[i] = chr(random.randint(0, 255))
+    # Just for fun - fill the input data with random data
+    data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = str(data_in)
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it
     encoder.set_symbols(data_in)
 
-    print("processing")
+    print("Processing")
     package_number = 0
     while not decoder.is_complete():
         # Encode a packet
-        sys.stdout.write("\tencoding package {} ...".format(package_number))
+        sys.stdout.write("\tEncoding packet {} ...".format(package_number))
         packet = encoder.encode()
         sys.stdout.write(" done!\n")
 
         # Pass that packet to the decoder
-        sys.stdout.write("\tdecoding package {} ...".format(package_number))
+        sys.stdout.write("\tDecoding packet {} ...".format(package_number))
         decoder.decode(packet)
         sys.stdout.write(" done!\n")
         package_number += 1
         print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
 
-    print("processing finished")
+    print("Processing finished")
 
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()
 
     # Check we properly decoded the data
-    print("checking results")
+    print("Checking results")
     if data_out == data_in:
         print("Data decoded correctly")
     else:
