@@ -1,8 +1,0 @@
-#! /usr/bin/env python
-# encoding: utf-8
-
-bld.program(
-    features='cxx test',
-    source=['kodo_python_tests.cpp'] + bld.path.ant_glob('src/*.cpp'),
-    target='kodo_python_tests',
-    use=['gtest'])

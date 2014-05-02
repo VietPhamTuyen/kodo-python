@@ -37,11 +37,6 @@ def options(opt):
         major_version=7))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
-        name='gtest',
-        git_repository='github.com/steinwurf/external-gtest.git',
-        major_version=2))
-
-    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='kodo',
         git_repository='github.com/steinwurf/kodo.git',
         major_version=16))
@@ -82,7 +77,6 @@ def configure(conf):
         recurse_helper(conf, 'boost')
         recurse_helper(conf, 'fifi')
         recurse_helper(conf, 'gauge')
-        recurse_helper(conf, 'gtest')
         recurse_helper(conf, 'kodo')
         recurse_helper(conf, 'sak')
         recurse_helper(conf, 'tables')
@@ -111,15 +105,9 @@ def build(bld):
         recurse_helper(bld, 'boost')
         recurse_helper(bld, 'fifi')
         recurse_helper(bld, 'gauge')
-        recurse_helper(bld, 'gtest')
         recurse_helper(bld, 'kodo')
         recurse_helper(bld, 'sak')
         recurse_helper(bld, 'tables')
-
-        # Only build test when executed from the
-        # top-level wscript i.e. not when included as a dependency
-        # in a recurse call
-        bld.recurse('test')
 
     bld.recurse('src/kodo_python')
 
@@ -135,7 +123,7 @@ def exec_test_python(bld):
     path = os.path.join(bld.out_dir, 'src', 'kodo_python')
     custom_env = dict(os.environ)
     custom_env['PYTHONPATH'] = path
-    print(custom_env['PYTHONPATH'])
+
     if os.path.exists('test'):
         for f in os.listdir('test'):
             if f.endswith('.py'):
