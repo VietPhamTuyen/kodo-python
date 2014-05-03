@@ -30,14 +30,14 @@ def main():
     data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = str(data_in)
 
-    # Assign the data buffer to the encoder so that we may start
-    # to produce encoded symbols from it
+    # Assign the data buffer to the encoder so that we can
+    # produce encoded symbols
     encoder.set_symbols(data_in)
 
     print("Processing")
     package_number = 0
     while not decoder.is_complete():
-        # Encode a packet
+        # Generate an encoded packet
         sys.stdout.write("\tEncoding packet {} ...".format(package_number))
         packet = encoder.encode()
         sys.stdout.write(" done!\n")
@@ -54,7 +54,7 @@ def main():
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()
 
-    # Check we properly decoded the data
+    # Check if we properly decoded the data
     print("Checking results")
     if data_out == data_in:
         print("Data decoded correctly")
