@@ -2,10 +2,10 @@
 # encoding: utf-8
 
 import os
-import random
 import unittest
 
 import kodo
+
 
 class TestEncodeDecode(unittest.TestCase):
 
@@ -36,19 +36,19 @@ class TestEncodeDecode(unittest.TestCase):
         # Assign the data buffer to the encoder so that we can
         # produce encoded symbols
         encoder.set_symbols(data_in)
-        
+
         while not decoder.is_complete():
-            # Generate an encoded packet            
+            # Generate an encoded packet
             packet = encoder.encode()
-            # Decode the encoded packet            
+            # Decode the encoded packet
             decoder.decode(packet)
 
         # The decoder is complete, now copy the symbols from the decoder
         data_out = decoder.copy_symbols()
 
-        # Check if we properly decoded the data        
+        # Check if we properly decoded the data
         self.failUnlessEqual(data_out, data_in)
-        
+
 
 def main():
     unittest.main()
