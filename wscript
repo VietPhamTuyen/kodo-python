@@ -83,7 +83,6 @@ def configure(conf):
 
 
 def build(bld):
-    print bld.env
     # Remove NDEBUG which is added from conf.check_python_headers
     flag_to_remove = 'NDEBUG'
     defines = ['DEFINES_PYEMBED', 'DEFINES_PYEXT']
