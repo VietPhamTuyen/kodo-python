@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <Python.h>
+#include <bytesobject.h>
+
 namespace kodo_python
 {
     template<class Encoder>
@@ -39,12 +42,15 @@ namespace kodo_python
     }
 
     template<class Encoder>
-    std::string encode(Encoder& encoder)
+    PyObject* encode(Encoder& encoder)
     {
         std::vector<uint8_t> payload(encoder.payload_size());
         uint32_t length = encoder.encode(payload.data());
-        std::string str(payload.begin(), payload.begin() + length);
-        return str;
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), length);
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), length);
+        #endif
     }
 
     template<class Coder>

@@ -14,48 +14,63 @@
 #include <kodo/print_cached_symbol_coefficients.hpp>
 #include <kodo/print_cached_symbol_data.hpp>
 
+#include <Python.h>
+#include <bytesobject.h>
+
 namespace kodo_python
 {
 
     template<class Decoder>
-    std::string copy_symbols(Decoder& decoder)
+    PyObject* copy_symbols(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.block_size());
         auto storage = sak::mutable_storage(payload.data(), decoder.block_size());
         decoder.copy_symbols(storage);
-        std::string str(payload.begin(), payload.end());
-        return str;
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        #endif
     }
 
     /// @todo: consider removing this method from the python api.
     template<class Decoder>
-    std::string copy_symbol(Decoder& decoder, uint32_t index)
+    PyObject* copy_symbol(Decoder& decoder, uint32_t index)
     {
-        std::vector<uint8_t> payload(decoder.payload_size());
-        auto storage = sak::mutable_storage(payload.data(), decoder.payload_size());
+        std::vector<uint8_t> payload(decoder.block_size());
+        auto storage = sak::mutable_storage(payload.data(), decoder.block_size());
         decoder.copy_symbol(index, storage);
-        std::string str(payload.begin(), payload.end());
-        return str;
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        #endif
     }
 
     template<class Decoder>
-    std::string recode(Decoder& decoder, const std::string& data)
+    PyObject* recode(Decoder& decoder, const std::string& data)
     {
         std::vector<uint8_t> payload(data.length());
         std::copy(data.c_str(), data.c_str() + data.length(), payload.data());
         decoder.recode(payload.data());
-        std::string str(payload.begin(), payload.end());
-        return str;
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), data.length());
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), data.length());
+        #endif
     }
 
     template<class Decoder>
-    std::string decode(Decoder& decoder, const std::string& data)
+    PyObject* decode(Decoder& decoder, const std::string& data)
     {
         std::vector<uint8_t> payload(data.length());
         std::copy(data.c_str(), data.c_str() + data.length(), payload.data());
         decoder.decode(payload.data());
-        std::string str(payload.begin(), payload.end());
-        return str;
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), data.length());
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), data.length());
+        #endif
     }
 
     template<class Decoder>
