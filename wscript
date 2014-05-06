@@ -83,6 +83,7 @@ def configure(conf):
 
 
 def build(bld):
+    print bld.env
     # Remove NDEBUG which is added from conf.check_python_headers
     flag_to_remove = 'NDEBUG'
     defines = ['DEFINES_PYEMBED', 'DEFINES_PYEXT']
@@ -120,12 +121,12 @@ def test(self):
 
 
 def exec_test_python(bld):
-    path = os.path.join(bld.out_dir, 'src', 'kodo_python')
-    custom_env = dict(os.environ)
-    custom_env['PYTHONPATH'] = path
+    python = bld.env['PYTHON'][0]
+    env = dict(os.environ)
+    env['PYTHONPATH'] = os.path.join(bld.out_dir, 'src', 'kodo_python')
 
     if os.path.exists('test'):
         for f in os.listdir('test'):
             if f.endswith('.py'):
                 test = os.path.join('test', f)
-                bld.cmd_and_log('python {0}\n'.format(test), env = custom_env)
+                bld.cmd_and_log('{0} {1}\n'.format(python, test), env=env)
