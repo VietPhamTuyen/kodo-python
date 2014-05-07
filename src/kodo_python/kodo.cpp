@@ -30,6 +30,11 @@ namespace kodo_python
         factory<kodo::full_rlnc_decoder<fifi::binary>>("full_rlnc_decoder_factory_binary");
         decoder<kodo::full_rlnc_decoder<fifi::binary>>("full_rlnc_decoder_binary");
 
+        factory<kodo::full_rlnc_encoder<fifi::binary4>>("full_rlnc_encoder_factory_binary4");
+        encoder<kodo::full_rlnc_encoder<fifi::binary4>>("full_rlnc_encoder_binary4");
+        factory<kodo::full_rlnc_decoder<fifi::binary4>>("full_rlnc_decoder_factory_binary4");
+        decoder<kodo::full_rlnc_decoder<fifi::binary4>>("full_rlnc_decoder_binary4");
+
         factory<kodo::full_rlnc_encoder<fifi::binary8>>("full_rlnc_encoder_factory_binary8");
         encoder<kodo::full_rlnc_encoder<fifi::binary8>>("full_rlnc_encoder_binary8");
         factory<kodo::full_rlnc_decoder<fifi::binary8>>("full_rlnc_decoder_factory_binary8");
@@ -45,6 +50,11 @@ namespace kodo_python
         encoder<kodo::on_the_fly_encoder<fifi::binary>>("on_the_fly_encoder_binary");
         factory<kodo::on_the_fly_decoder<fifi::binary>>("on_the_fly_decoder_factory_binary");
         decoder<kodo::on_the_fly_decoder<fifi::binary>>("on_the_fly_decoder_binary");
+
+        factory<kodo::on_the_fly_encoder<fifi::binary4>>("on_the_fly_encoder_factory_binary4");
+        encoder<kodo::on_the_fly_encoder<fifi::binary4>>("on_the_fly_encoder_binary4");
+        factory<kodo::on_the_fly_decoder<fifi::binary4>>("on_the_fly_decoder_factory_binary4");
+        decoder<kodo::on_the_fly_decoder<fifi::binary4>>("on_the_fly_decoder_binary4");
 
         factory<kodo::on_the_fly_encoder<fifi::binary8>>("on_the_fly_encoder_factory_binary8");
         encoder<kodo::on_the_fly_encoder<fifi::binary8>>("on_the_fly_encoder_binary8");
