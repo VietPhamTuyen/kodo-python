@@ -48,28 +48,54 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    PyObject* recode(Decoder& decoder, const std::string& data)
+    PyObject* recode(Decoder& decoder)
     {
-        std::vector<uint8_t> payload(data.length());
-        std::copy(data.c_str(), data.c_str() + data.length(), payload.data());
-        decoder.recode(payload.data());
+        std::vector<uint8_t> payload(decoder.payload_size());
+        auto length = decoder.recode(payload.data());
+
         #if PY_MAJOR_VERSION >= 3
-        return PyBytes_FromStringAndSize((char*)payload.data(), data.length());
+        return PyBytes_FromStringAndSize((char*)payload.data(), length);
         #else
-        return PyString_FromStringAndSize((char*)payload.data(), data.length());
+        return PyString_FromStringAndSize((char*)payload.data(), length);
         #endif
     }
 
     template<class Decoder>
-    PyObject* decode(Decoder& decoder, const std::string& data)
+    void decode(Decoder& decoder, const std::string& data)
     {
         std::vector<uint8_t> payload(data.length());
         std::copy(data.c_str(), data.c_str() + data.length(), payload.data());
         decoder.decode(payload.data());
+    }
+
+    template<class Decoder>
+    PyObject* decode_symbol(Decoder& decoder, const std::string& symbol_data,
+        const std::string& symbol_coefficients)
+    {
+        typedef typename Decoder::field_type field_type;
+        typedef typename field_type::value_type value_type;
+        std::vector<value_type> _symbol_data(decoder.symbol_size());
+        std::vector<value_type> _symbol_coefficients(decoder.symbol_size());
+
+        std::copy(
+            symbol_data.c_str(),
+            symbol_data.c_str() + symbol_data.length(),
+            _symbol_data.data());
+
+        std::copy(
+            symbol_coefficients.c_str(),
+            symbol_coefficients.c_str() + symbol_coefficients.length(),
+            _symbol_coefficients.data());
+
+        decoder.decode_symbol(_symbol_data.data(), _symbol_coefficients.data());
         #if PY_MAJOR_VERSION >= 3
-        return PyBytes_FromStringAndSize((char*)payload.data(), data.length());
+        return PyTuple_Pack(2,
+            PyBytes_FromStringAndSize((char*)_symbol_data.data(), decoder.symbol_size()),
+            PyBytes_FromStringAndSize((char*)_symbol_coefficients.data(), decoder.symbol_size()));
         #else
-        return PyString_FromStringAndSize((char*)payload.data(), data.length());
+        return PyTuple_Pack(2,
+            PyString_FromStringAndSize((char*)_symbol_data.data(), decoder.symbol_size()),
+            PyString_FromStringAndSize((char*)_symbol_coefficients.data(), decoder.symbol_size()));
         #endif
     }
 
@@ -90,6 +116,12 @@ namespace kodo_python
     void decoder(const std::string& name)
     {
         typedef Coder decoder_type;
+        typedef typename Coder::field_type field_type;
+        typedef typename field_type::value_type value_type;
+
+        void (decoder_type::*decode_symbol2)(uint8_t*, uint32_t) =
+            &decoder_type::decode_symbol;
+
         boost::python::class_<decoder_type, boost::noncopyable>(name.c_str(),
             boost::python::no_init)
             .def("payload_size", &decoder_type::payload_size)
@@ -100,6 +132,8 @@ namespace kodo_python
             .def("is_symbol_pivot", &decoder_type::is_symbol_pivot)
             .def("recode", &recode<decoder_type>)
             .def("decode", &decode<decoder_type>)
+            .def("decode_symbol", &decode_symbol<decoder_type>)
+            .def("decode_symbol_at_index", decode_symbol2)
             .def("is_complete", &decoder_type::is_complete)
             .def("copy_symbols", &copy_symbols<decoder_type>)
             .def("copy_symbol", &decoder_type::copy_symbol)
