@@ -8,11 +8,11 @@
 #include <sak/storage.hpp>
 #include <kodo/is_partial_complete.hpp>
 #include <kodo/has_partial_decoding_tracker.hpp>
-#include <kodo/print_decoder_state.hpp>
-#include <kodo/has_print_cached_symbol_coefficients.hpp>
-#include <kodo/has_print_cached_symbol_data.hpp>
-#include <kodo/print_cached_symbol_coefficients.hpp>
-#include <kodo/print_cached_symbol_data.hpp>
+// #include <kodo/print_decoder_state.hpp>
+// #include <kodo/has_print_cached_symbol_coefficients.hpp>
+// #include <kodo/has_print_cached_symbol_data.hpp>
+// #include <kodo/print_cached_symbol_coefficients.hpp>
+// #include <kodo/print_cached_symbol_data.hpp>
 
 #include <Python.h>
 #include <bytesobject.h>
@@ -86,44 +86,44 @@ namespace kodo_python
         return kodo::is_partial_complete(decoder);
     }
 
-    template<class Decoder>
-    bool has_print_decoder_state(Decoder& decoder)
-    {
-        (void) decoder;
-        return kodo::has_debug_linear_block_decoder<Decoder>::value;
-    }
+    // template<class Decoder>
+    // bool has_print_decoder_state(Decoder& decoder)
+    // {
+    //     (void) decoder;
+    //     return kodo::has_debug_linear_block_decoder<Decoder>::value;
+    // }
 
-    template<class Decoder>
-    void print_decoder_state(Decoder& decoder)
-    {
-        kodo::print_decoder_state(decoder, std::cout);
-    }
+    // template<class Decoder>
+    // void print_decoder_state(Decoder& decoder)
+    // {
+    //     kodo::print_decoder_state(decoder, std::cout);
+    // }
 
-    template<class Decoder>
-    bool has_print_cached_symbol_coefficients(Decoder& decoder)
-    {
-        (void) decoder;
-        return kodo::has_print_cached_symbol_coefficients<Decoder>::value;
-    }
+    // template<class Decoder>
+    // bool has_print_cached_symbol_coefficients(Decoder& decoder)
+    // {
+    //     (void) decoder;
+    //     return kodo::has_print_cached_symbol_coefficients<Decoder>::value;
+    // }
 
-    template<class Decoder>
-    void print_cached_symbol_coefficients(Decoder& decoder)
-    {
-        kodo::print_cached_symbol_coefficients(decoder, std::cout);
-    }
+    // template<class Decoder>
+    // void print_cached_symbol_coefficients(Decoder& decoder)
+    // {
+    //     kodo::print_cached_symbol_coefficients(decoder, std::cout);
+    // }
 
-    template<class Decoder>
-    bool has_print_cached_symbol_data(Decoder& decoder)
-    {
-        (void) decoder;
-        return kodo::has_print_cached_symbol_data<Decoder>::value;
-    }
+    // template<class Decoder>
+    // bool has_print_cached_symbol_data(Decoder& decoder)
+    // {
+    //     (void) decoder;
+    //     return kodo::has_print_cached_symbol_data<Decoder>::value;
+    // }
 
-    template<class Decoder>
-    void print_cached_symbol_data(Decoder& decoder)
-    {
-        kodo::print_cached_symbol_data(decoder, std::cout);
-    }
+    // template<class Decoder>
+    // void print_cached_symbol_data(Decoder& decoder)
+    // {
+    //     kodo::print_cached_symbol_data(decoder, std::cout);
+    // }
 
     template<class Coder>
     void decoder(const std::string& name)
@@ -142,15 +142,15 @@ namespace kodo_python
             .def("is_complete", &decoder_type::is_complete)
             .def("copy_symbols", &copy_symbols<decoder_type>)
             .def("copy_symbol", &decoder_type::copy_symbol)
-            .def("is_symbol_decoded", &decoder_type::is_symbol_decoded)
+            .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded)
             .def("has_partial_decoding_tracker", &has_partial_decoding_tracker<decoder_type>)
             .def("is_partial_complete", &is_partial_complete<decoder_type>)
-            .def("has_print_decoder_state", &has_print_decoder_state<decoder_type>)
-            .def("print_decoder_state", &print_decoder_state<decoder_type>)
-            .def("has_print_cached_symbol_coefficients", &has_print_cached_symbol_coefficients<decoder_type>)
-            .def("print_cached_symbol_coefficients", &print_cached_symbol_coefficients<decoder_type>)
-            .def("has_print_cached_symbol_data", &has_print_cached_symbol_data<decoder_type>)
-            .def("print_cached_symbol_data", &print_cached_symbol_data<decoder_type>)
+            // .def("has_print_decoder_state", &has_print_decoder_state<decoder_type>)
+            // .def("print_decoder_state", &print_decoder_state<decoder_type>)
+            // .def("has_print_cached_symbol_coefficients", &has_print_cached_symbol_coefficients<decoder_type>)
+            // .def("print_cached_symbol_coefficients", &print_cached_symbol_coefficients<decoder_type>)
+            // .def("has_print_cached_symbol_data", &has_print_cached_symbol_data<decoder_type>)
+            // .def("print_cached_symbol_data", &print_cached_symbol_data<decoder_type>)
         ;
 
         boost::python::register_ptr_to_python<boost::shared_ptr<decoder_type>>();

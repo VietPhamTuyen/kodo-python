@@ -27,9 +27,14 @@ def options(opt):
         major_version=1))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
+        name='cpuid',
+        git_repository='github.com/steinwurf/cpuid.git',
+        major_version=3))
+
+    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='fifi',
         git_repository='github.com/steinwurf/fifi.git',
-        major_version=10))
+        major_version=11))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='gauge',
@@ -39,7 +44,12 @@ def options(opt):
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='kodo',
         git_repository='github.com/steinwurf/kodo.git',
-        major_version=16))
+        major_version=17))
+
+    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
+        name='platform',
+        git_repository='github.com/steinwurf/platform.git',
+        major_version=1))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='sak',
@@ -75,9 +85,11 @@ def configure(conf):
         conf.load_external_tool('project_gen', 'wurf_project_generator')
 
         recurse_helper(conf, 'boost')
+        recurse_helper(conf, 'cpuid')
         recurse_helper(conf, 'fifi')
         recurse_helper(conf, 'gauge')
         recurse_helper(conf, 'kodo')
+        recurse_helper(conf, 'platform')
         recurse_helper(conf, 'sak')
         recurse_helper(conf, 'tables')
 
@@ -103,9 +115,11 @@ def build(bld):
         bld.load('wurf_dependency_bundle')
 
         recurse_helper(bld, 'boost')
+        recurse_helper(bld, 'cpuid')
         recurse_helper(bld, 'fifi')
         recurse_helper(bld, 'gauge')
         recurse_helper(bld, 'kodo')
+        recurse_helper(bld, 'platform')
         recurse_helper(bld, 'sak')
         recurse_helper(bld, 'tables')
 

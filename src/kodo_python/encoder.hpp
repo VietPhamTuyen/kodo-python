@@ -7,13 +7,17 @@
 
 #include <Python.h>
 #include <bytesobject.h>
-
+#include <kodo/has_systematic_encoder.hpp>
+#include <kodo/set_systematic_on.hpp>
+#include <kodo/set_systematic_off.hpp>
+#include <kodo/is_systematic_on.hpp>
 namespace kodo_python
 {
     template<class Encoder>
-    bool is_systematic(const Encoder& encoder)
+    bool has_systematic_encoder(const Encoder& encoder)
     {
-        return kodo::is_systematic_encoder(encoder);
+        (void) encoder;
+        return kodo::has_systematic_encoder<Encoder>::value;
     }
 
     template<class Encoder>
@@ -68,7 +72,7 @@ namespace kodo_python
             .def("encode", &encode<encoder_type>)
             .def("set_symbols", &set_symbols<encoder_type>)
             .def("set_symbol", &encoder_type::set_symbol)
-            .def("is_systematic", &is_systematic<encoder_type>)
+            .def("has_systematic_encoder", &has_systematic_encoder<encoder_type>)
             .def("is_systematic_on", &is_systematic_on<encoder_type>)
             .def("set_systematic_on", &set_systematic_on<encoder_type>)
             .def("set_systematic_off", &set_systematic_off<encoder_type>)

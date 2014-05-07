@@ -6,11 +6,13 @@
 #include <boost/python.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-#include <fifi/default_field.hpp>
+#include <fifi/binary.hpp>
+#include <fifi/binary4.hpp>
+#include <fifi/binary8.hpp>
+#include <fifi/binary16.hpp>
 
-#include <kodo/rlnc/full_vector_codes.hpp>
+#include <kodo/rlnc/full_rlnc_codes.hpp>
 #include <kodo/rlnc/on_the_fly_codes.hpp>
-#include <kodo/systematic_operations.hpp>
 
 #include <sak/storage.hpp>
 
