@@ -38,7 +38,7 @@ The compilers used by Steinwurf is listed on the `buildbot page`_.
 Linux
 -----
 You'll need the the python development headers to build kodo-python. These can
-most likely be aquired using your distro's package manager.
+most likely be acquired using your distro's package manager.
 
 Mac
 ---
@@ -46,7 +46,7 @@ Mac
 The default installation of python which exists on OSX doesn't include the
 python development header, which is required for kodo-python.
 Therefore you'll need to install python, e.g. using MacPorts.
-When you have aquired python use that installation of python to excecute the
+When you have acquired python use that installation of python to execute the
 waf commands.
 
 Windows
