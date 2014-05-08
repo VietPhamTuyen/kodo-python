@@ -33,7 +33,7 @@ def main():
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
     data_in = bytearray(os.urandom(encoder.block_size()))
-    data_in = str(data_in)
+    data_in = bytes(data_in)
 
     # Assign the data buffer to the encoder so that we can
     # produce encoded symbols

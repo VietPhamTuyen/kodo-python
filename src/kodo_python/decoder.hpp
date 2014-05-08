@@ -69,13 +69,11 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    PyObject* decode_symbol(Decoder& decoder, const std::string& symbol_data,
+    void decode_symbol(Decoder& decoder, const std::string& symbol_data,
         const std::string& symbol_coefficients)
     {
-        typedef typename Decoder::field_type field_type;
-        typedef typename field_type::value_type value_type;
-        std::vector<value_type> _symbol_data(decoder.symbol_size());
-        std::vector<value_type> _symbol_coefficients(decoder.symbol_size());
+        std::vector<uint8_t> _symbol_data(decoder.symbol_size());
+        std::vector<uint8_t> _symbol_coefficients(decoder.symbol_size());
 
         std::copy(
             symbol_data.c_str(),
@@ -88,15 +86,6 @@ namespace kodo_python
             _symbol_coefficients.data());
 
         decoder.decode_symbol(_symbol_data.data(), _symbol_coefficients.data());
-        #if PY_MAJOR_VERSION >= 3
-        return PyTuple_Pack(2,
-            PyBytes_FromStringAndSize((char*)_symbol_data.data(), decoder.symbol_size()),
-            PyBytes_FromStringAndSize((char*)_symbol_coefficients.data(), decoder.symbol_size()));
-        #else
-        return PyTuple_Pack(2,
-            PyString_FromStringAndSize((char*)_symbol_data.data(), decoder.symbol_size()),
-            PyString_FromStringAndSize((char*)_symbol_coefficients.data(), decoder.symbol_size()));
-        #endif
     }
 
     template<class Decoder>
@@ -135,6 +124,7 @@ namespace kodo_python
             .def("decode_symbol", &decode_symbol<decoder_type>)
             .def("decode_symbol_at_index", decode_symbol2)
             .def("is_complete", &decoder_type::is_complete)
+            .def("symbols_uncoded", &decoder_type::symbols_uncoded)
             .def("copy_symbols", &copy_symbols<decoder_type>)
             .def("copy_symbol", &decoder_type::copy_symbol)
             .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded)

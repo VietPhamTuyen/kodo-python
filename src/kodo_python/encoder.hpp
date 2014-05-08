@@ -39,10 +39,17 @@ namespace kodo_python
     }
 
     template<class Encoder>
-    void set_symbols(Encoder& encoder, std::string data)
+    void set_symbols(Encoder& encoder, const std::string& data)
     {
         auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
         encoder.set_symbols(storage);
+    }
+
+    template<class Encoder>
+    void set_symbol(Encoder& encoder, uint32_t index, const std::string& data)
+    {
+        auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
+        encoder.set_symbol(index, storage);
     }
 
     template<class Encoder>
@@ -71,7 +78,7 @@ namespace kodo_python
             .def("is_symbol_pivot", &encoder_type::is_symbol_pivot)
             .def("encode", &encode<encoder_type>)
             .def("set_symbols", &set_symbols<encoder_type>)
-            .def("set_symbol", &encoder_type::set_symbol)
+            .def("set_symbol", &set_symbol<encoder_type>)
             .def("has_systematic_encoder", &has_systematic_encoder<encoder_type>)
             .def("is_systematic_on", &is_systematic_on<encoder_type>)
             .def("set_systematic_on", &set_systematic_on<encoder_type>)
