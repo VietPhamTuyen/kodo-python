@@ -5,193 +5,117 @@
 # Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
+"""
+ @example rank_callback.cpp
 
-/// @example rank_callback.cpp
-///
-/// It may be that we want a function to be called on some event within the decoder.
-/// This can be done using callback functions.
-/// The following example illustrates how this can be done by adding the
-/// rank_callback_decoder layer to the decoder stack and how the rank changed event
-/// can be handled in three different ways. Other callback layers could also be
-/// used instead of the rank callback layer provided that they are added at the
-/// correct position in the stack.
+ It may be that we want a function to be called on some event within the
+ decoder. This can be done using callback functions. The following example
+ illustrates how this can be done by adding the rank_callback_decoder layer to
+ the decoder stack and how the rank changed event can be handled in three
+ different ways. Other callback layers could also be used instead of the rank
+ callback layer provided that they are added at the correct position in the
+ stack.
+"""
 
-#include <functional>
-
-#include <kodo/rlnc/full_vector_codes.hpp>
-#include <kodo/rank_callback_decoder.hpp>
-
-namespace kodo
-{
-    // Added rank_callback layer to decoder stack
-    template<class Field>
-    class full_rlnc_callback_decoder
-        : public // Payload API
-                 payload_decoder<
-                 // Codec Header API
-                 systematic_decoder<
-                 symbol_id_decoder<
-                 // Symbol ID API
-                 plain_symbol_id_reader<
-                 // Codec API
-
-                 // rank_callback layer is inserted in "Codec API" which it
-                 // designed for. It has to be inserted into the stack above
-                 // layers that can change the rank during decoding
-                 rank_callback_decoder<
-
-                 aligned_coefficients_decoder<
-                 forward_linear_block_decoder<
-                 symbol_decoding_status_counter<
-                 symbol_decoding_status_tracker<
-                 // Coefficient Storage API
-                 coefficient_value_access<
-                 coefficient_storage<
-                 coefficient_info<
-                 // Storage API
-                 deep_symbol_storage<
-                 storage_bytes_used<
-                 storage_block_info<
-                 // Finite Field API
-                 finite_field_math<typename fifi::default_field<Field>::type,
-                 finite_field_info<Field,
-                 // Factory API
-                 final_coder_factory_pool<
-                 // Final type
-                 full_rlnc_callback_decoder<Field>
-                     > > > > > > > > > > > > > > > > > >
-    {};
-}
-
-// Typdefs for the encoder/decoder type we wish to use
-typedef kodo::full_rlnc_encoder<fifi::binary8> rlnc_encoder;
-typedef kodo::full_rlnc_callback_decoder<fifi::binary8> rlnc_decoder;
-
-// Global function as callback handler
-void rank_changed_event(uint32_t rank)
-{
-    std::cout << "Rank changed to " << rank << std::endl;
-}
-
-// Global function as callback handler with pointer to the calling decoder
-// as parameter
-void rank_changed_event2(boost::weak_ptr<rlnc_decoder> w_decoder, uint32_t rank)
-{
-    /// Lock decoder pointer so that it cannot be freed until we are done
-    if ( boost::shared_ptr<rlnc_decoder> decoder = w_decoder.lock() )
-    {
-        std::cout << "Rank changed to " << rank << "/" <<
-            decoder->symbols() << std::endl;
-    }
-}
-
-// Some class
-class callback_handler
-{
-    public:
-
-        // Member function as callback handler
-        void rank_changed_event3(uint32_t rank)
-        {
-            std::cout << "Rank changed to " << rank << std::endl;
-        }
-};
-
-int main()
-{
-    // Set the number of symbols (i.e. the generation size in RLNC
-    // terminology) and the size of a symbol in bytes
-    uint32_t symbols = 8;
-    uint32_t symbol_size = 160;
-
-    // In the following we will make an encoder/decoder factory.
-    // The factories are used to build actual encoders/decoders
-    rlnc_encoder::factory encoder_factory(symbols, symbol_size);
-    auto encoder = encoder_factory.build();
-
-    rlnc_decoder::factory decoder_factory(symbols, symbol_size);
-    auto decoder = decoder_factory.build();
+import kodo
+import threading
+import os
 
 
-    // The following three code blocks illustrates three common ways that
-    // a callback function may be set and used.
-    // You may comment in the code block that you want to test.
+# Global function as callback handler
+def rank_changed_event(rank):
+    print("Rank changed to " << rank)
+
+lock = threading.Lock()
 
 
-    //  // Callback option 1:
-    //  // Set callback for decoder to be a global function
-    //
-    //  // Set callback handler
-    //  decoder->set_rank_changed_callback( rank_changed_event );
+# Global function as callback handler with pointer to the calling decoder
+# as parameter
+def rank_changed_event2(decoder, rank):
+    # Lock decoder pointer so that it cannot be freed until we are done
+    with lock:
+        print("Rank changed to {}/{}".format(rank, decoder.symbols()))
 
 
+# Some class
+class callback_handler(object):
+    def __init__(self):
+        super(callback_handler, self).__init__()
 
-    // Callback option 2:
-    // Set callback for decoder to be a global function that takes a
-    // pointer to the calling decoder as an additional argument
-
-    // Gets a weak pointer to decoder to ensure that our callback
-    // doesn't prevent kodo from freeing memory
-    boost::weak_ptr<rlnc_decoder> w_ptr(decoder);
-
-    // Set callback handler
-    decoder->set_rank_changed_callback (
-        std::bind( &rank_changed_event2, w_ptr, std::placeholders::_1 )
-    );
+    # Member function as callback handler
+    def rank_changed_event3(rank):
+        print("Rank changed to " << rank)
 
 
+def main():
+    # Set the number of symbols (i.e. the generation size in RLNC
+    # terminology) and the size of a symbol in bytes
+    symbols = 8
+    symbol_size = 160
 
-    //  // Callback option 3:
-    //  // Set callback for decoder to be a member function of some class
-    //  // This method is using lambda expressions which is not yet available in
-    //  // all compilers.
-    //
-    //  // Declare a class to handle callback
-    //  callback_handler handler;
-    //
-    //  // Set callback handler
-    //  decoder->set_rank_changed_callback (
-    //      [&] (uint32_t rank) { handler.rank_changed_event3( rank ); }
-    //  );
+    # In the following we will make an encoder/decoder factory.
+    # The factories are used to build actual encoders/decoders
+    encoder_factory = kodo.full_rlnc_encoder_factory_binary(symbols,
+                                                            symbol_size)
+    encoder = encoder_factory.build()
 
+    decoder_factory = kodo.full_rlnc_decoder_factory_binary(symbols,
+                                                            symbol_size)
+    decoder = decoder_factory.build()
 
+    # The following three code blocks illustrates three common ways that
+    # a callback function may be set and used.
+    # You may comment in the code block that you want to test.
 
-    // Allocate some storage for a "payload" the payload is what we would
-    // eventually send over a network
-    std::vector<uint8_t> payload(encoder->payload_size());
+    # Callback option 1:
+    # Set callback for decoder to be a global function
 
-    // Allocate some data to encode. In this case we make a buffer with the
-    // same size as the encoder's block size (the max. amount a single encoder
-    // can encode)
-    std::vector<uint8_t> data_in(encoder->block_size(), 'x');
+    # Set callback handler
+    decoder.set_rank_changed_callback(rank_changed_event)
 
+    # Callback option 2:
+    # Set callback for decoder to be a global function that takes a
+    # pointer to the calling decoder as an additional argument
 
-    // Assign the data buffer to the encoder so that we may start
-    // to produce encoded symbols from it
-    encoder->set_symbols(sak::storage(data_in));
+    decoder.set_rank_changed_callback(
+        lambda x: rank_changed_event2(decoder, x))
 
-    while( !decoder->is_complete() )
-    {
-        // Encode a packet into the payload buffer
-        encoder->encode( &payload[0] );
+    # Callback option 3:
+    # Set callback for decoder to be a member function of some class
+    # This method is using lambda expressions which is not yet available in
+    # all compilers.
 
-        // Pass that packet to the decoder
-        decoder->decode( &payload[0] );
-    }
+    # Declare a class to handle callback
+    handler = callback_handler()
 
-    // The decoder is complete, now copy the symbols from the decoder
-    std::vector<uint8_t> data_out(decoder->block_size());
-    decoder->copy_symbols(sak::storage(data_out));
+    # Set callback handler
+    decoder.set_rank_changed_callback(
+        lambda x: handler.rank_changed_event3(x)
+    )
 
-    // Check we properly decoded the data
-    if (std::equal(data_out.begin(), data_out.end(), data_in.begin()))
-    {
-        std::cout << "Data decoded correctly" << std::endl;
-    }
-    else
-    {
-        std::cout << "Unexpected failure to decode "
-                  << "please file a bug report :)" << std::endl;
-    }
+    # Just for fun - fill the data with random data
+    data_in = bytearray(os.urandom(encoder.block_size()))
+    data_in = bytes(data_in)
 
-}
+    # Assign the data buffer to the encoder so that we may start
+    # to produce encoded symbols from it
+    encoder.set_symbols(data_in)
+
+    while not decoder.is_complete():
+        # Encode a packet into the payload buffer
+        packet = encoder.encode()
+
+        # Pass that packet to the decoder
+        decoder.decode(packet)
+
+    # The decoder is complete, now copy the symbols from the decoder
+    data_out = decoder.copy_symbols()
+
+    # Check we properly decoded the data
+    if data_out == data_in:
+        print("Data decoded correctly")
+    else:
+        print("Unexpected failure to decode please file a bug report :)")
+
+if __name__ == "__main__":
+    main()

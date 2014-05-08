@@ -104,6 +104,3 @@ def main():
         print("Unexpected failure to decode "
                   << "please file a bug report :)")
 
-
-
-
