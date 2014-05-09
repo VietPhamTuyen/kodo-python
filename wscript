@@ -93,6 +93,9 @@ def configure(conf):
         recurse_helper(conf, 'sak')
         recurse_helper(conf, 'tables')
 
+    #Ensure that Python is configured properly
+    if not conf.env['BUILD_PYTHON']:
+        conf.fatal('Python was not configured properly')
 
 def build(bld):
     # Remove NDEBUG which is added from conf.check_python_headers
