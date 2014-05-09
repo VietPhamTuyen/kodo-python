@@ -88,6 +88,7 @@ def main():
         print("Data decoded correctly")
     else:
         print("Unexpected failure to decode please file a bug report :)")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
