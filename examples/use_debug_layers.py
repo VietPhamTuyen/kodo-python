@@ -14,6 +14,7 @@
 """
 
 import os
+import sys
 import random
 
 import kodo
@@ -51,6 +52,7 @@ def main():
 
         if encoder.has_trace():
             print("Trace encoder:")
+            sys.stdout.flush()
             encoder.trace()
 
         # Here we "simulate" a packet loss of approximately 50%
@@ -71,6 +73,7 @@ def main():
                 "input_symbol_coefficients"]
 
             print("Trace decoder:")
+            sys.stdout.flush()
             # Try to run without a filter to see the full amount of
             # output produced by the trace function. You can then
             # modify the filter to only view the information you are
