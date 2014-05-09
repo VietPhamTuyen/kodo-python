@@ -8,14 +8,13 @@
 #include <sak/storage.hpp>
 #include <kodo/is_partial_complete.hpp>
 #include <kodo/has_partial_decoding_tracker.hpp>
-// #include <kodo/print_decoder_state.hpp>
-// #include <kodo/has_print_cached_symbol_coefficients.hpp>
-// #include <kodo/has_print_cached_symbol_data.hpp>
-// #include <kodo/print_cached_symbol_coefficients.hpp>
-// #include <kodo/print_cached_symbol_data.hpp>
 
 #include <Python.h>
 #include <bytesobject.h>
+
+#include <kodo/write_feedback.hpp>
+
+#include "coder.hpp"
 
 namespace kodo_python
 {
@@ -101,28 +100,47 @@ namespace kodo_python
         return kodo::is_partial_complete(decoder);
     }
 
-    template<class Coder>
+    template<class Decoder>
+    PyObject* write_feedback(Decoder& decoder)
+    {
+        std::vector<uint8_t> payload(decoder.feedback_size());
+        uint32_t length = kodo::write_feedback(decoder, payload.data());
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), length);
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), length);
+        #endif
+    }
+
+    template<template<class, class> class Coder, class Type>
+    struct extra_decoder_methods
+    {
+        template<class DecoderClass>
+        void operator()(DecoderClass& decoder_class)
+        {
+            (void) decoder_class;
+        }
+    };
+
+    template<class Type>
+    struct extra_decoder_methods<kodo::sliding_window_decoder, Type>
+    {
+        template<class EncoderClass>
+        void operator()(EncoderClass& decoder_class)
+        {
+            decoder_class.def("feedback_size", &Type::feedback_size)
+                         .def("write_feedback", &write_feedback<Type>);
+        }
+    };
+
+    template<template<class, class> class Coder, class Field, class TraceTag>
     void decoder(const std::string& name)
     {
-        typedef Coder decoder_type;
-        typedef typename Coder::field_type field_type;
-        typedef typename field_type::value_type value_type;
-
-        void (decoder_type::*decode_symbol2)(uint8_t*, uint32_t) =
-            &decoder_type::decode_symbol;
-
-        boost::python::class_<decoder_type, boost::noncopyable>(name.c_str(),
-            boost::python::no_init)
-            .def("payload_size", &decoder_type::payload_size)
-            .def("block_size", &decoder_type::block_size)
-            .def("symbol_size", &decoder_type::symbol_size)
-            .def("symbols", &decoder_type::symbols)
-            .def("rank", &decoder_type::rank)
-            .def("is_symbol_pivot", &decoder_type::is_symbol_pivot)
+        typedef Coder<Field, TraceTag> decoder_type;
+        auto decoder_class = coder<Coder,Field,TraceTag>(name)
             .def("recode", &recode<decoder_type>)
             .def("decode", &decode<decoder_type>)
             .def("decode_symbol", &decode_symbol<decoder_type>)
-            .def("decode_symbol_at_index", decode_symbol2)
             .def("is_complete", &decoder_type::is_complete)
             .def("symbols_uncoded", &decoder_type::symbols_uncoded)
             .def("copy_symbols", &copy_symbols<decoder_type>)
@@ -131,6 +149,13 @@ namespace kodo_python
             .def("has_partial_decoding_tracker", &has_partial_decoding_tracker<decoder_type>)
             .def("is_partial_complete", &is_partial_complete<decoder_type>)
         ;
+
+        void (decoder_type::*decode_symbol2)(uint8_t*, uint32_t) =
+            &decoder_type::decode_symbol;
+        decoder_class.def("decode_symbol_at_index", decode_symbol2);
+
+        extra_decoder_methods<Coder, decoder_type> extra;
+        extra(decoder_class);
 
         boost::python::register_ptr_to_python<boost::shared_ptr<decoder_type>>();
     }
