@@ -6,24 +6,22 @@
 # See accompanying file LICENSE.rst or
 # http:#www.steinwurf.com/licensing
 
-"""
- @example switch_systematic_on_off.cpp
-
- This example shows how to enable or disable systematic coding for
- coding stacks that support it.
- Systematic coding is used to reduce the amount of work done by an
- encoder and a decoder. This is achieved by initially sending all
- symbols which has not previously been sent uncoded. Kodo allows this
- feature to be optionally turn of or off.
-"""
-import random
 import os
+import random
+import sys
 
 import kodo
 
 
 def main():
-
+    """
+    This example shows how to enable or disable systematic coding for
+    coding stacks that support it.
+    Systematic coding is used to reduce the amount of work done by an
+    encoder and a decoder. This is achieved by initially sending all
+    symbols which has not previously been sent uncoded. Kodo allows this
+    feature to be optionally turn of or off.
+    """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 16
@@ -39,7 +37,10 @@ def main():
                                                             symbol_size)
     decoder = decoder_factory.build()
 
-    # Just for fun - fill the data with random data
+    # Create some data to encode. In this case we make a buffer
+    # with the same size as the encoder's block size (the max.
+    # amount a single encoder can encode)
+    # Just for fun - fill the input data with random data
     data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = bytes(data_in)
 

@@ -13,6 +13,9 @@ import kodo
 
 
 def main():
+    """
+    Simple example showing how to encode and decode a block of memory.
+    """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 8
@@ -20,12 +23,12 @@ def main():
 
     # In the following we will make an encoder/decoder factory.
     # The factories are used to build actual encoders/decoders
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary(
-        symbols, symbol_size)
+    encoder_factory = kodo.full_rlnc_encoder_factory_binary(symbols,
+                                                            symbol_size)
     encoder = encoder_factory.build()
 
-    decoder_factory = kodo.full_rlnc_decoder_factory_binary(
-        symbols, symbol_size)
+    decoder_factory = kodo.full_rlnc_decoder_factory_binary(symbols,
+                                                            symbol_size)
     decoder = decoder_factory.build()
 
     # Create some data to encode. In this case we make a buffer

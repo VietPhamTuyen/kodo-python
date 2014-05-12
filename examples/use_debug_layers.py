@@ -6,21 +6,17 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-"""
- @example use_debug_layers.cpp
-
- Simple example showing how to use some of the debug layers defined
- in Kodo.
-"""
-
 import os
-import sys
 import random
+import sys
 
 import kodo
 
 
 def main():
+    """
+    Simple example showing how to use some of the debug layers defined in Kodo.
+    """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 8
@@ -36,8 +32,10 @@ def main():
                                                                    symbol_size)
     decoder = decoder_factory.build()
 
-    # Allocate some data to encode. Just for fun - fill the data with random
-    # data
+    # Create some data to encode. In this case we make a buffer
+    # with the same size as the encoder's block size (the max.
+    # amount a single encoder can encode)
+    # Just for fun - fill the input data with random data
     data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = bytes(data_in)
 

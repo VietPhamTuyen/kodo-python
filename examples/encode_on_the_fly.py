@@ -6,22 +6,20 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-"""
-@example encode_on_the_fly.cpp
-
-This example shows how to use a storage aware encoder which will
-allow you to encode from a block before all symbols have been
-specified. This can be useful in cases where the symbols that
-should be encoded are produced on-the-fly.
-"""
-
 import os
 import random
+import sys
 
 import kodo
 
 
 def main():
+    """
+    This example shows how to use a storage aware encoder which will
+    allow you to encode from a block before all symbols have been
+    specified. This can be useful in cases where the symbols that
+    should be encoded are produced on-the-fly.
+    """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 42
@@ -37,7 +35,10 @@ def main():
                                                              symbol_size)
     decoder = decoder_factory.build()
 
-    # Just for fun - fill the data with random data
+    # Create some data to encode. In this case we make a buffer
+    # with the same size as the encoder's block size (the max.
+    # amount a single encoder can encode)
+    # Just for fun - fill the input data with random data
     data_in = bytearray(os.urandom(encoder.block_size()))
 
     # Lets split the data into symbols and feed the encoder one symbol at a
@@ -65,7 +66,7 @@ def main():
             # For an encoder the rank specifies the number of symbols
             # it has available for encoding
             rank = encoder.rank()
-            encoder.set_symbol(rank,  symbol_storage[rank])
+            encoder.set_symbol(rank, symbol_storage[rank])
 
     print("Finished")
     # The decoder is complete, now copy the symbols from the decoder

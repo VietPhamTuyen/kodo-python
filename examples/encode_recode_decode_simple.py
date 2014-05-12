@@ -5,39 +5,37 @@
 # Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
-"""
- @example encode_recode_decode_simple.cpp
-
- In Network Coding applications one of the key features is the
- ability of intermediate nodes in the network to recode packets
- as they traverse them. In Kodo it is possible to recode packets
- in decoders which provide the recode() function.
-
- This example shows how to use one encoder and two decoders to
- simulate a simple relay network as shown below (for simplicity
- we have error free links, i.e. no data packets are lost when being
- sent from encoder to decoder1 and decoder1 to decoder2):
-
-         +-----------+      +-----------+      +------------+
-         |  encoder  |+---.| decoder1 |+---.|  decoder2 |
-         +-----------+      | (recoder) |      +------------+
-                            +-----------+
-
- In a practical application recoding can be using in several different
- ways and one must consider several different factors e.g. such as
- reducing linear dependency by coordinating several recoding nodes
- in the network.
- Suggestions for dealing with such issues can be found in current
- research litterature (e.g. MORE: A Network Coding Approach to
- Opportunistic Routing).
-"""
 
 import os
+import sys
 
 import kodo
 
 
 def main():
+    """
+    In Network Coding applications one of the key features is the
+    ability of intermediate nodes in the network to recode packets
+    as they traverse them. In Kodo it is possible to recode packets
+    in decoders which provide the recode() function.
+
+    This example shows how to use one encoder and two decoders to
+    simulate a simple relay network as shown below (for simplicity
+    we have error free links, i.e. no data packets are lost when being
+    sent from encoder to decoder1 and decoder1 to decoder2):
+
+            +-----------+     +-----------+     +-----------+
+            |  encoder  |+---.| decoder1  |+---.|  decoder2 |
+            +-----------+     | (recoder) |     +-----------+
+                              +-----------+
+    In a practical application recoding can be using in several different
+    ways and one must consider several different factors e.g. such as
+    reducing linear dependency by coordinating several recoding nodes
+    in the network.
+    Suggestions for dealing with such issues can be found in current
+    research literature (e.g. MORE: A Network Coding Approach to
+    Opportunistic Routing).
+    """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 42
@@ -54,7 +52,10 @@ def main():
     decoder1 = decoder_factory.build()
     decoder2 = decoder_factory.build()
 
-    # Just for fun - fill the data with random data
+    # Create some data to encode. In this case we make a buffer
+    # with the same size as the encoder's block size (the max.
+    # amount a single encoder can encode)
+    # Just for fun - fill the input data with random data
     data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = bytes(data_in)
 

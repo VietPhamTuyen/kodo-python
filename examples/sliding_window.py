@@ -6,24 +6,22 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-"""
- @example sliding_window.cpp
-
- This example shows how to use sliding window encoder and decoder
- stacks. The sliding window is special in that it does not require
- that all symbols are available at the encoder before encoding can
- start. In addition it uses feedback beteen the decoder and encoder
- such that symbols that have already been received at the decoder
- are not included in the encoding again (saving computations).
-"""
-
 import os
 import random
+import sys
 
 import kodo
 
 
 def main():
+    """
+    This example shows how to use sliding window encoder and decoder
+    stacks. The sliding window is special in that it does not require
+    that all symbols are available at the encoder before encoding can
+    start. In addition it uses feedback between the decoder and encoder
+    such that symbols that have already been received at the decoder
+    are not included in the encoding again (saving computations).
+    """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 42
@@ -38,16 +36,12 @@ def main():
                                                                  symbol_size)
     decoder = decoder_factory.build()
 
-    # Allocate some random data to encode. In this case we make a buffer with
-    # the same size as the encoder's block size (the max. amount a single
-    # encoder can encode)
+    # Create some data to encode. In this case we make a buffer
+    # with the same size as the encoder's block size (the max.
+    # amount a single encoder can encode)
+    # Just for fun - fill the input data with random data
     data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = bytes(data_in)
-
-    # The sliding window codec stacks uses feedback to optimize the
-    # coding. Using the following we can allocate a buffer for the
-    # feedback buffer.
-    feedback = bytearray(encoder.feedback_size())
 
     # Lets split the data into symbols and feed the encoder one symbol at a
     # time
