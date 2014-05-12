@@ -5,7 +5,7 @@ import os
 from waflib.TaskGen import feature, after_method
 
 APPNAME = 'kodo-python'
-VERSION = '1.0.0'
+VERSION = '2.0.0'
 
 
 def recurse_helper(ctx, name):
@@ -96,6 +96,7 @@ def configure(conf):
     #Ensure that Python is configured properly
     if not conf.env['BUILD_PYTHON']:
         conf.fatal('Python was not configured properly')
+
 
 def build(bld):
     # Remove NDEBUG which is added from conf.check_python_headers

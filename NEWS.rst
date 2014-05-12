@@ -8,6 +8,12 @@ Latest
 ------
 * tbd
 
+2.0.0
+-----
+* Major: Updated to use Kodo 17
+* Minor: Extended API
+* Minor: Added additional examples
+
 1.0.0
 -----
 * Initial release
