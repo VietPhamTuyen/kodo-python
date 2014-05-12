@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <set>
-
 #include <kodo/trace.hpp>
 #include <kodo/has_trace.hpp>
 

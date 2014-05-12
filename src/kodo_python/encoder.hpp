@@ -7,6 +7,7 @@
 
 #include <Python.h>
 #include <bytesobject.h>
+
 #include <kodo/has_systematic_encoder.hpp>
 #include <kodo/set_systematic_on.hpp>
 #include <kodo/set_systematic_off.hpp>
