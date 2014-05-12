@@ -4,9 +4,10 @@
 # Copyright Steinwurf ApS 2011-2013.
 # Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
 # See accompanying file LICENSE.rst or
-# http://www.steinwurf.com/licensing
+# http:#www.steinwurf.com/licensing
 
 import os
+import random
 import sys
 
 import kodo
@@ -14,11 +15,16 @@ import kodo
 
 def main():
     """
-    Simple example showing how to encode and decode a block of memory.
+    This example shows how to enable or disable systematic coding for
+    coding stacks that support it.
+    Systematic coding is used to reduce the amount of work done by an
+    encoder and a decoder. This is achieved by initially sending all
+    symbols which has not previously been sent uncoded. Kodo allows this
+    feature to be optionally turn of or off.
     """
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
-    symbols = 8
+    symbols = 16
     symbol_size = 160
 
     # In the following we will make an encoder/decoder factory.
@@ -38,36 +44,52 @@ def main():
     data_in = bytearray(os.urandom(encoder.block_size()))
     data_in = bytes(data_in)
 
-    # Assign the data buffer to the encoder so that we can
-    # produce encoded symbols
+    # Assign the data buffer to the encoder so that we may start
+    # to produce encoded symbols from it
     encoder.set_symbols(data_in)
 
-    print("Processing")
-    package_number = 0
+    print("Starting encoding / decoding")
+
     while not decoder.is_complete():
-        # Generate an encoded packet
-        sys.stdout.write("\tEncoding packet {} ...".format(package_number))
+
+        # If the chosen codec stack supports systematic coding
+        if encoder.has_systematic_encoder():
+
+            # With 50% probability toggle systematic
+            if random.choice([True, False]):
+
+                if encoder.is_systematic_on():
+                    print("Turning systematic OFF")
+                    encoder.set_systematic_off()
+                else:
+                    print("Turning systematic ON")
+                    encoder.set_systematic_on()
+
+        # Encode a packet into the payload buffer
         packet = encoder.encode()
-        sys.stdout.write(" done!\n")
+
+        if random.choice([True, False]):
+            print("Drop packet")
+            continue
 
         # Pass that packet to the decoder
-        sys.stdout.write("\tDecoding packet {} ...".format(package_number))
         decoder.decode(packet)
-        sys.stdout.write(" done!\n")
-        package_number += 1
-        print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
 
-    print("Processing finished")
+        print("Rank of decoder {}".format(decoder.rank()))
+
+        # Symbols that were received in the systematic phase correspond
+        # to the original source symbols and are therefore marked as
+        # decoded
+        print("Symbols decoded {}".format(decoder.symbols_uncoded()))
 
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()
 
-    # Check if we properly decoded the data
-    print("Checking results")
+    # Check we properly decoded the data
     if data_out == data_in:
         print("Data decoded correctly")
     else:
-        print("Unable to decode please file a bug report :)")
+        print("Unexpected failure to decode please file a bug report :)")
         sys.exit(1)
 
 if __name__ == "__main__":

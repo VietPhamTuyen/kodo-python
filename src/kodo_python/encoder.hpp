@@ -8,12 +8,23 @@
 #include <Python.h>
 #include <bytesobject.h>
 
+#include <kodo/has_systematic_encoder.hpp>
+#include <kodo/set_systematic_on.hpp>
+#include <kodo/set_systematic_off.hpp>
+#include <kodo/is_systematic_on.hpp>
+#include <kodo/write_feedback.hpp>
+#include <kodo/disable_trace.hpp>
+#include <kodo/enable_trace.hpp>
+
+#include "coder.hpp"
+
 namespace kodo_python
 {
     template<class Encoder>
-    bool is_systematic(const Encoder& encoder)
+    bool has_systematic_encoder(const Encoder& encoder)
     {
-        return kodo::is_systematic_encoder(encoder);
+        (void) encoder;
+        return kodo::has_systematic_encoder<Encoder>::value;
     }
 
     template<class Encoder>
@@ -35,10 +46,17 @@ namespace kodo_python
     }
 
     template<class Encoder>
-    void set_symbols(Encoder& encoder, std::string data)
+    void set_symbols(Encoder& encoder, const std::string& data)
     {
         auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
         encoder.set_symbols(storage);
+    }
+
+    template<class Encoder>
+    void set_symbol(Encoder& encoder, uint32_t index, const std::string& data)
+    {
+        auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
+        encoder.set_symbol(index, storage);
     }
 
     template<class Encoder>
@@ -53,26 +71,55 @@ namespace kodo_python
         #endif
     }
 
-    template<class Coder>
+    template<class Encoder>
+    void read_feedback(Encoder& encoder, const std::string& feedback)
+    {
+        std::vector<uint8_t> _feedback(feedback.length());
+        std::copy(
+            feedback.c_str(),
+            feedback.c_str() + feedback.length(),
+            _feedback.data());
+        encoder.read_feedback(_feedback.data());
+    }
+
+    template<template<class, class> class Coder, class Type>
+    struct extra_encoder_methods
+    {
+        template<class EncoderClass>
+        void operator()(EncoderClass& encoder_class)
+        {
+            (void) encoder_class;
+        }
+    };
+
+    template<class Type>
+    struct extra_encoder_methods<kodo::sliding_window_encoder, Type>
+    {
+        template<class EncoderClass>
+        void operator()(EncoderClass& encoder_class)
+        {
+            encoder_class.def("feedback_size", &Type::feedback_size)
+                         .def("read_feedback", &read_feedback<Type>);
+        }
+    };
+
+    template<template<class, class> class Coder, class Field, class TraceTag>
     void encoder(const std::string& name)
     {
-        typedef Coder encoder_type;
-        boost::python::class_<encoder_type, boost::noncopyable>(name.c_str(),
-            boost::python::no_init)
-            .def("payload_size", &encoder_type::payload_size)
-            .def("block_size", &encoder_type::block_size)
-            .def("symbol_size", &encoder_type::symbol_size)
-            .def("symbols", &encoder_type::symbols)
-            .def("rank", &encoder_type::rank)
-            .def("is_symbol_pivot", &encoder_type::is_symbol_pivot)
+        typedef Coder<Field, TraceTag> encoder_type;
+        typedef Coder<Field, TraceTag> decoder_type;
+        auto encoder_class = coder<Coder,Field,TraceTag>(name)
             .def("encode", &encode<encoder_type>)
             .def("set_symbols", &set_symbols<encoder_type>)
-            .def("set_symbol", &encoder_type::set_symbol)
-            .def("is_systematic", &is_systematic<encoder_type>)
+            .def("set_symbol", &set_symbol<encoder_type>)
+            .def("has_systematic_encoder", &has_systematic_encoder<encoder_type>)
             .def("is_systematic_on", &is_systematic_on<encoder_type>)
             .def("set_systematic_on", &set_systematic_on<encoder_type>)
             .def("set_systematic_off", &set_systematic_off<encoder_type>)
         ;
+
+        extra_encoder_methods<Coder, encoder_type> extra;
+        extra(encoder_class);
 
         boost::python::register_ptr_to_python<boost::shared_ptr<encoder_type>>();
     }

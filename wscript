@@ -27,9 +27,14 @@ def options(opt):
         major_version=1))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
+        name='cpuid',
+        git_repository='github.com/steinwurf/cpuid.git',
+        major_version=3))
+
+    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='fifi',
         git_repository='github.com/steinwurf/fifi.git',
-        major_version=10))
+        major_version=11))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='gauge',
@@ -39,7 +44,12 @@ def options(opt):
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='kodo',
         git_repository='github.com/steinwurf/kodo.git',
-        major_version=16))
+        major_version=17))
+
+    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
+        name='platform',
+        git_repository='github.com/steinwurf/platform.git',
+        major_version=1))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='sak',
@@ -75,12 +85,17 @@ def configure(conf):
         conf.load_external_tool('project_gen', 'wurf_project_generator')
 
         recurse_helper(conf, 'boost')
+        recurse_helper(conf, 'cpuid')
         recurse_helper(conf, 'fifi')
         recurse_helper(conf, 'gauge')
         recurse_helper(conf, 'kodo')
+        recurse_helper(conf, 'platform')
         recurse_helper(conf, 'sak')
         recurse_helper(conf, 'tables')
 
+    #Ensure that Python is configured properly
+    if not conf.env['BUILD_PYTHON']:
+        conf.fatal('Python was not configured properly')
 
 def build(bld):
     # Remove NDEBUG which is added from conf.check_python_headers
@@ -103,9 +118,11 @@ def build(bld):
         bld.load('wurf_dependency_bundle')
 
         recurse_helper(bld, 'boost')
+        recurse_helper(bld, 'cpuid')
         recurse_helper(bld, 'fifi')
         recurse_helper(bld, 'gauge')
         recurse_helper(bld, 'kodo')
+        recurse_helper(bld, 'platform')
         recurse_helper(bld, 'sak')
         recurse_helper(bld, 'tables')
 
@@ -123,9 +140,15 @@ def exec_test_python(bld):
     python = bld.env['PYTHON'][0]
     env = dict(os.environ)
     env['PYTHONPATH'] = os.path.join(bld.out_dir, 'src', 'kodo_python')
-
+    # First, run the unit tests in the 'test' folder
     if os.path.exists('test'):
-        for f in os.listdir('test'):
+        for f in sorted(os.listdir('test')):
             if f.endswith('.py'):
                 test = os.path.join('test', f)
                 bld.cmd_and_log('{0} {1}\n'.format(python, test), env=env)
+    # Then run the examples in the 'examples' folder
+    if os.path.exists('examples'):
+        for f in sorted(os.listdir('examples')):
+            if f.endswith('.py'):
+                example = os.path.join('examples', f)
+                bld.cmd_and_log('{0} {1}\n'.format(python, example), env=env)
