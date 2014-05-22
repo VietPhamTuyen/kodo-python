@@ -8,6 +8,11 @@ Latest
 ------
 * tbd
 
+2.1.0
+-----
+* Minor: Set ``kodo-python`` as the name for wscript target, so that it doesn't
+         clash with the kodo dependency when both are used as dependencies.
+
 2.0.0
 -----
 * Major: Updated to use Kodo 17
