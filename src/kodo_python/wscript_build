@@ -13,6 +13,7 @@ bld(
     features='cxx cxxshlib pyext',
     source=bld.path.ant_glob('**/*.cpp'),
     target='kodo',
+    name='kodo-python',
     cxxflags=extra_cxxflags,
     linkflags=extra_linkflags,
     use=[
