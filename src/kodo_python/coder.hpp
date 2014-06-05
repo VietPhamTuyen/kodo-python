@@ -61,10 +61,11 @@ namespace kodo_python {
     auto coder(const std::string& name) ->
         boost::python::class_<Coder<Field, TraceTag>, boost::noncopyable>
     {
+        using namespace boost::python;
+
         typedef Coder<Field, TraceTag> coder_type;
-        auto coder_class = boost::python::class_<coder_type,
-                                                   boost::noncopyable>(
-            name.c_str(), boost::python::no_init)
+        auto coder_class = class_<coder_type,boost::noncopyable>(
+            name.c_str(), no_init)
             .def("payload_size", &coder_type::payload_size)
             .def("block_size", &coder_type::block_size)
             .def("symbol_size", &coder_type::symbol_size)

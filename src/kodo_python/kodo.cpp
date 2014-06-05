@@ -5,6 +5,7 @@
 
 #include <boost/python.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/docstring_options.hpp>
 
 #include <fifi/binary.hpp>
 #include <fifi/binary4.hpp>
@@ -86,6 +87,8 @@ namespace kodo_python
 
     BOOST_PYTHON_MODULE(kodo)
     {
+        boost::python::docstring_options doc_options;
+        doc_options.disable_cpp_signatures();
         create_coders();
     }
 }
