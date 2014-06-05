@@ -10,20 +10,73 @@
 namespace kodo_python
 {
     template<class Coder>
-    void factory(const std::string& name)
+    void factory(const std::string& stack, const std::string& field, bool trace,
+        const std::string& coder)
     {
         using namespace boost::python;
 
+        std::string s = "_";
+        std::string kind = coder + s + std::string("factory");
+        std::string trace_string = trace ? "_trace" : "";
+        std::string name = stack + s + kind + s + field + trace_string;
+
         typedef typename Coder::factory factory_type;
-        class_<factory_type, boost::noncopyable>(name.c_str(),
-            init<uint32_t, uint32_t>())
-            .def("build", &factory_type::build, "BUILD")
-            .def("set_symbols", &factory_type::set_symbols, arg("symbols"), "SET_SYMBOLS")
-            .def("set_symbol_size", &factory_type::set_symbol_size, arg("symbol_size"), "SET_SYMBOL_SIZE")
-            .def("max_symbols", &factory_type::max_symbols, "MAX_SYMBOLS")
-            .def("max_symbol_size", &factory_type::max_symbol_size, "MAX_SYMBOL_SIZE")
-            .def("max_block_size", &factory_type::max_block_size, "MAX_BLOCK_SIZE")
-            .def("max_payload_size", &factory_type::max_payload_size, "MAX_PAYLOAD_SIZE")
-        ;
+        auto factory = class_<factory_type, boost::noncopyable>(
+            name.c_str(),
+            (std::string("Factory for creating ") + coder + std::string("s.")
+                ).c_str(),
+            init<uint32_t, uint32_t>(
+                args("max_symbols", "max_symbol_size"),
+                "Factory constructor.\n\n"
+                "\t:param max_symbols: "
+                "The maximum symbols the coders can expect.\n"
+                "\t:param max_symbol_size: "
+                "The maximum size of a symbol in bytes.\n"
+                ))
+        .def("build", &factory_type::build,
+            "Builds the actual coder.\n\n"
+            "\t:returns: An instantiation of a coder.\n")
+        .def("set_symbols", &factory_type::set_symbols, arg("symbols"),
+            "Sets the number of symbols.\n\n"
+            "\t:param symbols: The number of symbols.\n"
+        )
+        .def("set_symbol_size", &factory_type::set_symbol_size,
+            arg("symbol_size"),
+            "Sets the symbol size.\n\n"
+            "\t:param symbols_size: The symbol size.\n"
+        )
+        .def("max_symbols", &factory_type::max_symbols,
+            "Returns the maximum number of symbols in a block.\n\n"
+            "\t:returns: The maximum number of symbols in a block.\n"
+        )
+        .def("max_symbol_size", &factory_type::max_symbol_size,
+            "Returns the maximum symbol size in bytes.\n\n"
+            "\t:returns: The maximum symbol size in bytes.\n"
+        )
+        .def("max_payload_size", &factory_type::max_payload_size,
+            "Returns the maximum required payload buffer size in bytes.\n\n"
+            "\t:returns: The maximum required payload buffer size in bytes.\n"
+        );
+
+        std::string max_block_size_desc;
+        if (coder == std::string("encoder"))
+        {
+            max_block_size_desc =
+            "Returns the maximum amount of data encoded in bytes. This is "
+            "calculated by multiplying the maximum number of symbols encoded "
+            "by the maximum size of a symbol.\n\n"
+            "\t:returns: The maximum amount of data encoded in bytes\n";
+        }
+        else if (coder == std::string("decoder"))
+        {
+            max_block_size_desc =
+            "Returns the maximum amount of data decoded in bytes. This is "
+            "calculated by multiplying the maximum number of symbols decoded "
+            "by the maximum size of a symbol.\n\n"
+            "\t:returns: The maximum amount of data decoded in bytes\n";
+        }
+        factory.def("max_block_size", &factory_type::max_block_size,
+            max_block_size_desc.c_str()
+        );
     }
 }

@@ -51,9 +51,18 @@ namespace kodo_python {
         template<class CoderClass>
         void operator()(CoderClass& coder_class)
         {
-            coder_class.def("trace", &trace<Type>);
-            coder_class.def("filtered_trace", &filtered_trace<Type>);
-            coder_class.def("has_trace", &has_trace<Type>);
+            coder_class
+            .def("trace", &trace<Type>,
+                "Writes the trace information to stdout.\n"
+            )
+            .def("filtered_trace", &filtered_trace<Type>,
+                "Writes the filtered trace information to stdout.\n\n"
+                "\t:param filter: The \"zone\" filter which allows control "
+                "over what output will be produced by the trace.")
+            .def("has_trace", &has_trace<Type>,
+                "Returns true if the trace functions are available.\n\n"
+                "\t:returns: True if the trace functions are available.\n"
+            );
         }
     };
 
@@ -65,14 +74,37 @@ namespace kodo_python {
 
         typedef Coder<Field, TraceTag> coder_type;
         auto coder_class = class_<coder_type,boost::noncopyable>(
-            name.c_str(), no_init)
-            .def("payload_size", &coder_type::payload_size)
-            .def("block_size", &coder_type::block_size)
-            .def("symbol_size", &coder_type::symbol_size)
-            .def("symbols", &coder_type::symbols)
-            .def("rank", &coder_type::rank)
-            .def("is_symbol_pivot", &coder_type::is_symbol_pivot);
-
+            name.c_str(), "An (en/de)coder", no_init)
+        .def("payload_size", &coder_type::payload_size,
+            "Returns the required payload buffer size in bytes.\n\n"
+            "\t:returns: The required payload buffer size in bytes.\n"
+        )
+        .def("block_size", &coder_type::block_size,
+            "Returns the block size i.e. the total size in bytes that this"
+            "coder operates on.\n\n"
+            "\t:returns: The block size i.e. the total size in bytes that this "
+            "coder operates on.\n"
+        )
+        .def("symbol_size", &coder_type::symbol_size,
+            "Returns the symbol size of a symbol in bytes.\n\n"
+            "\t:returns: The symbol size of a symbol in bytes.\n"
+        )
+        .def("symbols", &coder_type::symbols,
+            "Returns the number of symbols in this block coder.\n\n"
+            "\t:returns: The number of symbols in this block coder.\n"
+        )
+        .def("rank", &coder_type::rank,
+            "The rank of a decoder states how many symbols have been decoded "
+            "or partially decoded. The rank of an encoder states how many "
+            "symbols are available for encoding.\n\n"
+            "\t:returns: The rank of the decoder or encoder.\n"
+        )
+        .def("is_symbol_pivot", &coder_type::is_symbol_pivot,
+            "The symbol pivot indicates whether a symbol is available to "
+            "either an encoder or decoder. A coefficient generator may use "
+            "this information when generating coding coefficients.\n\n"
+            "\t:returns: True if the symbol is available.\n"
+        );
 
         trace_methods<TraceTag, coder_type> trace;
         trace(coder_class);

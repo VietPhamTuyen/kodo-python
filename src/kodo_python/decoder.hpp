@@ -5,14 +5,16 @@
 
 #pragma once
 
-#include <sak/storage.hpp>
-#include <kodo/is_partial_complete.hpp>
-#include <kodo/has_partial_decoding_tracker.hpp>
-
 #include <Python.h>
 #include <bytesobject.h>
 
+#include <boost/python/args.hpp>
+
+#include <kodo/has_partial_decoding_tracker.hpp>
+#include <kodo/is_partial_complete.hpp>
 #include <kodo/write_feedback.hpp>
+
+#include <sak/storage.hpp>
 
 #include "coder.hpp"
 
@@ -25,20 +27,6 @@ namespace kodo_python
         std::vector<uint8_t> payload(decoder.block_size());
         auto storage = sak::mutable_storage(payload.data(), decoder.block_size());
         decoder.copy_symbols(storage);
-        #if PY_MAJOR_VERSION >= 3
-        return PyBytes_FromStringAndSize((char*)payload.data(), decoder.block_size());
-        #else
-        return PyString_FromStringAndSize((char*)payload.data(), decoder.block_size());
-        #endif
-    }
-
-    /// @todo: consider removing this method from the python api.
-    template<class Decoder>
-    PyObject* copy_symbol(Decoder& decoder, uint32_t index)
-    {
-        std::vector<uint8_t> payload(decoder.block_size());
-        auto storage = sak::mutable_storage(payload.data(), decoder.block_size());
-        decoder.copy_symbol(index, storage);
         #if PY_MAJOR_VERSION >= 3
         return PyBytes_FromStringAndSize((char*)payload.data(), decoder.block_size());
         #else
@@ -125,30 +113,77 @@ namespace kodo_python
     template<class Type>
     struct extra_decoder_methods<kodo::sliding_window_decoder, Type>
     {
-        template<class EncoderClass>
-        void operator()(EncoderClass& decoder_class)
+        template<class DecoderClass>
+        void operator()(DecoderClass& decoder_class)
         {
-            decoder_class.def("feedback_size", &Type::feedback_size)
-                         .def("write_feedback", &write_feedback<Type>);
+            decoder_class
+            .def("feedback_size", &Type::feedback_size,
+                "Returns the required feedback buffer size in bytes.\n\n"
+                "\t:returns: The required feedback buffer size in bytes.\n"
+            )
+            .def("write_feedback", &write_feedback<Type>,
+                "Returns a buffer containing the feedback.\n\n"
+                "\t:returns: A buffer containing the feedback.\n");
         }
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void decoder(const std::string& name)
+    void decoder(const std::string& stack, const std::string& field, bool trace)
     {
+        using namespace boost::python;
+
+        std::string s = "_";
+        std::string kind = "decoder";
+        std::string trace_string = trace ? "_trace" : "";
+        std::string name = stack + s + kind + s + field + trace_string;
+
         typedef Coder<Field, TraceTag> decoder_type;
         auto decoder_class = coder<Coder,Field,TraceTag>(name)
-            .def("recode", &recode<decoder_type>)
-            .def("decode", &decode<decoder_type>)
-            .def("decode_symbol", &decode_symbol<decoder_type>)
-            .def("is_complete", &decoder_type::is_complete)
-            .def("symbols_uncoded", &decoder_type::symbols_uncoded)
-            .def("copy_symbols", &copy_symbols<decoder_type>)
-            .def("copy_symbol", &decoder_type::copy_symbol)
-            .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded)
-            .def("has_partial_decoding_tracker", &has_partial_decoding_tracker<decoder_type>)
-            .def("is_partial_complete", &is_partial_complete<decoder_type>)
-        ;
+        .def("recode", &recode<decoder_type>,
+            "Recodes a symbol. This function is special for network codes.\n\n"
+            "\t:returns: The recoded symbol.\n"
+        )
+        .def("decode", &decode<decoder_type>, arg("symbol_data"),
+            "Decodes the provided encoded symbol.\n\n"
+            "\t:param symbol_data: The encoded symbol.\n"
+        )
+        .def("decode_symbol", &decode_symbol<decoder_type>,
+            arg("symbol_data"), arg("symbol_coefficients"),
+            "Decodes an encoded symbol according to the coding "
+            "coefficients.\n\n"
+            "\t:param symbol_data: The encoded symbol.\n"
+            "\t:param symbol_coefficients: The coding coefficients used to "
+            "create the encoded symbol.\n"
+        )
+        .def("is_complete", &decoder_type::is_complete,
+            "Check whether decoding is complete.\n\n"
+            "\t:returns: True if the decoding is complete.\n"
+        )
+        .def("symbols_uncoded", &decoder_type::symbols_uncoded,
+            "Returns the number of uncoded symbols.\n\n"
+            "\t:returns: The number of symbols which have been uncoded.\n"
+        )
+        .def("copy_symbols", &copy_symbols<decoder_type>,
+            "Returns the decoded symbols.\n\n"
+            "\t:returns: The decoded symbols.\n"
+        )
+        .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded,
+            "Returns whether the symbol is uncoded or not.\n\n"
+            "\t:param index: Index of the symbol to check.\n"
+            "\t:returns: True if the symbol is uncoded, and otherwise false.\n"
+        )
+        .def("has_partial_decoding_tracker",
+            &has_partial_decoding_tracker<decoder_type>,
+            "Return whether the decoder contains a partial decoding tracker\n\n"
+            "\t:returns: True if the partial decoding tracker is available, "
+            "and otherwise false.\n"
+        )
+        .def("is_partial_complete", &is_partial_complete<decoder_type>,
+            "Returns true if the decoding matrix should be partially "
+            "decoded.\n\n"
+            "\t:returns: True if the decoding matrix should be partially "
+            "decoded.\n"
+        );
 
         void (decoder_type::*decode_symbol2)(uint8_t*, uint32_t) =
             &decoder_type::decode_symbol;
@@ -157,7 +192,7 @@ namespace kodo_python
         extra_decoder_methods<Coder, decoder_type> extra;
         extra(decoder_class);
 
-        boost::python::register_ptr_to_python<boost::shared_ptr<decoder_type>>();
+        register_ptr_to_python<boost::shared_ptr<decoder_type>>();
     }
 }
 

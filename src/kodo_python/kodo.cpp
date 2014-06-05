@@ -32,49 +32,40 @@ namespace kodo_python
         template<class, class> class Decoder,
         class Field,
         class TraceTag>
-    void create(const std::string& kind, const std::string& field,
-                const std::string& trace)
+    void create(const std::string& stack, const std::string& field, bool trace)
     {
-        std::string trace_string = "";
-        if (trace != "")
-            trace_string = "_" + trace;
-
-        factory<Encoder<Field, TraceTag>>(
-            kind + "_encoder_factory_" + field + trace_string );
-        encoder<Encoder, Field, TraceTag>(
-            kind + "_encoder_" + field + trace_string);
-        factory<Decoder<Field, TraceTag>>(
-            kind + "_decoder_factory_" + field + trace_string);
-        decoder<Decoder, Field, TraceTag>(
-            kind + "_decoder_" + field + trace_string);
+        factory<Encoder<Field, TraceTag>>(stack, field, trace, "encoder");
+        encoder<Encoder, Field, TraceTag>(stack, field, trace);
+        factory<Decoder<Field, TraceTag>>(stack, field, trace, "decoder");
+        decoder<Decoder, Field, TraceTag>(stack, field, trace);
     }
 
     template<
         template<class, class> class Encoder,
         template<class, class> class Decoder,
         class TraceTag>
-    void create_field(const std::string& kind, const std::string& trace)
+    void create_field(const std::string& stack, bool trace)
     {
         create<Encoder, Decoder, fifi::binary, TraceTag>(
-            kind, "binary", trace);
+            stack, "binary", trace);
         create<Encoder, Decoder, fifi::binary4, TraceTag>(
-            kind, "binary4", trace);
+            stack, "binary4", trace);
         create<Encoder, Decoder, fifi::binary8, TraceTag>(
-            kind, "binary8", trace);
+            stack, "binary8", trace);
         create<Encoder, Decoder, fifi::binary16, TraceTag>(
-            kind, "binary16", trace);
+            stack, "binary16", trace);
     }
 
     template<
         template<class, class> class Encoder,
         template<class, class> class Decoder>
-    void create_trace(const std::string& kind)
+    void create_trace(const std::string& stack)
     {
-        create_field<Encoder, Decoder, kodo::disable_trace>(kind, "");
-        create_field<Encoder, Decoder, kodo::enable_trace>(kind, "trace");
+        create_field<Encoder, Decoder, kodo::disable_trace>(stack, false);
+        create_field<Encoder, Decoder, kodo::enable_trace>(stack, true);
     }
 
-    void create_coders()
+    void create_stacks()
     {
         create_trace<
             kodo::full_rlnc_encoder, kodo::full_rlnc_decoder>("full_rlnc");
@@ -88,7 +79,7 @@ namespace kodo_python
     BOOST_PYTHON_MODULE(kodo)
     {
         boost::python::docstring_options doc_options;
-        doc_options.disable_cpp_signatures();
-        create_coders();
+        doc_options.disable_signatures();
+        create_stacks();
     }
 }
