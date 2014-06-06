@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <boost/python/args.hpp>
+
 #include <kodo/trace.hpp>
 #include <kodo/has_trace.hpp>
 
@@ -56,6 +58,7 @@ namespace kodo_python {
                 "Writes the trace information to stdout.\n"
             )
             .def("filtered_trace", &filtered_trace<Type>,
+                boost::python::arg("filter"),
                 "Writes the filtered trace information to stdout.\n\n"
                 "\t:param filter: The \"zone\" filter which allows control "
                 "over what output will be produced by the trace.")

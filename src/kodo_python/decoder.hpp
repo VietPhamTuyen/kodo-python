@@ -168,6 +168,7 @@ namespace kodo_python
             "\t:returns: The decoded symbols.\n"
         )
         .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded,
+            arg("index"),
             "Returns whether the symbol is uncoded or not.\n\n"
             "\t:param index: Index of the symbol to check.\n"
             "\t:returns: True if the symbol is uncoded, and otherwise false.\n"

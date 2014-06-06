@@ -55,6 +55,13 @@ namespace kodo_python
     }
 
     template<class Encoder>
+    void set_symbol(Encoder& encoder, uint32_t index, const std::string& data)
+    {
+        auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
+        encoder.set_symbol(index, storage);
+    }
+
+    template<class Encoder>
     PyObject* encode(Encoder& encoder)
     {
         std::vector<uint8_t> payload(encoder.payload_size());
@@ -108,6 +115,8 @@ namespace kodo_python
     template<template<class, class> class Coder, class Field, class TraceTag>
     void encoder(const std::string& stack, const std::string& field, bool trace)
     {
+        using namespace boost::python;
+
         std::string s = "_";
         std::string kind = "encoder";
         std::string trace_string = trace ? "_trace" : "";
@@ -120,9 +129,14 @@ namespace kodo_python
             "Encodes a symbol.\n\n"
             "\t:returns: The encoded symbol.\n"
         )
-        .def("set_symbols", &set_symbols<encoder_type>,
+        .def("set_symbols", &set_symbols<encoder_type>, arg("symbols"),
             "Sets the symbols to be encoded.\n\n"
             "\t:param symbols: The symbols to be encoded.\n"
+        )
+        .def("set_symbol", &set_symbol<encoder_type>, args("index", "symbol"),
+            "Sets a symbol to be encoded.\n\n"
+            "\t:param index: The index of the symbol in the coding block.\n"
+            "\t:param symbol: The actual data of that symbol.\n"
         )
         .def("has_systematic_encoder", &has_systematic_encoder<encoder_type>,
             "Returns whether the encoder is a systematic encoder\n\n"
@@ -143,6 +157,6 @@ namespace kodo_python
         extra_encoder_methods<Coder, encoder_type> extra;
         extra(encoder_class);
 
-        boost::python::register_ptr_to_python<boost::shared_ptr<encoder_type>>();
+        register_ptr_to_python<boost::shared_ptr<encoder_type>>();
     }
 }
