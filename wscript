@@ -37,11 +37,6 @@ def options(opt):
         major_version=11))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
-        name='gauge',
-        git_repository='github.com/steinwurf/cxx-gauge.git',
-        major_version=7))
-
-    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='kodo',
         git_repository='github.com/steinwurf/kodo.git',
         major_version=17))
@@ -87,7 +82,6 @@ def configure(conf):
         recurse_helper(conf, 'boost')
         recurse_helper(conf, 'cpuid')
         recurse_helper(conf, 'fifi')
-        recurse_helper(conf, 'gauge')
         recurse_helper(conf, 'kodo')
         recurse_helper(conf, 'platform')
         recurse_helper(conf, 'sak')
@@ -121,7 +115,6 @@ def build(bld):
         recurse_helper(bld, 'boost')
         recurse_helper(bld, 'cpuid')
         recurse_helper(bld, 'fifi')
-        recurse_helper(bld, 'gauge')
         recurse_helper(bld, 'kodo')
         recurse_helper(bld, 'platform')
         recurse_helper(bld, 'sak')
