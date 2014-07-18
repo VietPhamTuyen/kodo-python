@@ -8,6 +8,12 @@ Latest
 ------
 * tbd
 
+2.2.0
+-----
+* Minor: Added documentation for the python functions.
+* Minor: Added keyword arguements for the python functions.
+* BugFix: Removed unused dependencies guage and tables.
+
 2.1.0
 -----
 * Minor: Set ``kodo-python`` as the name for wscript target, so that it doesn't
