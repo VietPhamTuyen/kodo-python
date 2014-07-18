@@ -52,11 +52,6 @@ def options(opt):
         major_version=10))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
-        name='tables',
-        git_repository='github.com/steinwurf/tables.git',
-        major_version=4))
-
-    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='waf-tools',
         git_repository='github.com/steinwurf/external-waf-tools.git',
         major_version=2))
@@ -85,7 +80,6 @@ def configure(conf):
         recurse_helper(conf, 'kodo')
         recurse_helper(conf, 'platform')
         recurse_helper(conf, 'sak')
-        recurse_helper(conf, 'tables')
 
     #Ensure that Python is configured properly
     if not conf.env['BUILD_PYTHON']:
@@ -118,7 +112,6 @@ def build(bld):
         recurse_helper(bld, 'kodo')
         recurse_helper(bld, 'platform')
         recurse_helper(bld, 'sak')
-        recurse_helper(bld, 'tables')
 
     bld.recurse('src/kodo_python')
 
