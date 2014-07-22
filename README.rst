@@ -20,11 +20,13 @@ details in the LICENSE.rst file.
 
 How to Get It
 =============
-To get the Python bindings, you can either build them from source or download
-a prebuilt version from `here`_.
+To get the Python bindings, you can either build them from source, download
+a prebuilt version from `here`_, or simply get it from pip:
+
+.. image:: https://badge.fury.io/py/kodo.svg
+    :target: http://badge.fury.io/py/kodo
 
 .. _here: http://bongo.steinwurf.dk/files/bin/kodo-python
-
 
 Requirements
 ============
