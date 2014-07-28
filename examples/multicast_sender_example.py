@@ -66,7 +66,7 @@ def main():
 
     # Get the data to encode.
     f = open(os.path.expanduser(args.file_path), 'r')
-    data_in = bytes(bytearray(f.read()))
+    data_in = bytes(bytearray(f.read(), 'utf-8'))
     f.close()
 
     # Assign the data buffer to the encoder so that we can
