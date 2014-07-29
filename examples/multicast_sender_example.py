@@ -34,9 +34,10 @@ def main():
         default=MCAST_PORT)
 
     parser.add_argument(
-        '--loops',
+        '--packets',
         type=int,
-        help='The number of loops. Set to a negative number to loop forever.',
+        help='The number of packets to send. Set to a negative number to keep '
+             'sending packages forever.',
         default=10)
 
     args = parser.parse_args()
@@ -65,8 +66,8 @@ def main():
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
 
     # Get the data to encode.
-    f = open(os.path.expanduser(args.file_path), 'r')
-    data_in = bytes(bytearray(f.read(), 'utf-8'))
+    f = open(os.path.expanduser(args.file_path), 'rb')
+    data_in = f.read()
     f.close()
 
     # Assign the data buffer to the encoder so that we can

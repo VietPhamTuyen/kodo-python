@@ -19,7 +19,7 @@ def main():
     parser.add_argument(
         '--output-file',
         type=str,
-        help='Path to the file which should be send.',
+        help='Path to the file which should be received.',
         default=None)
 
     parser.add_argument(
@@ -75,7 +75,7 @@ def main():
         print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
 
         # Write data to file (it may not be valid until the very end though).
-        f = open(args.output_file, 'w')
+        f = open(args.output_file, 'wb')
         f.write(decoder.copy_symbols())
         f.close()
 
