@@ -78,7 +78,7 @@ def main():
 
     print("Processing")
     counter = 0
-    while args.loops < 0 or counter < args.loops:
+    while args.packets < 0 or counter < args.packets:
         time.sleep(0.2)
         counter += 1
         # Generate an encoded packet
