@@ -68,7 +68,7 @@ def main():
             rank = encoder.rank()
             encoder.set_symbol(rank, symbol_storage[rank])
 
-    print("Finished")
+    print("Processing finished")
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()
 

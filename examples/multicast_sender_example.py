@@ -34,11 +34,9 @@ def main():
         default=MCAST_PORT)
 
     parser.add_argument(
-        '--packets',
-        type=int,
-        help='The number of packets to send. Set to a negative number to keep '
-             'sending packages forever.',
-        default=10)
+        '--dry-run',
+        action='store_true',
+        help='Run without network use.')
 
     args = parser.parse_args()
 
@@ -78,7 +76,7 @@ def main():
 
     print("Processing")
     counter = 0
-    while args.packets < 0 or counter < args.packets:
+    while True and not args.dry_run:
         time.sleep(0.2)
         counter += 1
         # Generate an encoded packet
@@ -89,7 +87,7 @@ def main():
         # Send the packet.
         sock.sendto(packet, address)
 
-    print("Finished")
+    print("Processing finished")
 
 if __name__ == "__main__":
     main()

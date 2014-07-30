@@ -20,7 +20,7 @@ def main():
         '--output-file',
         type=str,
         help='Path to the file which should be received.',
-        default=None)
+        default='output_file')
 
     parser.add_argument(
         '--ip',
@@ -33,6 +33,11 @@ def main():
         type=int,
         help='The port to send to.',
         default=MCAST_PORT)
+
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Run without network use.')
 
     args = parser.parse_args()
 
@@ -61,11 +66,8 @@ def main():
 
     print("Processing")
     package_number = 0
-    while not decoder.is_complete():
+    while not decoder.is_complete() and not args.dry_run:
         time.sleep(0.2)
-        if not args.output_file:
-            print("No output file specified, no processing necessary.")
-            break
         packet = sock.recv(10240)
 
         sys.stdout.write("\tDecoding packet {}...".format(package_number))
