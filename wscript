@@ -138,4 +138,5 @@ def exec_test_python(bld):
         for f in sorted(os.listdir('examples')):
             if f.endswith('.py'):
                 example = os.path.join('examples', f)
-                bld.cmd_and_log('{0} {1}\n'.format(python, example), env=env)
+                bld.cmd_and_log(
+                    '{0} {1} --dry-run\n'.format(python, example), env=env)
