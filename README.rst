@@ -6,7 +6,7 @@ such as encoding and decoding of data. The examples folder provides sample
 applications showing usage of the python API.
 
 .. image:: http://buildbot.steinwurf.dk/svgstatus?project=kodo-python
-    :target: http://buildbot.steinwurf.dk/stats?project=kodo-python
+    :target: http://buildbot.steinwurf.dk/stats?projects=kodo-python
     :alt: Buildbot status
 .. image:: https://badge.fury.io/py/kodo.svg
     :target: http://badge.fury.io/py/kodo
