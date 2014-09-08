@@ -7,13 +7,18 @@
 
 #include <boost/python/args.hpp>
 
+#include <string>
+
 namespace kodo_python
 {
     template<class Coder>
     void factory(const std::string& stack, const std::string& field, bool trace,
         const std::string& coder)
     {
-        using namespace boost::python;
+        using boost::python::arg;
+        using boost::python::args;
+        using boost::python::class_;
+        using boost::python::init;
 
         std::string s = "_";
         std::string kind = coder + s + std::string("factory");
@@ -31,8 +36,7 @@ namespace kodo_python
                 "\t:param max_symbols: "
                 "The maximum symbols the coders can expect.\n"
                 "\t:param max_symbol_size: "
-                "The maximum size of a symbol in bytes.\n"
-                ))
+                "The maximum size of a symbol in bytes.\n"))
         .def("build", &factory_type::build,
             "Builds the actual coder.\n\n"
             "\t:returns: An instantiation of a coder.\n")

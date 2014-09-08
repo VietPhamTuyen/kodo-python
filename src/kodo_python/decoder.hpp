@@ -100,7 +100,7 @@ namespace kodo_python
     struct is_partial_complete_method
     {
         template<class DecoderClass>
-        void operator()(DecoderClass& decoder_class)
+        is_partial_complete_method(DecoderClass& decoder_class)
         {
             (void) decoder_class;
         }
@@ -110,7 +110,7 @@ namespace kodo_python
     struct is_partial_complete_method<true, Type>
     {
         template<class DecoderClass>
-        void operator()(DecoderClass& decoder_class)
+        is_partial_complete_method(DecoderClass& decoder_class)
         {
             decoder_class
             .def("is_partial_complete", &is_partial_complete<Type>,
@@ -125,7 +125,7 @@ namespace kodo_python
     struct extra_decoder_methods
     {
         template<class DecoderClass>
-        void operator()(DecoderClass& decoder_class)
+        extra_decoder_methods(DecoderClass& decoder_class)
         {
             (void) decoder_class;
         }
@@ -135,7 +135,7 @@ namespace kodo_python
     struct extra_decoder_methods<kodo::sliding_window_decoder, Type>
     {
         template<class DecoderClass>
-        void operator()(DecoderClass& decoder_class)
+        extra_decoder_methods(DecoderClass& decoder_class)
         {
             decoder_class
             .def("feedback_size", &Type::feedback_size,
@@ -160,7 +160,7 @@ namespace kodo_python
         std::string name = stack + s + kind + s + field + trace_string;
 
         typedef Coder<Field, TraceTag> decoder_type;
-        auto decoder_class = coder<Coder,Field,TraceTag>(name)
+        auto decoder_class = coder<Coder, Field, TraceTag>(name)
         .def("recode", &recode<decoder_type>,
             "Recodes a symbol. This function is special for network codes.\n\n"
             "\t:returns: The recoded symbol.\n"
@@ -203,12 +203,10 @@ namespace kodo_python
         is_partial_complete_method<
             kodo::has_partial_decoding_tracker<decoder_type>::value,
             decoder_type>
-                partial_complete_method;
+            is_partial_complete_method(decoder_class);
 
-        partial_complete_method(decoder_class);
-
-        extra_decoder_methods<Coder, decoder_type> extra;
-        extra(decoder_class);
+        extra_decoder_methods<Coder, decoder_type> extra_decoder_methods(
+            decoder_class);
 
         register_ptr_to_python<boost::shared_ptr<decoder_type>>();
     }

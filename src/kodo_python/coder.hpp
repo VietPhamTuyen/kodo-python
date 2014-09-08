@@ -35,7 +35,7 @@ namespace kodo_python
     struct trace_methods
     {
         template<class CoderClass>
-        void operator()(CoderClass& coder_class)
+        trace_methods(CoderClass& coder_class)
         {
             (void) coder_class;
         }
@@ -45,7 +45,7 @@ namespace kodo_python
     struct trace_methods<kodo::enable_trace, true, Type>
     {
         template<class CoderClass>
-        void operator()(CoderClass& coder_class)
+        trace_methods(CoderClass& coder_class)
         {
             coder_class
             .def("trace", &trace<Type>,
@@ -99,12 +99,8 @@ namespace kodo_python
             "\t:returns: True if the symbol is available.\n"
         );
 
-        trace_methods<
-            TraceTag,
-            kodo::has_trace<coder_type>::value,
-            coder_type> trace;
-
-        trace(coder_class);
+        trace_methods<TraceTag, kodo::has_trace<coder_type>::value, coder_type>
+            trace_methods(coder_class);
 
         return coder_class;
     }

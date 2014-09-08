@@ -86,7 +86,7 @@ namespace kodo_python
     struct systematic_encoder_methods
     {
         template<class EncoderClass>
-        void operator()(EncoderClass& encoder_class)
+        systematic_encoder_methods(EncoderClass& encoder_class)
         {
             (void) encoder_class;
         }
@@ -96,7 +96,7 @@ namespace kodo_python
     struct systematic_encoder_methods<true, Type>
     {
         template<class EncoderClass>
-        void operator()(EncoderClass& encoder_class)
+        systematic_encoder_methods(EncoderClass& encoder_class)
         {
             encoder_class
             .def("is_systematic_on", &is_systematic_on<Type>,
@@ -115,7 +115,7 @@ namespace kodo_python
     struct extra_encoder_methods
     {
         template<class EncoderClass>
-        void operator()(EncoderClass& encoder_class)
+        extra_encoder_methods(EncoderClass& encoder_class)
         {
             (void) encoder_class;
         }
@@ -125,7 +125,7 @@ namespace kodo_python
     struct extra_encoder_methods<kodo::sliding_window_encoder, Type>
     {
         template<class EncoderClass>
-        void operator()(EncoderClass& encoder_class)
+        extra_encoder_methods(EncoderClass& encoder_class)
         {
             encoder_class
             .def("feedback_size", &Type::feedback_size,
@@ -151,7 +151,7 @@ namespace kodo_python
         std::string name = stack + s + kind + s + field + trace_string;
 
         typedef Coder<Field, TraceTag> encoder_type;
-        auto encoder_class = coder<Coder,Field,TraceTag>(name)
+        auto encoder_class = coder<Coder, Field, TraceTag>(name)
         .def("encode", &encode<encoder_type>,
             "Encodes a symbol.\n\n"
             "\t:returns: The encoded symbol.\n"
@@ -165,14 +165,13 @@ namespace kodo_python
             "\t:param index: The index of the symbol in the coding block.\n"
             "\t:param symbol: The actual data of that symbol.\n");
 
-        extra_encoder_methods<Coder, encoder_type> extra;
-        extra(encoder_class);
+        extra_encoder_methods<Coder, encoder_type> extra_encoder_methods(
+            encoder_class);
 
         systematic_encoder_methods<
             kodo::has_systematic_encoder<encoder_type>::value,
             encoder_type>
-                systematic;
-        systematic(encoder_class);
+            systematic_encoder_methods(encoder_class);
 
         register_ptr_to_python<boost::shared_ptr<encoder_type>>();
     }
