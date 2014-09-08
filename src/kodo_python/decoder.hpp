@@ -16,6 +16,9 @@
 
 #include <sak/storage.hpp>
 
+#include <string>
+#include <vector>
+
 #include "coder.hpp"
 
 namespace kodo_python
@@ -76,13 +79,6 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    bool has_partial_decoding_tracker(Decoder& decoder)
-    {
-        (void) decoder;
-        return kodo::has_partial_decoding_tracker<Decoder>::value;
-    }
-
-    template<class Decoder>
     bool is_partial_complete(Decoder& decoder)
     {
         return kodo::is_partial_complete(decoder);
@@ -99,6 +95,31 @@ namespace kodo_python
         return PyString_FromStringAndSize((char*)payload.data(), length);
         #endif
     }
+
+    template<bool HAS_PARTIAL_DECODING_TRACKER, class Type>
+    struct is_partial_complete_method
+    {
+        template<class DecoderClass>
+        void operator()(DecoderClass& decoder_class)
+        {
+            (void) decoder_class;
+        }
+    };
+
+    template<class Type>
+    struct is_partial_complete_method<true, Type>
+    {
+        template<class DecoderClass>
+        void operator()(DecoderClass& decoder_class)
+        {
+            decoder_class
+            .def("is_partial_complete", &is_partial_complete<Type>,
+                "Returns true if the decoding matrix should be partially "
+                "decoded.\n\n"
+                "\t:returns: True if the decoding matrix should be partially "
+                "decoded.\n");
+        }
+    };
 
     template<template<class, class> class Coder, class Type>
     struct extra_decoder_methods
@@ -130,7 +151,8 @@ namespace kodo_python
     template<template<class, class> class Coder, class Field, class TraceTag>
     void decoder(const std::string& stack, const std::string& field, bool trace)
     {
-        using namespace boost::python;
+        using boost::python::register_ptr_to_python;
+        using boost::python::arg;
 
         std::string s = "_";
         std::string kind = "decoder";
@@ -172,23 +194,18 @@ namespace kodo_python
             "Returns whether the symbol is uncoded or not.\n\n"
             "\t:param index: Index of the symbol to check.\n"
             "\t:returns: True if the symbol is uncoded, and otherwise false.\n"
-        )
-        .def("has_partial_decoding_tracker",
-            &has_partial_decoding_tracker<decoder_type>,
-            "Return whether the decoder contains a partial decoding tracker\n\n"
-            "\t:returns: True if the partial decoding tracker is available, "
-            "and otherwise false.\n"
-        )
-        .def("is_partial_complete", &is_partial_complete<decoder_type>,
-            "Returns true if the decoding matrix should be partially "
-            "decoded.\n\n"
-            "\t:returns: True if the decoding matrix should be partially "
-            "decoded.\n"
         );
 
         void (decoder_type::*decode_symbol2)(uint8_t*, uint32_t) =
             &decoder_type::decode_symbol;
         decoder_class.def("decode_symbol_at_index", decode_symbol2);
+
+        is_partial_complete_method<
+            kodo::has_partial_decoding_tracker<decoder_type>::value,
+            decoder_type>
+                partial_complete_method;
+
+        partial_complete_method(decoder_class);
 
         extra_decoder_methods<Coder, decoder_type> extra;
         extra(decoder_class);

@@ -18,17 +18,13 @@
 #include <kodo/set_systematic_on.hpp>
 #include <kodo/write_feedback.hpp>
 
+#include <string>
+#include <vector>
+
 #include "coder.hpp"
 
 namespace kodo_python
 {
-    template<class Encoder>
-    bool has_systematic_encoder(const Encoder& encoder)
-    {
-        (void) encoder;
-        return kodo::has_systematic_encoder<Encoder>::value;
-    }
-
     template<class Encoder>
     bool is_systematic_on(const Encoder& encoder)
     {
@@ -50,14 +46,16 @@ namespace kodo_python
     template<class Encoder>
     void set_symbols(Encoder& encoder, const std::string& data)
     {
-        auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
+        auto storage = sak::const_storage(
+            (uint8_t*)data.c_str(), data.length());
         encoder.set_symbols(storage);
     }
 
     template<class Encoder>
     void set_symbol(Encoder& encoder, uint32_t index, const std::string& data)
     {
-        auto storage = sak::const_storage((uint8_t*)data.c_str(), data.length());
+        auto storage = sak::const_storage(
+            (uint8_t*)data.c_str(), data.length());
         encoder.set_symbol(index, storage);
     }
 
@@ -84,6 +82,35 @@ namespace kodo_python
         encoder.read_feedback(_feedback.data());
     }
 
+    template<bool IS_SYSTEMATIC_ENCODER, class Type>
+    struct systematic_encoder_methods
+    {
+        template<class EncoderClass>
+        void operator()(EncoderClass& encoder_class)
+        {
+            (void) encoder_class;
+        }
+    };
+
+    template<class Type>
+    struct systematic_encoder_methods<true, Type>
+    {
+        template<class EncoderClass>
+        void operator()(EncoderClass& encoder_class)
+        {
+            encoder_class
+            .def("is_systematic_on", &is_systematic_on<Type>,
+                "Returns true if the encoder is in systematic mode.\n\n"
+                "\t:returns: True if the encoder is in systematic mode.\n"
+            )
+            .def("set_systematic_on", &set_systematic_on<Type>,
+                "Set the encoder in systematic mode.\n"
+            )
+            .def("set_systematic_off", &set_systematic_off<Type>,
+                "Turns off systematic mode.\n");
+        }
+    };
+
     template<template<class, class> class Coder, class Type>
     struct extra_encoder_methods
     {
@@ -107,15 +134,16 @@ namespace kodo_python
             )
             .def("read_feedback", &read_feedback<Type>,
                 "Returns the feedback information.\n\n"
-                "\t:returns: The feedback information.\n"
-            );
+                "\t:returns: The feedback information.\n");
         }
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
     void encoder(const std::string& stack, const std::string& field, bool trace)
     {
-        using namespace boost::python;
+        using boost::python::arg;
+        using boost::python::args;
+        using boost::python::register_ptr_to_python;
 
         std::string s = "_";
         std::string kind = "encoder";
@@ -123,7 +151,6 @@ namespace kodo_python
         std::string name = stack + s + kind + s + field + trace_string;
 
         typedef Coder<Field, TraceTag> encoder_type;
-        typedef Coder<Field, TraceTag> decoder_type;
         auto encoder_class = coder<Coder,Field,TraceTag>(name)
         .def("encode", &encode<encoder_type>,
             "Encodes a symbol.\n\n"
@@ -136,26 +163,16 @@ namespace kodo_python
         .def("set_symbol", &set_symbol<encoder_type>, args("index", "symbol"),
             "Sets a symbol to be encoded.\n\n"
             "\t:param index: The index of the symbol in the coding block.\n"
-            "\t:param symbol: The actual data of that symbol.\n"
-        )
-        .def("has_systematic_encoder", &has_systematic_encoder<encoder_type>,
-            "Returns whether the encoder is a systematic encoder\n\n"
-            "\t:returns: True if the encoder is a systematic encoder, and "
-            "otherwise false.\n"
-        )
-        .def("is_systematic_on", &is_systematic_on<encoder_type>,
-            "Returns true if the encoder is in systematic mode.\n\n"
-            "\t:returns: True if the encoder is in systematic mode.\n"
-        )
-        .def("set_systematic_on", &set_systematic_on<encoder_type>,
-            "Set the encoder in systematic mode.\n"
-        )
-        .def("set_systematic_off", &set_systematic_off<encoder_type>,
-            "Turns off systematic mode.\n"
-        );
+            "\t:param symbol: The actual data of that symbol.\n");
 
         extra_encoder_methods<Coder, encoder_type> extra;
         extra(encoder_class);
+
+        systematic_encoder_methods<
+            kodo::has_systematic_encoder<encoder_type>::value,
+            encoder_type>
+                systematic;
+        systematic(encoder_class);
 
         register_ptr_to_python<boost::shared_ptr<encoder_type>>();
     }

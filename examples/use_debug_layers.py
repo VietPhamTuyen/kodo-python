@@ -48,7 +48,7 @@ def main():
         # Encode a packet into the payload buffer
         packet = encoder.encode()
 
-        if encoder.has_trace():
+        if 'trace' in dir(encoder):
             print("Trace encoder:")
             sys.stdout.flush()
             encoder.trace()
@@ -65,7 +65,7 @@ def main():
 
         # Pass that packet to the decoder
         decoder.decode(packet)
-        if decoder.has_trace():
+        if 'trace' in dir(decoder):
             filter_function = lambda zone: zone in [
                 "decoder_state",
                 "input_symbol_coefficients"]
