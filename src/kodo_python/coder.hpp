@@ -12,14 +12,8 @@
 
 #include <Python.h>
 
-namespace kodo_python {
-
-    template<class Coder>
-    bool has_trace(Coder& coder)
-    {
-        (void) coder;
-        return kodo::has_trace<Coder>::value;
-    }
+namespace kodo_python
+{
 
     template<class Coder>
     void trace(Coder& coder)
@@ -37,21 +31,21 @@ namespace kodo_python {
         return kodo::trace(coder, std::cout, filter);
     }
 
-    template<class TraceTag, class Type>
+    template<class TraceTag, bool has_trace, class Type>
     struct trace_methods
     {
         template<class CoderClass>
-        void operator()(CoderClass& coder_class)
+        trace_methods(CoderClass& coder_class)
         {
             (void) coder_class;
         }
     };
 
     template<class Type>
-    struct trace_methods<kodo::enable_trace, Type>
+    struct trace_methods<kodo::enable_trace, true, Type>
     {
         template<class CoderClass>
-        void operator()(CoderClass& coder_class)
+        trace_methods(CoderClass& coder_class)
         {
             coder_class
             .def("trace", &trace<Type>,
@@ -61,11 +55,7 @@ namespace kodo_python {
                 boost::python::arg("filter"),
                 "Writes the filtered trace information to stdout.\n\n"
                 "\t:param filter: The \"zone\" filter which allows control "
-                "over what output will be produced by the trace.")
-            .def("has_trace", &has_trace<Type>,
-                "Returns true if the trace functions are available.\n\n"
-                "\t:returns: True if the trace functions are available.\n"
-            );
+                "over what output will be produced by the trace.");
         }
     };
 
@@ -109,8 +99,8 @@ namespace kodo_python {
             "\t:returns: True if the symbol is available.\n"
         );
 
-        trace_methods<TraceTag, coder_type> trace;
-        trace(coder_class);
+        trace_methods<TraceTag, kodo::has_trace<coder_type>::value, coder_type>
+            trace_methods(coder_class);
 
         return coder_class;
     }

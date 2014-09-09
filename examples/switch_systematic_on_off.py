@@ -53,7 +53,7 @@ def main():
     while not decoder.is_complete():
 
         # If the chosen codec stack supports systematic coding
-        if encoder.has_systematic_encoder():
+        if 'is_systematic_on' in dir(encoder):
 
             # With 50% probability toggle systematic
             if random.choice([True, False]):
