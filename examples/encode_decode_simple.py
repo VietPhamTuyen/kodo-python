@@ -35,7 +35,7 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytes(os.urandom(encoder.block_size()))
+    data_in = os.urandom(encoder.block_size())
 
     # Assign the data buffer to the encoder so that we can
     # produce encoded symbols
