@@ -12,6 +12,7 @@ Latest
   trace encoder no longer has the trace function. Also the ``has_`` functions have
   been removed. This includes: ``has_partial_decoding_tracker``,
   ``has_systematic_encoder``, and ``has_trace``.
+* Patch: Simplified examples.
 
 2.2.0
 -----
