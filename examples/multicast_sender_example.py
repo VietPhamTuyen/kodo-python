@@ -1,3 +1,11 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+# Copyright Steinwurf ApS 2011-2013.
+# Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
+# See accompanying file LICENSE.rst or
+# http://www.steinwurf.com/licensing
+
 import argparse
 import kodo
 import os
@@ -10,10 +18,7 @@ MCAST_PORT = 5007
 
 
 def main():
-    """
-    Example of a sender which encodes and sends a file.
-    """
-
+    """Example of a sender which encodes and sends a file."""
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument(
         '--file-path',
@@ -75,14 +80,11 @@ def main():
     address = (args.ip, args.port)
 
     print("Processing")
-    counter = 0
     while True and not args.dry_run:
         time.sleep(0.2)
-        counter += 1
         # Generate an encoded packet
-        sys.stdout.write("\tEncoding packet...")
         packet = encoder.encode()
-        sys.stdout.write(" done!\n")
+        print("Packet encoded!")
 
         # Send the packet.
         sock.sendto(packet, address)

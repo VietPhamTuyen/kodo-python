@@ -14,6 +14,8 @@ import kodo
 
 def main():
     """
+    Encode recode decode example.
+
     In Network Coding applications one of the key features is the
     ability of intermediate nodes in the network to recode packets
     as they traverse them. In Kodo it is possible to recode packets
@@ -56,8 +58,7 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytearray(os.urandom(encoder.block_size()))
-    data_in = bytes(data_in)
+    data_in = os.urandom(encoder.block_size())
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it

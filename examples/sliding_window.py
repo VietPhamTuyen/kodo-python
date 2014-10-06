@@ -15,6 +15,8 @@ import kodo
 
 def main():
     """
+    Sliding window example.
+
     This example shows how to use sliding window encoder and decoder
     stacks. The sliding window is special in that it does not require
     that all symbols are available at the encoder before encoding can
@@ -40,8 +42,7 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytearray(os.urandom(encoder.block_size()))
-    data_in = bytes(data_in)
+    data_in = os.urandom(encoder.block_size())
 
     # Lets split the data into symbols and feed the encoder one symbol at a
     # time

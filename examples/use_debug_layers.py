@@ -14,9 +14,7 @@ import kodo
 
 
 def main():
-    """
-    Simple example showing how to use some of the debug layers defined in Kodo.
-    """
+    """An example of how to use the trace functionality."""
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 8
@@ -36,8 +34,7 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytearray(os.urandom(encoder.block_size()))
-    data_in = bytes(data_in)
+    data_in = os.urandom(encoder.block_size())
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it
