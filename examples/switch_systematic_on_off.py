@@ -15,6 +15,8 @@ import kodo
 
 def main():
     """
+    Switch systematic off example.
+
     This example shows how to enable or disable systematic coding for
     coding stacks that support it.
     Systematic coding is used to reduce the amount of work done by an
@@ -41,8 +43,7 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytearray(os.urandom(encoder.block_size()))
-    data_in = bytes(data_in)
+    data_in = os.urandom(encoder.block_size())
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it

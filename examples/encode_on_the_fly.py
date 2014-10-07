@@ -15,6 +15,8 @@ import kodo
 
 def main():
     """
+    Encode on the fly example.
+
     This example shows how to use a storage aware encoder which will
     allow you to encode from a block before all symbols have been
     specified. This can be useful in cases where the symbols that
@@ -39,14 +41,12 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytearray(os.urandom(encoder.block_size()))
+    data_in = os.urandom(encoder.block_size())
 
     # Lets split the data into symbols and feed the encoder one symbol at a
     # time
     symbol_storage = [
-        bytes(data_in[i:i+symbol_size]) for i in range(0,
-                                                       len(data_in),
-                                                       symbol_size)
+        data_in[i:i+symbol_size] for i in range(0, len(data_in), symbol_size)
     ]
 
     print("Processing")

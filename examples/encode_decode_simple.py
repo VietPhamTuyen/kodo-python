@@ -13,9 +13,7 @@ import kodo
 
 
 def main():
-    """
-    Simple example showing how to encode and decode a block of memory.
-    """
+    """Simple example showing how to encode and decode a block of memory."""
     # Set the number of symbols (i.e. the generation size in RLNC
     # terminology) and the size of a symbol in bytes
     symbols = 8
@@ -35,26 +33,23 @@ def main():
     # with the same size as the encoder's block size (the max.
     # amount a single encoder can encode)
     # Just for fun - fill the input data with random data
-    data_in = bytearray(os.urandom(encoder.block_size()))
-    data_in = bytes(data_in)
+    data_in = os.urandom(encoder.block_size())
 
     # Assign the data buffer to the encoder so that we can
     # produce encoded symbols
     encoder.set_symbols(data_in)
 
     print("Processing")
-    package_number = 0
+    packet_number = 0
     while not decoder.is_complete():
         # Generate an encoded packet
-        sys.stdout.write("\tEncoding packet {} ...".format(package_number))
         packet = encoder.encode()
-        sys.stdout.write(" done!\n")
+        print("Packet {} encoded!".format(packet_number))
 
         # Pass that packet to the decoder
-        sys.stdout.write("\tDecoding packet {} ...".format(package_number))
         decoder.decode(packet)
-        sys.stdout.write(" done!\n")
-        package_number += 1
+        print("Packet {} decoded!".format(packet_number))
+        packet_number += 1
         print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
 
     print("Processing finished")

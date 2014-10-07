@@ -1,8 +1,15 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+# Copyright Steinwurf ApS 2011-2013.
+# Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
+# See accompanying file LICENSE.rst or
+# http://www.steinwurf.com/licensing
+
 import argparse
 import kodo
 import socket
 import struct
-import sys
 import time
 
 MCAST_GRP = '224.1.1.1'
@@ -11,8 +18,9 @@ MCAST_PORT = 5007
 
 def main():
     """
-    Example showing a receiver which receives data, decodes it, and finally
-    writes it to a file.
+    Multicast example, reciever part.
+
+    An example where data is received, decoded, and finally written to a file.
     """
 
     parser = argparse.ArgumentParser(description=main.__doc__)
@@ -65,15 +73,12 @@ def main():
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
     print("Processing")
-    package_number = 0
     while not decoder.is_complete() and not args.dry_run:
         time.sleep(0.2)
         packet = sock.recv(10240)
 
-        sys.stdout.write("\tDecoding packet {}...".format(package_number))
         decoder.decode(packet)
-        sys.stdout.write(" done!\n")
-        package_number += 1
+        print("Packet decoded!")
         print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
 
         # Write data to file (it may not be valid until the very end though).
