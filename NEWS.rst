@@ -6,6 +6,11 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+
+3.0.0
+-----
 * Minor: Added multi-cast examples.
 * Major: Python object now only provide the functions they support. E.g., a non
   trace encoder no longer has the trace function. Also the ``has_`` functions have
@@ -20,7 +25,7 @@ Latest
 
 * Minor: Added documentation for the python functions.
 * Minor: Added keyword arguments for the python functions.
-* BugFix: Removed unused dependencies guage and tables.
+* Patch: Removed unused dependencies guage and tables.
 
 2.1.0
 -----
