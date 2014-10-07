@@ -151,7 +151,6 @@ namespace kodo_python
     template<template<class, class> class Coder, class Field, class TraceTag>
     void decoder(const std::string& stack, const std::string& field, bool trace)
     {
-        using boost::python::register_ptr_to_python;
         using boost::python::arg;
 
         std::string s = "_";
@@ -207,8 +206,6 @@ namespace kodo_python
 
         extra_decoder_methods<Coder, decoder_type> extra_decoder_methods(
             decoder_class);
-
-        register_ptr_to_python<boost::shared_ptr<decoder_type>>();
     }
 }
 

@@ -82,5 +82,8 @@ namespace kodo_python
         factory.def("max_block_size", &factory_type::max_block_size,
             max_block_size_desc.c_str()
         );
+        // Enable boost to map from the c++ pointer type to the python coder
+        // type. E.g., from std::shared_ptr<Codec> to python [Codec]_encoder.
+        boost::python::register_ptr_to_python<typename factory_type::pointer>();
     }
 }
