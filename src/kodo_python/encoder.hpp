@@ -143,7 +143,6 @@ namespace kodo_python
     {
         using boost::python::arg;
         using boost::python::args;
-        using boost::python::register_ptr_to_python;
 
         std::string s = "_";
         std::string kind = "encoder";
@@ -172,7 +171,5 @@ namespace kodo_python
             kodo::has_systematic_encoder<encoder_type>::value,
             encoder_type>
             systematic_encoder_methods(encoder_class);
-
-        register_ptr_to_python<boost::shared_ptr<encoder_type>>();
     }
 }
