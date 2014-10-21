@@ -17,6 +17,7 @@
 #include <kodo/set_systematic_off.hpp>
 #include <kodo/set_systematic_on.hpp>
 #include <kodo/write_feedback.hpp>
+#include <kodo/rlnc/sparse_full_rlnc_encoder.hpp>
 
 #include <string>
 #include <vector>
@@ -140,7 +141,7 @@ namespace kodo_python
     };
 
     template<class Type>
-    struct extra_encoder_methods<kodo::shallow_sparse_full_rlnc_encoder, Type>
+    struct extra_encoder_methods<kodo::sparse_full_rlnc_encoder, Type>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)

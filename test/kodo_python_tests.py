@@ -27,22 +27,22 @@ test_sets = [
      kodo.full_rlnc_decoder_factory_binary16_trace),
 
     # Sparse Full RLNC
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary,
+    (kodo.sparse_full_rlnc_encoder_factory_binary,
      kodo.full_rlnc_decoder_factory_binary),
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary4,
+    (kodo.sparse_full_rlnc_encoder_factory_binary4,
      kodo.full_rlnc_decoder_factory_binary4),
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary8,
+    (kodo.sparse_full_rlnc_encoder_factory_binary8,
      kodo.full_rlnc_decoder_factory_binary8),
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary16,
+    (kodo.sparse_full_rlnc_encoder_factory_binary16,
      kodo.full_rlnc_decoder_factory_binary16),
     # Sparse Full RLNC Trace
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary_trace,
+    (kodo.sparse_full_rlnc_encoder_factory_binary_trace,
      kodo.full_rlnc_decoder_factory_binary_trace),
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary4_trace,
+    (kodo.sparse_full_rlnc_encoder_factory_binary4_trace,
      kodo.full_rlnc_decoder_factory_binary4_trace),
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary8_trace,
+    (kodo.sparse_full_rlnc_encoder_factory_binary8_trace,
      kodo.full_rlnc_decoder_factory_binary8_trace),
-    (kodo.shallow_sparse_full_rlnc_encoder_factory_binary16_trace,
+    (kodo.sparse_full_rlnc_encoder_factory_binary16_trace,
      kodo.full_rlnc_decoder_factory_binary16_trace),
 
     # On The Fly

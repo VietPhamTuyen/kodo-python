@@ -14,8 +14,9 @@
 
 #include <kodo/rlnc/full_rlnc_codes.hpp>
 #include <kodo/rlnc/on_the_fly_codes.hpp>
-#include <kodo/rlnc/sliding_window_encoder.hpp>
 #include <kodo/rlnc/sliding_window_decoder.hpp>
+#include <kodo/rlnc/sliding_window_encoder.hpp>
+#include <kodo/rlnc/sparse_full_rlnc_encoder.hpp>
 #include <kodo/disable_trace.hpp>
 #include <kodo/enable_trace.hpp>
 
@@ -111,7 +112,7 @@ namespace kodo_python
         create_trace<kodo::full_rlnc_encoder>("full_rlnc");
         create_trace<kodo::full_rlnc_decoder>("full_rlnc");
 
-        create_trace<kodo::shallow_sparse_full_rlnc_encoder>("shallow_sparse_full_rlnc");
+        create_trace<kodo::sparse_full_rlnc_encoder>("sparse_full_rlnc");
 
         create_trace<kodo::on_the_fly_encoder>("on_the_fly");
         create_trace<kodo::on_the_fly_decoder>("on_the_fly");
