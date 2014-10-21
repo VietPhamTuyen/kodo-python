@@ -27,17 +27,18 @@
 
 namespace kodo_python
 {
+
     template<
         template<class, class> class Encoder,
         template<class, class> class Decoder,
         class Field,
         class TraceTag>
-    void create(const std::string& stack, const std::string& field, bool trace)
+    void create(const std::string& stack, bool trace)
     {
-        factory<Encoder<Field, TraceTag>>(stack, field, trace, "encoder");
-        encoder<Encoder, Field, TraceTag>(stack, field, trace);
-        factory<Decoder<Field, TraceTag>>(stack, field, trace, "decoder");
-        decoder<Decoder, Field, TraceTag>(stack, field, trace);
+        factory<Encoder, Field, TraceTag>(stack, trace, "encoder");
+        encoder<Encoder, Field, TraceTag>(stack, trace);
+        factory<Decoder, Field, TraceTag>(stack, trace, "decoder");
+        decoder<Decoder, Field, TraceTag>(stack, trace);
     }
 
     template<
@@ -46,14 +47,10 @@ namespace kodo_python
         class TraceTag>
     void create_field(const std::string& stack, bool trace)
     {
-        create<Encoder, Decoder, fifi::binary, TraceTag>(
-            stack, "binary", trace);
-        create<Encoder, Decoder, fifi::binary4, TraceTag>(
-            stack, "binary4", trace);
-        create<Encoder, Decoder, fifi::binary8, TraceTag>(
-            stack, "binary8", trace);
-        create<Encoder, Decoder, fifi::binary16, TraceTag>(
-            stack, "binary16", trace);
+        create<Encoder, Decoder, fifi::binary, TraceTag>(stack, trace);
+        create<Encoder, Decoder, fifi::binary4, TraceTag>(stack, trace);
+        create<Encoder, Decoder, fifi::binary8, TraceTag>(stack, trace);
+        create<Encoder, Decoder, fifi::binary16, TraceTag>(stack, trace);
     }
 
     template<

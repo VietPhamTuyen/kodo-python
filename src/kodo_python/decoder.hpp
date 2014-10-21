@@ -16,10 +16,12 @@
 
 #include <sak/storage.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
 #include "coder.hpp"
+#include "resolve_field_name.hpp"
 
 namespace kodo_python
 {
@@ -28,12 +30,15 @@ namespace kodo_python
     PyObject* copy_symbols(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.block_size());
-        auto storage = sak::mutable_storage(payload.data(), decoder.block_size());
+        auto storage = sak::mutable_storage(
+            payload.data(), decoder.block_size());
         decoder.copy_symbols(storage);
         #if PY_MAJOR_VERSION >= 3
-        return PyBytes_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        return PyBytes_FromStringAndSize(
+            (char*)payload.data(), decoder.block_size());
         #else
-        return PyString_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        return PyString_FromStringAndSize(
+            (char*)payload.data(), decoder.block_size());
         #endif
     }
 
@@ -149,9 +154,11 @@ namespace kodo_python
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void decoder(const std::string& stack, const std::string& field, bool trace)
+    void decoder(const std::string& stack, bool trace)
     {
         using boost::python::arg;
+
+        std::string field = resolve_field_name<Field>();
 
         std::string s = "_";
         std::string kind = "decoder";

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "coder.hpp"
+#include "resolve_field_name.hpp"
 
 namespace kodo_python
 {
@@ -139,10 +140,12 @@ namespace kodo_python
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void encoder(const std::string& stack, const std::string& field, bool trace)
+    void encoder(const std::string& stack, bool trace)
     {
         using boost::python::arg;
         using boost::python::args;
+
+        std::string field = resolve_field_name<Field>();
 
         std::string s = "_";
         std::string kind = "encoder";

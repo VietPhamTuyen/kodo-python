@@ -9,23 +9,26 @@
 
 #include <string>
 
+#include "resolve_field_name.hpp"
+
 namespace kodo_python
 {
-    template<class Coder>
-    void factory(const std::string& stack, const std::string& field, bool trace,
-        const std::string& coder)
+    template<template<class, class> class Coder, class Field, class TraceTag>
+    void factory(const std::string& stack, bool trace, const std::string& coder)
     {
         using boost::python::arg;
         using boost::python::args;
         using boost::python::class_;
         using boost::python::init;
 
+        std::string field = resolve_field_name<Field>();
+
         std::string s = "_";
         std::string kind = coder + s + std::string("factory");
         std::string trace_string = trace ? "_trace" : "";
         std::string name = stack + s + kind + s + field + trace_string;
 
-        typedef typename Coder::factory factory_type;
+        typedef typename Coder<Field, TraceTag>::factory factory_type;
         auto factory = class_<factory_type, boost::noncopyable>(
             name.c_str(),
             (std::string("Factory for creating ") + coder + std::string("s.")

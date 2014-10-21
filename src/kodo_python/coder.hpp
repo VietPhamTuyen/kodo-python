@@ -10,6 +10,8 @@
 #include <kodo/trace.hpp>
 #include <kodo/has_trace.hpp>
 
+#include <string>
+
 #include <Python.h>
 
 namespace kodo_python
@@ -66,7 +68,7 @@ namespace kodo_python
         using namespace boost::python;
 
         typedef Coder<Field, TraceTag> coder_type;
-        auto coder_class = class_<coder_type,boost::noncopyable>(
+        auto coder_class = class_<coder_type, boost::noncopyable>(
             name.c_str(), "An (en/de)coder", no_init)
         .def("payload_size", &coder_type::payload_size,
             "Returns the required payload buffer size in bytes.\n\n"
