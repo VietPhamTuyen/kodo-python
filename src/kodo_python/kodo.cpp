@@ -24,53 +24,98 @@
 #include "decoder.hpp"
 #include "encoder.hpp"
 #include "factory.hpp"
+#include "is_encoder.hpp"
+
+#include <string>
 
 namespace kodo_python
 {
 
     template<
-        template<class, class> class Encoder,
-        template<class, class> class Decoder,
+        template<class, class> class Coder,
+        class Field,
+        class TraceTag,
+        bool IsEncoder>
+    struct create_coder
+    {
+        void operator()(const std::string& stack, bool trace)
+        {
+            (void) stack;
+            (void) trace;
+            assert(0);
+        }
+    };
+
+    template<
+        template<class, class> class Coder,
+        class Field,
+        class TraceTag>
+    struct create_coder<Coder, Field, TraceTag, true>
+    {
+        void operator()(const std::string& stack, bool trace)
+        {
+            factory<Coder, Field, TraceTag>(stack, trace, "encoder");
+            encoder<Coder, Field, TraceTag>(stack, trace);
+        }
+    };
+
+    template<
+        template<class, class> class Coder,
+        class Field,
+        class TraceTag>
+    struct create_coder<Coder, Field, TraceTag, false>
+    {
+        void operator()(const std::string& stack, bool trace)
+        {
+            factory<Coder, Field, TraceTag>(stack, trace, "decoder");
+            decoder<Coder, Field, TraceTag>(stack, trace);
+        }
+    };
+
+    template<
+        template<class, class> class Coder,
         class Field,
         class TraceTag>
     void create(const std::string& stack, bool trace)
     {
-        factory<Encoder, Field, TraceTag>(stack, trace, "encoder");
-        encoder<Encoder, Field, TraceTag>(stack, trace);
-        factory<Decoder, Field, TraceTag>(stack, trace, "decoder");
-        decoder<Decoder, Field, TraceTag>(stack, trace);
+        create_coder<
+            Coder,
+            Field,
+            TraceTag,
+            is_encoder<Coder<Field, TraceTag>>::value
+        > cc;
+        cc(stack, trace);
     }
 
     template<
-        template<class, class> class Encoder,
-        template<class, class> class Decoder,
+        template<class, class> class Coder,
         class TraceTag>
     void create_field(const std::string& stack, bool trace)
     {
-        create<Encoder, Decoder, fifi::binary, TraceTag>(stack, trace);
-        create<Encoder, Decoder, fifi::binary4, TraceTag>(stack, trace);
-        create<Encoder, Decoder, fifi::binary8, TraceTag>(stack, trace);
-        create<Encoder, Decoder, fifi::binary16, TraceTag>(stack, trace);
+        create<Coder, fifi::binary, TraceTag>(stack, trace);
+        create<Coder, fifi::binary4, TraceTag>(stack, trace);
+        create<Coder, fifi::binary8, TraceTag>(stack, trace);
+        create<Coder, fifi::binary16, TraceTag>(stack, trace);
     }
 
     template<
-        template<class, class> class Encoder,
-        template<class, class> class Decoder>
+        template<class, class> class Coder>
     void create_trace(const std::string& stack)
     {
-        create_field<Encoder, Decoder, kodo::disable_trace>(stack, false);
-        create_field<Encoder, Decoder, kodo::enable_trace>(stack, true);
+        create_field<Coder, kodo::disable_trace>(stack, false);
+        create_field<Coder, kodo::enable_trace>(stack, true);
     }
 
     void create_stacks()
     {
-        create_trace<
-            kodo::full_rlnc_encoder, kodo::full_rlnc_decoder>("full_rlnc");
-        create_trace<
-            kodo::on_the_fly_encoder, kodo::on_the_fly_decoder>("on_the_fly");
-        create_trace<
-            kodo::sliding_window_encoder, kodo::sliding_window_decoder>(
-            "sliding_window");
+        create_trace<kodo::full_rlnc_encoder>("full_rlnc");
+        create_trace<kodo::full_rlnc_decoder>("full_rlnc");
+
+        create_trace<kodo::on_the_fly_encoder>("on_the_fly");
+        create_trace<kodo::on_the_fly_decoder>("on_the_fly");
+
+        create_trace<kodo::sliding_window_encoder>("sliding_window");
+        create_trace<kodo::sliding_window_decoder>("sliding_window");
     }
 
     BOOST_PYTHON_MODULE(kodo)
