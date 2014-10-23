@@ -31,7 +31,6 @@
 
 namespace kodo_python
 {
-
     template<
         template<class, class> class Coder,
         class Field,
@@ -39,7 +38,7 @@ namespace kodo_python
         bool IsEncoder>
     struct create_coder
     {
-        void operator()(const std::string& stack, bool trace)
+        create_coder(const std::string& stack, bool trace)
         {
             (void) stack;
             (void) trace;
@@ -53,7 +52,7 @@ namespace kodo_python
         class TraceTag>
     struct create_coder<Coder, Field, TraceTag, true>
     {
-        void operator()(const std::string& stack, bool trace)
+        create_coder(const std::string& stack, bool trace)
         {
             factory<Coder, Field, TraceTag>(stack, trace, "encoder");
             encoder<Coder, Field, TraceTag>(stack, trace);
@@ -66,7 +65,7 @@ namespace kodo_python
         class TraceTag>
     struct create_coder<Coder, Field, TraceTag, false>
     {
-        void operator()(const std::string& stack, bool trace)
+        create_coder(const std::string& stack, bool trace)
         {
             factory<Coder, Field, TraceTag>(stack, trace, "decoder");
             decoder<Coder, Field, TraceTag>(stack, trace);
@@ -79,13 +78,8 @@ namespace kodo_python
         class TraceTag>
     void create(const std::string& stack, bool trace)
     {
-        create_coder<
-            Coder,
-            Field,
-            TraceTag,
-            is_encoder<Coder<Field, TraceTag>>::value
-        > cc;
-        cc(stack, trace);
+        create_coder<Coder, Field, TraceTag,
+            is_encoder<Coder<Field, TraceTag>>::value>coder(stack, trace);
     }
 
     template<
@@ -119,7 +113,6 @@ namespace kodo_python
 
         create_trace<kodo::sliding_window_encoder>("sliding_window");
         create_trace<kodo::sliding_window_decoder>("sliding_window");
-
     }
 
     BOOST_PYTHON_MODULE(kodo)

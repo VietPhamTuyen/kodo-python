@@ -20,7 +20,7 @@ namespace kodo_python
     template<class Coder>
     void trace(Coder& coder)
     {
-        return kodo::trace(coder, std::cout);
+        kodo::trace(coder, std::cout);
     }
 
     template<class Coder>
@@ -30,7 +30,7 @@ namespace kodo_python
         {
             return boost::python::call<bool>(function, zone);
         };
-        return kodo::trace(coder, std::cout, filter);
+        kodo::trace(coder, std::cout, filter);
     }
 
     template<class TraceTag, bool has_trace, class Type>
