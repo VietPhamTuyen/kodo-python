@@ -102,14 +102,14 @@ namespace kodo_python
         {
             encoder_class
             .def("is_systematic_on", &is_systematic_on<Type>,
-                "Returns true if the encoder is in systematic mode.\n\n"
+                "Check if the encoder is in systematic mode.\n\n"
                 "\t:returns: True if the encoder is in systematic mode.\n"
             )
             .def("set_systematic_on", &set_systematic_on<Type>,
                 "Set the encoder in systematic mode.\n"
             )
             .def("set_systematic_off", &set_systematic_off<Type>,
-                "Turns off systematic mode.\n");
+                "Turn off systematic mode.\n");
         }
     };
 
@@ -131,11 +131,11 @@ namespace kodo_python
         {
             encoder_class
             .def("feedback_size", &Type::feedback_size,
-                "Returns the required feedback buffer size in bytes.\n\n"
+                "Return the required feedback buffer size in bytes.\n\n"
                 "\t:returns: The required feedback buffer size in bytes.\n"
             )
             .def("read_feedback", &read_feedback<Type>,
-                "Returns the feedback information.\n\n"
+                "Return the feedback information.\n\n"
                 "\t:returns: The feedback information.\n");
         }
     };
@@ -180,15 +180,15 @@ namespace kodo_python
         typedef Coder<Field, TraceTag> encoder_type;
         auto encoder_class = coder<Coder, Field, TraceTag>(name)
         .def("encode", &encode<encoder_type>,
-            "Encodes a symbol.\n\n"
+            "Encode a symbol.\n\n"
             "\t:returns: The encoded symbol.\n"
         )
         .def("set_symbols", &set_symbols<encoder_type>, arg("symbols"),
-            "Sets the symbols to be encoded.\n\n"
+            "Set the symbols to be encoded.\n\n"
             "\t:param symbols: The symbols to be encoded.\n"
         )
         .def("set_symbol", &set_symbol<encoder_type>, args("index", "symbol"),
-            "Sets a symbol to be encoded.\n\n"
+            "Set a symbol to be encoded.\n\n"
             "\t:param index: The index of the symbol in the coding block.\n"
             "\t:param symbol: The actual data of that symbol.\n");
 
