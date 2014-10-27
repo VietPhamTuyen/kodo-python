@@ -13,7 +13,6 @@ import json
 
 
 def main():
-    return
     """
     UDP Client for sending and receiving files from/to a server.
     """
@@ -67,6 +66,9 @@ def main():
         help='Run without network use.')
 
     args = parser.parse_args()
+
+    if args.dry_run:
+        return
 
     if args.direction == 'download':
         download(args)

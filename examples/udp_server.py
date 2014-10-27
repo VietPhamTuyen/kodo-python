@@ -14,7 +14,6 @@ import os
 
 
 def main():
-    return
     """Example of a sender which encodes and sends a file."""
     parser = argparse.ArgumentParser(description=main.__doc__)
 
@@ -30,6 +29,9 @@ def main():
         help='Run without network use.')
 
     args = parser.parse_args()
+
+    if args.dry_run:
+        return
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.bind(('', args.settings_port))
