@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-# Copyright Steinwurf ApS 2011-2013.
+# Copyright Steinwurf ApS 2014.
 # Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
@@ -56,6 +56,12 @@ def main():
         default=1400)
 
     parser.add_argument(
+        '--redundant_symbols',
+        type=int,
+        help='The number of redundant symbols.',
+        default=10)
+
+    parser.add_argument(
         '--direction',
         choices=['upload', 'download'],
         default='download')
@@ -95,54 +101,45 @@ def download(args):
     # Count number of lost packets.
     # Time time it took / print throughput
 
-    send_settings(
-        settings_port=args.settings_port,
-        ip=args.ip,
-        request=args.direction,
-        symbol_size=args.symbol_size,
-        symbols=args.symbols,
-        port=args.port)
+    send_settings(args)
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.bind((args.ip, args.port))
 
-    print("Processing")
+    print("Receiving data")
+    received = 0
     while not decoder.is_complete() and not args.dry_run:
         packet = receive_socket.recv(4096)
 
         decoder.decode(packet)
-        print("Packet decoded!")
-        print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
+        received += 1
 
         # Write data to file (it may not be valid until the very end though).
-        f = open(args.output_file, 'wb')
-        f.write(decoder.copy_symbols())
-        f.close()
+        #~f = open(args.output_file, 'wb')
+        #~f.write(decoder.copy_symbols())
+        #~f.close()
 
-    print("Processing finished")
+    print("Receiving finished, decoded after " + str(received) + " packets")
 
 
-def send_settings(ip, settings_port, request, symbol_size, symbols, port):
+def send_settings(args):
     """ Send settings to server and wait for it to start."""
-    settings = {
-        'request': request,
-        'symbol_size': symbol_size,
-        'symbols': symbols,
-        'port': port
-    }
-    message = json.dumps(settings)
+
+    settings = vars(args)
+    settings_port = settings.pop("settings_port")
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.settimeout(2)
-    receive_socket.bind((ip, settings_port+1))
+    receive_socket.bind((args.ip, settings_port+1))
 
+    message = json.dumps(settings)
     data = None
     address = ''
-    while data is None and address != ip:
+    while data is None and address != args.ip:
         print("Sending configuration.")
-        send_socket.sendto(message, (ip, settings_port))
+        send_socket.sendto(message, (args.ip, settings_port))
         print("Waiting for confirmation.")
         try:
             data, address = receive_socket.recvfrom(1024)
@@ -150,8 +147,6 @@ def send_settings(ip, settings_port, request, symbol_size, symbols, port):
             print("timeout.")
             pass
     print("Server acknowledged.")
-    print settings
-
 
 if __name__ == "__main__":
     main()

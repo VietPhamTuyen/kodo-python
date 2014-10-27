@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-# Copyright Steinwurf ApS 2011-2013.
+# Copyright Steinwurf ApS 2014.
 # Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
@@ -11,7 +11,6 @@ import socket
 import json
 import kodo
 import os
-
 
 def main():
     """Example of a sender which encodes and sends a file."""
@@ -49,35 +48,30 @@ def main():
             continue
         send_socket.sendto("OK", (address[0], args.settings_port+1))
         print settings
-        if settings['request'] == 'download':
-            run_download_simulation(ip=address[0], **settings)
-        elif settings['request'] == 'upload':
-            run_upload_simulation(ip=address[0], **settings)
+        if settings['direction'] == 'download':
+            run_download(settings)
+        elif settings['direction'] == 'upload':
+            run_upload(settings)
 
-
-def run_upload_simulation(ip, symbols, request, symbol_size, port):
+def run_upload(settings):
     pass
 
-
-def run_download_simulation(ip, symbols, request, symbol_size, port):
+def run_download(settings):
     # In the following we will make an encoder factory.
     # The factories are used to build actual encoder
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary(symbols,
-                                                            symbol_size)
+    encoder_factory = kodo.full_rlnc_encoder_factory_binary(settings['symbols'],
+                                                            settings['symbol_size'])
     encoder = encoder_factory.build()
     data_in = os.urandom(encoder.block_size())
     encoder.set_symbols(data_in)
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    address = (ip, port)
+    address = (settings['ip'], settings['port'])
 
-    while encoder.rank() == encoder.symbols():
+    for i in range(settings['symbols'] + settings['redundant_symbols']):
         packet = encoder.encode()
-        print("Packet encoded!")
-
-        # Send the packet.
         send_socket.sendto(packet, address)
 
-    print("Processing finished")
+    print("Sent " + str(i) + " packets")
 if __name__ == "__main__":
     main()
