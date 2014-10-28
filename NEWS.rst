@@ -6,20 +6,21 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
-
+* Major: Upgrade to kodo 19
+* Major: Upgrade to fifi 14
 
 3.0.0
 -----
-* Minor: Added multi-cast examples.
-* Major: Python object now only provide the functions they support. E.g., a non
-  trace encoder no longer has the trace function. Also the ``has_`` functions have
-  been removed. This includes: ``has_partial_decoding_tracker``,
+* Minor: Added multicast examples.
+* Major: Python objects now only provide the functions they support. E.g., a
+  non-trace encoder no longer has the trace function. Also the ``has_``
+  functions were removed. This includes: ``has_partial_decoding_tracker``,
   ``has_systematic_encoder``, and ``has_trace``.
 * Patch: Simplified examples.
 * Major: Updated Kodo major version to 18.
 * Major: Updated Fifi major version to 13.
 * Major: Updated Sak major version to 12.
+
 2.2.0
 -----
 
