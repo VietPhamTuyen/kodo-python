@@ -72,15 +72,20 @@ def receive_data(settings):
     decoder = decoder_factory.build()
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    receive_socket.settimeout(2)
     receive_socket.bind(('', settings['server_port']))
 
     received = 0
     respond_client(settings, "settings OK, recieving")
 
     while not decoder.is_complete():
-        packet = receive_socket.recv(settings['symbol_size']+100)
-        decoder.decode(packet)
-        received += 1
+        try:
+            packet = receive_socket.recv(settings['symbol_size']+100)
+            decoder.decode(packet)
+            received += 1
+        except socket.timeout:
+            print("timeout - stop receiving")
+            return
 
     print("Receiving finished, decoded after " + str(received) + " packets")
 

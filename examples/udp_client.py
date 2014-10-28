@@ -152,6 +152,7 @@ def receive_data(settings):
 
     # Set receiving sockets
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    receive_socket.settimeout(2)
     receive_socket.bind(('', settings['client_port']))
 
     send_settings(settings)
@@ -160,10 +161,15 @@ def receive_data(settings):
     received = 0
     start = time.clock()
     while not decoder.is_complete():
-        packet = receive_socket.recv(settings['symbol_size']+100)
 
-        decoder.decode(packet)
-        received += 1
+        try:
+            packet = receive_socket.recv(settings['symbol_size']+100)
+            decoder.decode(packet)
+            received += 1
+        except socket.timeout:
+            print("timeout - stop receiving")
+            return
+
     end = time.clock()
 
     print("Decoded after " + str(received) + " packets, received " +
