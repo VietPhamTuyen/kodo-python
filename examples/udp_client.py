@@ -6,11 +6,13 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-import argparse
-import kodo
+import os
 import socket
+
+import argparse
 import json
 
+import kodo
 
 def main():
     """
@@ -26,7 +28,7 @@ def main():
     #     default=100)
 
     parser.add_argument(
-        '--ip',
+        '--server_ip',
         type=str,
         help='The ip to use.',
         default='127.0.0.1')
@@ -38,10 +40,16 @@ def main():
         default=4141)
 
     parser.add_argument(
-        '--port',
+        '--client_port',
         type=int,
         help='The port to use.',
         default=4242)
+
+    parser.add_argument(
+        '--server_port',
+        type=int,
+        help='The port to use.',
+        default=4343)
 
     parser.add_argument(
         '--symbols',
@@ -63,8 +71,8 @@ def main():
 
     parser.add_argument(
         '--direction',
-        choices=['upload', 'download'],
-        default='download')
+        choices=['client->server', 'server->client', 'client->server->client'],
+        default='client->server->client')
 
     parser.add_argument(
         '--dry-run',
@@ -76,77 +84,96 @@ def main():
     if args.dry_run:
         return
 
-    if args.direction == 'download':
-        download(args)
-    elif args.direction == 'upload':
-        upload(args)
+    settings = vars(args)
+
+    if settings['direction'] == 'server->client':
+        receive_data(settings)
+    elif settings['direction'] == 'client->server':
+        send_data(settings)
+    elif settings['direction'] == 'client->server->client':
+        settings['direction'] = 'client->server'
+        send_data(settings)
+        settings['direction'] = 'server->client'
+        receive_data(settings)
 
 
-def upload(args):
+def send_data(settings):
     """Upload data."""
-    send_settings(args)
-    assert 0, 'Wrong direction!'
+
+    send_settings(settings)
+
+    # Setup kodo encoder_factory and encoder
+    encoder_factory = kodo.full_rlnc_encoder_factory_binary(
+        settings['symbols'],
+        settings['symbol_size'])
+
+    encoder = encoder_factory.build()
+    data_in = os.urandom(encoder.block_size())
+    encoder.set_symbols(data_in)
+
+    # Set sending sockets
+    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    address = (settings['server_ip'], settings['server_port'])
+
+    # Sent coded packets
+    for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
+        packet = encoder.encode()
+        send_socket.sendto(packet, address)
+
+    print("Sent " + str(i) + " packets." )
 
 
-def download(args):
-    """Download data."""
-    # In the following we will make an decoder factory.
-    # The factories are used to build actual decoder
+def receive_data(settings):
+    """Receive data from the server."""
+
+    # Setup kodo encoder_factory and decoder
     decoder_factory = kodo.full_rlnc_decoder_factory_binary(
-        max_symbols=args.symbols,
-        max_symbol_size=args.symbol_size)
+        max_symbols=settings['symbols'],
+        max_symbol_size=settings['symbol_size'])
 
     decoder = decoder_factory.build()
 
-    # Count number of lost packets.
-    # Time time it took / print throughput
-
-    send_settings(args)
-
+    # Set receiving sockets
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    receive_socket.bind((args.ip, args.port))
+    receive_socket.bind((settings['server_ip'], settings['client_port']))
 
-    print("Receiving data")
+    send_settings(settings)
+
+    # Decode coded packets
+    #~ print("Receiving data")
     received = 0
-    while not decoder.is_complete() and not args.dry_run:
+    while not decoder.is_complete():
         packet = receive_socket.recv(4096)
 
         decoder.decode(packet)
         received += 1
 
-        # Write data to file (it may not be valid until the very end though).
-        #~f = open(args.output_file, 'wb')
-        #~f.write(decoder.copy_symbols())
-        #~f.close()
-
     print("Receiving finished, decoded after " + str(received) + " packets")
 
 
-def send_settings(args):
-    """ Send settings to server and wait for it to start."""
-
-    settings = vars(args)
-    settings_port = settings.pop("settings_port")
+def send_settings(settings):
+    """ Send settings to server."""
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.settimeout(2)
-    receive_socket.bind((args.ip, settings_port+1))
+    receive_socket.bind((settings['server_ip'], settings['settings_port']+1))
 
     message = json.dumps(settings)
     data = None
     address = ''
-    while data is None and address != args.ip:
-        print("Sending configuration.")
-        send_socket.sendto(message, (args.ip, settings_port))
-        print("Waiting for confirmation.")
+    while data is None and address != settings['server_ip']:
+        #~ print("Sending configuration.")
+        send_socket.sendto(
+            message, (settings['server_ip'], settings['settings_port']))
+        #~ print("Waiting for confirmation.")
         try:
             data, address = receive_socket.recvfrom(1024)
         except socket.timeout:
             print("timeout.")
             pass
-    print("Server acknowledged.")
+    #~ print("Server acknowledged.")
 
 if __name__ == "__main__":
     main()

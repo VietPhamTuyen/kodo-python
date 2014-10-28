@@ -6,11 +6,13 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-import argparse
-import socket
-import json
-import kodo
 import os
+import socket
+
+import argparse
+import json
+
+import kodo
 
 def main():
     """Example of a sender which encodes and sends a file."""
@@ -37,8 +39,8 @@ def main():
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    # Wait for connections
-    print("running server, press ctrl+c to stop.")
+    # Wait for settings connections
+    print("Server running, press ctrl+c to stop.")
     while True:
         data, address = receive_socket.recvfrom(1024)
         try:
@@ -46,32 +48,55 @@ def main():
         except Exception:
             print("Message not understood.")
             continue
-        send_socket.sendto("OK", (address[0], args.settings_port+1))
-        print settings
-        if settings['direction'] == 'download':
-            run_download(settings)
-        elif settings['direction'] == 'upload':
-            run_upload(settings)
+        settings['client_ip'] = address[0]
+        send_socket.sendto(
+            "settings OK", (settings['client_ip'], args.settings_port+1))
 
-def run_upload(settings):
-    pass
+        print(settings)
+        if settings['direction'] == 'server->client':
+            send_data(settings)
+        elif settings['direction'] == 'client->server':
+            receive_data(settings)
 
-def run_download(settings):
-    # In the following we will make an encoder factory.
-    # The factories are used to build actual encoder
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary(settings['symbols'],
-                                                            settings['symbol_size'])
+def receive_data(settings):
+
+    decoder_factory = kodo.full_rlnc_decoder_factory_binary(
+        max_symbols=settings['symbols'],
+        max_symbol_size=settings['symbol_size'])
+
+    decoder = decoder_factory.build()
+
+    receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    receive_socket.bind((settings['client_ip'], settings['server_port']))
+
+    print("Receiving data")
+    received = 0
+    while not decoder.is_complete():
+        packet = receive_socket.recv(4096)
+
+        decoder.decode(packet)
+        received += 1
+
+    print("Receiving finished, decoded after " + str(received) + " packets")
+
+
+def send_data(settings):
+
+    encoder_factory = kodo.full_rlnc_encoder_factory_binary(
+        settings['symbols'], settings['symbol_size'])
+
     encoder = encoder_factory.build()
     data_in = os.urandom(encoder.block_size())
     encoder.set_symbols(data_in)
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    address = (settings['ip'], settings['port'])
+    address = (settings['client_ip'], settings['client_port'])
 
-    for i in range(settings['symbols'] + settings['redundant_symbols']):
+    for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
         packet = encoder.encode()
         send_socket.sendto(packet, address)
 
     print("Sent " + str(i) + " packets")
+
 if __name__ == "__main__":
     main()
