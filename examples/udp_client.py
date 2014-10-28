@@ -28,27 +28,33 @@ def main():
     #     default=100)
 
     parser.add_argument(
-        '--server_ip',
+        '--server-ip',
         type=str,
         help='The ip to use.',
         default='127.0.0.1')
 
     parser.add_argument(
-        '--settings-port',
+        '--server-settings-port',
         type=int,
         help='The port to use.',
         default=4141)
 
     parser.add_argument(
-        '--client_port',
+        '--client-settings-port',
         type=int,
         help='The port to use.',
+        default=4142)
+
+    parser.add_argument(
+        '--client-port',
+        type=int,
+        help='The port to use for data on the client.',
         default=4242)
 
     parser.add_argument(
-        '--server_port',
+        '--server-port',
         type=int,
-        help='The port to use.',
+        help='The port to use for data on the server.',
         default=4343)
 
     parser.add_argument(
@@ -58,13 +64,13 @@ def main():
         default=64)
 
     parser.add_argument(
-        '--symbol_size',
+        '--symbol-size',
         type=int,
         help='The size of each symbol.',
         default=1400)
 
     parser.add_argument(
-        '--redundant_symbols',
+        '--redundant-symbols',
         type=int,
         help='The number of redundant symbols.',
         default=10)
@@ -85,6 +91,10 @@ def main():
         return
 
     settings = vars(args)
+
+    if settings ['symbol_size'] > 65000:
+        Print("Resulting packets too big, reduce symbol size")
+        return
 
     if settings['direction'] == 'server->client':
         receive_data(settings)
@@ -140,10 +150,9 @@ def receive_data(settings):
     send_settings(settings)
 
     # Decode coded packets
-    #~ print("Receiving data")
     received = 0
     while not decoder.is_complete():
-        packet = receive_socket.recv(4096)
+        packet = receive_socket.recv(settings['symbol_size']+100)
 
         decoder.decode(packet)
         received += 1
@@ -152,13 +161,16 @@ def receive_data(settings):
 
 
 def send_settings(settings):
-    """ Send settings to server."""
+    """
+    Send settings to server, block until confirmation received that settings
+    was correctly understood and everything is set up
+    """
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.settimeout(2)
-    receive_socket.bind((settings['server_ip'], settings['settings_port']+1))
+    receive_socket.bind((settings['server_ip'], settings['client_settings_port']))
 
     message = json.dumps(settings)
     data = None
@@ -166,7 +178,7 @@ def send_settings(settings):
     while data is None and address != settings['server_ip']:
         #~ print("Sending configuration.")
         send_socket.sendto(
-            message, (settings['server_ip'], settings['settings_port']))
+            message, (settings['server_ip'], settings['server_settings_port']))
         #~ print("Waiting for confirmation.")
         try:
             data, address = receive_socket.recvfrom(1024)
@@ -174,6 +186,7 @@ def send_settings(settings):
             print("timeout.")
             pass
     #~ print("Server acknowledged.")
+
 
 if __name__ == "__main__":
     main()

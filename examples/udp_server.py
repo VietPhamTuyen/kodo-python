@@ -37,8 +37,6 @@ def main():
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.bind(('', args.settings_port))
 
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
     # Wait for settings connections
     print("Server running, press ctrl+c to stop.")
     while True:
@@ -49,14 +47,21 @@ def main():
             print("Message not understood.")
             continue
         settings['client_ip'] = address[0]
-        send_socket.sendto(
-            "settings OK", (settings['client_ip'], args.settings_port+1))
 
-        print(settings)
         if settings['direction'] == 'server->client':
             send_data(settings)
         elif settings['direction'] == 'client->server':
             receive_data(settings)
+
+def respond_client(settings, message):
+    '''
+    Respond to the client when settings have been received and we are ready
+    to send or receive
+    '''
+
+    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    send_socket.sendto(
+            message, (settings['client_ip'], settings['client_settings_port']))
 
 def receive_data(settings):
 
@@ -69,11 +74,11 @@ def receive_data(settings):
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.bind((settings['client_ip'], settings['server_port']))
 
-    print("Receiving data")
     received = 0
-    while not decoder.is_complete():
-        packet = receive_socket.recv(4096)
+    respond_client(settings, "settings OK, recieving")
 
+    while not decoder.is_complete():
+        packet = receive_socket.recv(settings['symbol_size']+100)
         decoder.decode(packet)
         received += 1
 
@@ -91,6 +96,8 @@ def send_data(settings):
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     address = (settings['client_ip'], settings['client_port'])
+
+    respond_client(settings, "settings OK, sending")
 
     for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
         packet = encoder.encode()
