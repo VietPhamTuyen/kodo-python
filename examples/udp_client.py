@@ -8,6 +8,7 @@
 
 import os
 import socket
+import time
 
 import argparse
 import json
@@ -125,13 +126,19 @@ def send_data(settings):
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     address = (settings['server_ip'], settings['server_port'])
 
+    start = time.clock()
     # Sent coded packets
     for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
         packet = encoder.encode()
         send_socket.sendto(packet, address)
 
-    print("Sent " + str(i) + " packets." )
+    end = time.clock()
+    size = encoder.block_size() * (1. + float(settings['redundant_symbols']) /
+           settings['symbols'])
 
+    print("Sent " + str(settings['symbols']+settings['redundant_symbols']) +
+          " packets, " + str(size/1000) + " kB, in " + str(end-start) +
+          " s, at " + str(size * 8 / 1000 / (end-start)) + " kb/s.")
 
 def receive_data(settings):
     """Receive data from the server."""
@@ -151,14 +158,18 @@ def receive_data(settings):
 
     # Decode coded packets
     received = 0
+    start = time.clock()
     while not decoder.is_complete():
         packet = receive_socket.recv(settings['symbol_size']+100)
 
         decoder.decode(packet)
         received += 1
+    end = time.clock()
 
-    print("Receiving finished, decoded after " + str(received) + " packets")
-
+    print("Decoded after " + str(received) + " packets, received " +
+          str(float(decoder.block_size()) / 1000 ) + " kB, in " + str(end-start) +
+          " s, at " + str(decoder.block_size() * 8 / 1000 / (end-start))
+          + " kb/s.")
 
 def send_settings(settings):
     """
@@ -176,17 +187,16 @@ def send_settings(settings):
     data = None
     address = ''
     while data is None and address != settings['server_ip']:
-        #~ print("Sending configuration.")
+        # Send settings
         send_socket.sendto(
             message, (settings['server_ip'], settings['server_settings_port']))
-        #~ print("Waiting for confirmation.")
+        # Waiting for respons
         try:
             data, address = receive_socket.recvfrom(1024)
         except socket.timeout:
             print("timeout.")
             pass
-    #~ print("Server acknowledged.")
-
+    #Server acknowledged
 
 if __name__ == "__main__":
     main()
