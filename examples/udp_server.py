@@ -22,7 +22,7 @@ def main():
         '--settings-port',
         type=int,
         help='The port to use.',
-        default=4141)
+        default=41001)
 
     parser.add_argument(
         '--dry-run',
@@ -72,7 +72,7 @@ def receive_data(settings):
     decoder = decoder_factory.build()
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    receive_socket.bind((settings['client_ip'], settings['server_port']))
+    receive_socket.bind(('', settings['server_port']))
 
     received = 0
     respond_client(settings, "settings OK, recieving")

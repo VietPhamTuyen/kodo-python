@@ -38,25 +38,25 @@ def main():
         '--server-settings-port',
         type=int,
         help='The port to use.',
-        default=4141)
+        default=41001)
 
     parser.add_argument(
         '--client-settings-port',
         type=int,
         help='The port to use.',
-        default=4142)
-
-    parser.add_argument(
-        '--client-port',
-        type=int,
-        help='The port to use for data on the client.',
-        default=4242)
+        default=41002)
 
     parser.add_argument(
         '--server-port',
         type=int,
         help='The port to use for data on the server.',
-        default=4343)
+        default=42001)
+
+    parser.add_argument(
+        '--client-port',
+        type=int,
+        help='The port to use for data on the client.',
+        default=42002)
 
     parser.add_argument(
         '--symbols',
@@ -152,7 +152,7 @@ def receive_data(settings):
 
     # Set receiving sockets
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    receive_socket.bind((settings['server_ip'], settings['client_port']))
+    receive_socket.bind(('', settings['client_port']))
 
     send_settings(settings)
 
@@ -181,7 +181,7 @@ def send_settings(settings):
 
     receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receive_socket.settimeout(2)
-    receive_socket.bind((settings['server_ip'], settings['client_settings_port']))
+    receive_socket.bind(('', settings['client_settings_port']))
 
     message = json.dumps(settings)
     data = None
