@@ -16,10 +16,12 @@
 
 #include <sak/storage.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
 #include "coder.hpp"
+#include "resolve_field_name.hpp"
 
 namespace kodo_python
 {
@@ -28,12 +30,15 @@ namespace kodo_python
     PyObject* copy_symbols(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.block_size());
-        auto storage = sak::mutable_storage(payload.data(), decoder.block_size());
+        auto storage = sak::mutable_storage(
+            payload.data(), decoder.block_size());
         decoder.copy_symbols(storage);
         #if PY_MAJOR_VERSION >= 3
-        return PyBytes_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        return PyBytes_FromStringAndSize(
+            (char*)payload.data(), decoder.block_size());
         #else
-        return PyString_FromStringAndSize((char*)payload.data(), decoder.block_size());
+        return PyString_FromStringAndSize(
+            (char*)payload.data(), decoder.block_size());
         #endif
     }
 
@@ -114,9 +119,8 @@ namespace kodo_python
         {
             decoder_class
             .def("is_partial_complete", &is_partial_complete<Type>,
-                "Returns true if the decoding matrix should be partially "
-                "decoded.\n\n"
-                "\t:returns: True if the decoding matrix should be partially "
+                "Check whether the decoding matrix is partially decoded.\n\n"
+                "\t:returns: True if the decoding matrix is partially "
                 "decoded.\n");
         }
     };
@@ -139,19 +143,21 @@ namespace kodo_python
         {
             decoder_class
             .def("feedback_size", &Type::feedback_size,
-                "Returns the required feedback buffer size in bytes.\n\n"
+                "Return the required feedback buffer size in bytes.\n\n"
                 "\t:returns: The required feedback buffer size in bytes.\n"
             )
             .def("write_feedback", &write_feedback<Type>,
-                "Returns a buffer containing the feedback.\n\n"
+                "Return a buffer containing the feedback.\n\n"
                 "\t:returns: A buffer containing the feedback.\n");
         }
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void decoder(const std::string& stack, const std::string& field, bool trace)
+    void decoder(const std::string& stack, bool trace)
     {
         using boost::python::arg;
+
+        std::string field = resolve_field_name<Field>();
 
         std::string s = "_";
         std::string kind = "decoder";
@@ -161,17 +167,16 @@ namespace kodo_python
         typedef Coder<Field, TraceTag> decoder_type;
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
         .def("recode", &recode<decoder_type>,
-            "Recodes a symbol. This function is special for network codes.\n\n"
+            "Recode symbol.\n\n"
             "\t:returns: The recoded symbol.\n"
         )
         .def("decode", &decode<decoder_type>, arg("symbol_data"),
-            "Decodes the provided encoded symbol.\n\n"
+            "Decode the provided encoded symbol.\n\n"
             "\t:param symbol_data: The encoded symbol.\n"
         )
         .def("decode_symbol", &decode_symbol<decoder_type>,
             arg("symbol_data"), arg("symbol_coefficients"),
-            "Decodes an encoded symbol according to the coding "
-            "coefficients.\n\n"
+            "Decode encoded symbol according to the coding coefficients.\n\n"
             "\t:param symbol_data: The encoded symbol.\n"
             "\t:param symbol_coefficients: The coding coefficients used to "
             "create the encoded symbol.\n"
@@ -181,16 +186,16 @@ namespace kodo_python
             "\t:returns: True if the decoding is complete.\n"
         )
         .def("symbols_uncoded", &decoder_type::symbols_uncoded,
-            "Returns the number of uncoded symbols.\n\n"
+            "Return the number of uncoded symbols.\n\n"
             "\t:returns: The number of symbols which have been uncoded.\n"
         )
         .def("copy_symbols", &copy_symbols<decoder_type>,
-            "Returns the decoded symbols.\n\n"
+            "Return the decoded symbols.\n\n"
             "\t:returns: The decoded symbols.\n"
         )
         .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded,
             arg("index"),
-            "Returns whether the symbol is uncoded or not.\n\n"
+            "Return whether the symbol is uncoded or not.\n\n"
             "\t:param index: Index of the symbol to check.\n"
             "\t:returns: True if the symbol is uncoded, and otherwise false.\n"
         );

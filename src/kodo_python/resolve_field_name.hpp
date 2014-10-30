@@ -1,0 +1,45 @@
+// Copyright Steinwurf ApS 2011-2013.
+// Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
+// See accompanying file LICENSE.rst or
+// http://www.steinwurf.com/licensing
+
+#pragma once
+
+#include <string>
+#include <fifi/binary.hpp>
+#include <fifi/binary4.hpp>
+#include <fifi/binary8.hpp>
+#include <fifi/binary16.hpp>
+
+namespace kodo_python
+{
+    template<class Field>
+    std::string resolve_field_name()
+    {
+        assert(0);
+    }
+
+    template<>
+    std::string resolve_field_name<fifi::binary>()
+    {
+        return "binary";
+    }
+
+    template<>
+    std::string resolve_field_name<fifi::binary4>()
+    {
+        return "binary4";
+    }
+
+    template<>
+    std::string resolve_field_name<fifi::binary8>()
+    {
+        return "binary8";
+    }
+
+    template<>
+    std::string resolve_field_name<fifi::binary16>()
+    {
+        return "binary16";
+    }
+}
