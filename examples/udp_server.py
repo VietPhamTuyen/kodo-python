@@ -8,6 +8,7 @@
 
 import os
 import socket
+import time
 
 import argparse
 import json
@@ -34,81 +35,102 @@ def main():
     if args.dry_run:
         return
 
-    receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    receive_socket.bind(('', args.settings_port))
-
-    # Wait for settings connections
-    print("Server running, press ctrl+c to stop.")
-    while True:
-        data, address = receive_socket.recvfrom(1024)
-        try:
-            settings = json.loads(data)
-        except Exception:
-            print("Message not understood.")
-            continue
-        settings['client_ip'] = address[0]
-
-        if settings['direction'] == 'server->client':
-            send_data(settings)
-        elif settings['direction'] == 'client->server':
-            receive_data(settings)
-
-def respond_client(settings, message):
-    '''
-    Respond to the client when settings have been received and we are ready
-    to send or receive
-    '''
-
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    send_socket.sendto(
-            message, (settings['client_ip'], settings['client_settings_port']))
-
-def receive_data(settings):
-
-    decoder_factory = kodo.full_rlnc_decoder_factory_binary(
-        max_symbols=settings['symbols'],
-        max_symbol_size=settings['symbol_size'])
-
-    decoder = decoder_factory.build()
-
-    receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    receive_socket.settimeout(2)
-    receive_socket.bind(('', settings['server_port']))
-
-    received = 0
-    respond_client(settings, "settings OK, recieving")
-
-    while not decoder.is_complete():
-        try:
-            packet = receive_socket.recv(settings['symbol_size']+100)
-            decoder.decode(packet)
-            received += 1
-        except socket.timeout:
-            print("timeout - stop receiving")
-            return
-
-    print("Receiving finished, decoded after " + str(received) + " packets")
+    s = Server(args)
+    s.start()
 
 
-def send_data(settings):
+class Server:
 
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary(
-        settings['symbols'], settings['symbol_size'])
+    def __init__(self,args):
 
-    encoder = encoder_factory.build()
-    data_in = os.urandom(encoder.block_size())
-    encoder.set_symbols(data_in)
+        self.args = args
 
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    address = (settings['client_ip'], settings['client_port'])
+        self.m_socket_settings_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    respond_client(settings, "settings OK, sending")
+    def start(self):
 
-    for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
-        packet = encoder.encode()
-        send_socket.sendto(packet, address)
+        settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        settings_socket.bind(('', self.args.settings_port))
 
-    print("Sent " + str(i) + " packets")
+        # Wait for settings connections
+        print("Server running, press ctrl+c to stop.")
+        while True:
+            data, address = settings_socket.recvfrom(1024)
+            try:
+                settings = json.loads(data)
+            except Exception:
+                print("Message not understood.")
+                continue
+            settings['client_ip'] = address[0]
+
+            if settings['direction'] == 'server->client':
+                self.send_data(settings)
+            elif settings['direction'] == 'client->server':
+                self.receive_data(settings)
+
+    def receive_data(self, settings):
+
+        decoder_factory = kodo.full_rlnc_decoder_factory_binary(
+            max_symbols=settings['symbols'],
+            max_symbol_size=settings['symbol_size'])
+
+        decoder = decoder_factory.build()
+
+        data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        data_socket.settimeout(2)
+        data_socket.bind(('', settings['data_port']))
+
+        received = 0
+        self.m_socket_settings_send.sendto(
+            "settings OK, receiving",
+            (settings['client_ip'], settings['client_settings_port']))
+
+        while not decoder.is_complete():
+            try:
+                packet = data_socket.recv(settings['symbol_size']+100)
+                decoder.decode(packet)
+                received += 1
+            except socket.timeout:
+                print("timeout - stop receiving")
+                break
+
+        data_socket.close()
+        print("Receiving finished, decoded after " + str(received) + " packets")
+
+    def send_data(self, settings):
+
+        encoder_factory = kodo.full_rlnc_encoder_factory_binary(
+            settings['symbols'], settings['symbol_size'])
+
+        encoder = encoder_factory.build()
+        data_in = os.urandom(encoder.block_size())
+        encoder.set_symbols(data_in)
+
+        data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        control_socket.settimeout(0.00000000000000000001)
+        control_socket.bind(('', settings['control_port']))
+
+        self.m_socket_settings_send.sendto(
+            "settings OK, sending",
+            (settings['client_ip'], settings['client_settings_port']))
+
+        for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
+            packet = encoder.encode()
+            data_socket.sendto(packet,
+                (settings['client_ip'], settings['data_port']))
+
+            try:
+                ack = control_socket.recv(1024, socket.MSG_PEEK)
+                print ("Stopping after " + str(i) + " sent packets" )
+                break
+            except socket.timeout:
+                continue
+
+        data_socket.close()
+        control_socket.close()
+        print("Sent " + str(i) + " packets")
 
 if __name__ == "__main__":
     main()
