@@ -45,7 +45,7 @@ class Server:
 
         self.args = args
 
-        self.m_socket_settings_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def start(self):
 
@@ -61,6 +61,7 @@ class Server:
             except Exception:
                 print("Message not understood.")
                 continue
+
             settings['client_ip'] = address[0]
 
             if settings['direction'] == 'server->client':
@@ -77,22 +78,34 @@ class Server:
         decoder = decoder_factory.build()
 
         data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        data_socket.settimeout(2)
+        data_socket.settimeout(settings['timeout'])
         data_socket.bind(('', settings['data_port']))
 
-        received = 0
-        self.m_socket_settings_send.sendto(
+        self.send_socket.sendto(
             "settings OK, receiving",
-            (settings['client_ip'], settings['client_settings_port']))
+            (settings['client_ip'], settings['client_control_port']))
 
-        while not decoder.is_complete():
+        received = 0
+        start = time.time()
+        end = start
+
+        while 1:
             try:
                 packet = data_socket.recv(settings['symbol_size']+100)
-                decoder.decode(packet)
-                received += 1
+
+                if not decoder.is_complete():
+                    decoder.decode(packet)
+                    received += 1
+
+                if decoder.is_complete():
+                    if end == start:
+                        end = time.time() #stopping time once
+                    self.send_socket.sendto("Stop sending",
+                        (settings['server_ip'], settings['server_control_port']))
+
             except socket.timeout:
-                print("timeout - stop receiving")
-                break
+                #~print("Timeout - stopped receiving")
+                break # no more data arriving
 
         data_socket.close()
         print("Receiving finished, decoded after " + str(received) + " packets")
@@ -106,29 +119,26 @@ class Server:
         data_in = os.urandom(encoder.block_size())
         encoder.set_symbols(data_in)
 
-        data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
         control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         control_socket.settimeout(0.00000000000000000001)
-        control_socket.bind(('', settings['control_port']))
+        control_socket.bind(('', settings['server_control_port']))
 
-        self.m_socket_settings_send.sendto(
+        self.send_socket.sendto(
             "settings OK, sending",
-            (settings['client_ip'], settings['client_settings_port']))
+            (settings['client_ip'], settings['client_control_port']))
 
         for i in range(1,settings['symbols'] + settings['redundant_symbols']+1):
             packet = encoder.encode()
-            data_socket.sendto(packet,
+            self.send_socket.sendto(packet,
                 (settings['client_ip'], settings['data_port']))
 
             try:
-                ack = control_socket.recv(1024, socket.MSG_PEEK)
+                ack = control_socket.recv(1024)
                 print ("Stopping after " + str(i) + " sent packets" )
                 break
             except socket.timeout:
                 continue
 
-        data_socket.close()
         control_socket.close()
         print("Sent " + str(i) + " packets")
 
