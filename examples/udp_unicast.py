@@ -79,7 +79,7 @@ def main():
         '--max_redundancy',
         type=float,
         help='The maximum amount of redundancy to be sent in percent.',
-        default=100)
+        default=200)
 
     parser.add_argument(
         '--direction',
@@ -218,7 +218,7 @@ class Base:
                         (self.settings['other_ip'], self.settings['other_control_port']))
 
             except socket.timeout:
-                #~print("Timeout - stopped receiving")
+                print("Timeout - stopped receiving")
                 break # no more data arriving
 
         # in case we did not complete
@@ -303,7 +303,7 @@ class Client(Base):
             try:
                 data, address = control_socket.recvfrom(1024) #Server acknowledged
             except socket.timeout:
-                #~print("timeout.")
+                print("Timeout - server not responding to settings.")
                 pass
 
         control_socket.close()
