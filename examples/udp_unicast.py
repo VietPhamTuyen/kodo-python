@@ -17,7 +17,7 @@ import kodo
 
 def main():
     """
-    UDP Client for sending and receiving files from/to a server.
+    UDP Server/Client for sending and receiving files.
     """
 
     parser = argparse.ArgumentParser(description=main.__doc__)
@@ -31,70 +31,76 @@ def main():
     parser.add_argument(
         '--dry-run',
         action='store_true',
-        help='Run without network use.')
+        help='Run without network use, for testing purposes')
 
     parser.add_argument(
         '--settings-port',
         type=int,
-        help='The port to use.',
+        help='settings port on the server.',
         default=41001)
 
     parser.add_argument(
         '--role',
+        help = 'intended role, a server is waiting for test settings \
+            from a client.',
         choices=['server', 'client'],
         default='client')
 
-    parser.add_argument(
+    client_group = parser.add_argument_group('Client arguments',
+        'Arguments set on the client defining test parameters.')
+
+    client_group.add_argument(
         '--server-ip',
         type=str,
-        help='The ip to use.',
+        help='ip of the server.',
         default='127.0.0.1')
 
-    parser.add_argument(
+    client_group.add_argument(
         '--client-control-port',
         type=int,
-        help='The port to use.',
+        help='control port on the client side, used for signaling.',
         default=41003)
 
-    parser.add_argument(
+    client_group.add_argument(
         '--server-control-port',
         type=int,
-        help='The port to use.',
+        help='control port on the server side, used for signaling.',
         default=41005)
 
-    parser.add_argument(
+    client_group.add_argument(
         '--data-port',
         type=int,
-        help='The port to use for data.',
+        help='port used for data transmission.',
         default=41011)
 
-    parser.add_argument(
+    client_group.add_argument(
         '--symbols',
         type=int,
-        help='The number of symbols.',
+        help='number of symbols in each generation/block.',
         default=64)
 
-    parser.add_argument(
+    client_group.add_argument(
         '--symbol-size',
         type=int,
-        help='The size of each symbol.',
+        help='size of each symbol, in bytes.',
         default=1400)
 
-    parser.add_argument(
-        '--max_redundancy',
+    client_group.add_argument(
+        '--max-redundancy',
         type=float,
-        help='The maximum amount of redundancy to be sent in percent.',
+        help='maximum amount of redundancy to be sent, in percent.',
         default=200)
 
-    parser.add_argument(
+    client_group.add_argument(
         '--direction',
+        help='direction of data transmission',
         choices=['client->server', 'server->client', 'client->server->client'],
         default='client->server->client')
 
-    parser.add_argument(
+    client_group.add_argument(
         '--timeout',
         type=float,
-        help='The timeout on the sockets.',
+        help='timeout used for various sockets, in seconds.',
         default=.2)
 
     args = parser.parse_args()
@@ -112,7 +118,7 @@ def main():
     if args.role == 'server':
         server(args)
 
-def send_data(args, settings):
+def send_data(settings):
     """
     Send data to the other node
     """
@@ -130,11 +136,11 @@ def send_data(args, settings):
     control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     control_socket.settimeout(0.00000000000000000001)
 
-    if args.role == 'client':
+    if settings['role'] == 'client':
         send_settings(settings)
         control_socket.bind(('', settings['client_control_port']))
 
-    if args.role == 'server':
+    if settings['role'] == 'server':
         send_socket.sendto("settings OK, sending",
             (settings['client_ip'], settings['client_control_port']))
         control_socket.bind(('', settings['server_control_port']))
@@ -144,13 +150,13 @@ def send_data(args, settings):
     sent = 0
     start = end = time.time()
 
-    while sent < settings['symbols']* settings['max_redundancy']:
+    while sent < settings['symbols']* settings['max_redundancy']/100:
         packet = encoder.encode()
         send_socket.sendto(packet, address)
         sent += 1
 
         try:
-            ack = control_socket.recv(1024)
+            control_socket.recv(1024)
             if end == start:
                 end = time.time()
             break
@@ -164,10 +170,11 @@ def send_data(args, settings):
     control_socket.close()
 
     size = encoder.block_size() * (float(sent) / settings['symbols'])
-    print("Sent " + str(sent) + " packets, " + str(size/1000) + " kB, in " +
-          str(end-start) + " s, at " + str(size * 8 / 1000 / (end-start)) + " kb/s.")
+    print("Sent " + str(sent) + " packets, " + str(size/1000) +
+          " kB, in " + str(end-start) + " s, at " +
+          str(size * 8 / 1000 / (end-start)) + " kb/s.")
 
-def receive_data(args, settings):
+def receive_data(settings):
     """Receive data from the other node"""
 
     # Setup kodo encoder_factory and decoder
@@ -186,10 +193,10 @@ def receive_data(args, settings):
 
     address = (settings['other_ip'], settings['other_control_port'])
 
-    if args.role == 'client':
+    if settings['role'] == 'client':
         send_settings(settings)
 
-    if args.role == 'server':
+    if settings['role'] == 'server':
         send_socket.sendto("settings OK, receiving", address)
 
     # Decode coded packets
@@ -219,10 +226,40 @@ def receive_data(args, settings):
 
     data_socket.close()
 
+    if not decoder.is_complete():
+        print("Decoding failed")
+
     size = decoder.block_size() * (float(received) / settings['symbols'])
-    print("Decoded after " + str(received) + " packets, received " +
+    print("Received " + str(received) + " packets, totalling " +
           str(size/1000 ) + " kB, in " + str(end-start) + " s, at " +
           str(decoder.block_size() * 8 / 1000 / (end-start)) + " kb/s.")
+
+def send_settings(settings):
+    """
+    Send settings to server, block until confirmation received that settings
+    was correctly received
+    """
+
+    control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    control_socket.settimeout(settings['timeout'])
+    control_socket.bind(('', settings['client_control_port']))
+
+    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    message = json.dumps(settings)
+    ack = None
+    address = ''
+    while ack is None:
+        # Send settings
+        send_socket.sendto(
+            message, (settings['server_ip'], settings['settings_port']))
+        # Waiting for respons
+        try:
+            ack, address = control_socket.recvfrom(1024) #Server ack
+        except socket.timeout:
+            print("Timeout - server not responding to settings.")
+
+    control_socket.close()
 
 def server(args):
 
@@ -239,15 +276,15 @@ def server(args):
             print("Settings Message not understood.")
             continue
 
+        settings['role'] = 'server'
         settings['client_ip'] = address[0]
         settings['other_ip'] = address[0]
         settings['other_control_port'] = settings['client_control_port']
-        settings = settings
 
         if settings['direction'] == 'server->client':
-            send_data(args, settings)
+            send_data(settings)
         elif settings['direction'] == 'client->server':
-            receive_data(args, settings)
+            receive_data(settings)
 
 def client(args):
 
@@ -256,45 +293,16 @@ def client(args):
     settings['other_control_port'] = settings['server_control_port']
 
     if settings['direction'] == 'server->client':
-        receive_data(args, settings)
+        receive_data(settings)
 
     elif settings['direction'] == 'client->server':
-        send_data(args, settings)
+        send_data(settings)
 
     elif settings['direction'] == 'client->server->client':
         settings['direction'] = 'server->client'
-        receive_data(args, settings)
+        receive_data(settings)
         settings['direction'] = 'client->server'
-        send_data(args, settings)
-
-def send_settings(settings):
-    """
-    Send settings to server, block until confirmation received that settings
-    was correctly received
-    """
-
-    control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    control_socket.settimeout(settings['timeout'])
-    control_socket.bind(('', settings['client_control_port']))
-
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    message = json.dumps(settings)
-    data = None
-    address = ''
-    while data is None:
-        # Send settings
-        send_socket.sendto(
-            message, (settings['server_ip'], settings['settings_port']))
-        # Waiting for respons
-        try:
-            data, address = control_socket.recvfrom(1024) #Server acknowledged
-        except socket.timeout:
-            print("Timeout - server not responding to settings.")
-            pass
-
-    control_socket.close()
+        send_data(settings)
 
 if __name__ == "__main__":
     main()
-
