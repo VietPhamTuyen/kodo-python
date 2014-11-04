@@ -76,10 +76,10 @@ def main():
         default=1400)
 
     parser.add_argument(
-        '--redundant-symbols',
-        type=int,
-        help='The number of redundant symbols.',
-        default=10)
+        '--max_redundancy',
+        type=float,
+        help='The maximum amount of redundancy to be sent in percent.',
+        default=100)
 
     parser.add_argument(
         '--direction',
@@ -117,11 +117,15 @@ def main():
 
 class Base:
 
-    def send_data(self):
-        """send data"""
+    def __init__(self,args):
 
-        if self.args.role == 'client':
-            self.send_settings()
+        self.args = args
+        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def send_data(self):
+        """
+        Send data to the other node
+        """
 
         # Setup kodo encoder_factory and encoder
         encoder_factory = kodo.full_rlnc_encoder_factory_binary(
@@ -135,30 +139,30 @@ class Base:
         control_socket.settimeout(0.00000000000000000001)
 
         if self.args.role == 'client':
+            self.send_settings()
             control_socket.bind(('', self.settings['client_control_port']))
-            address = (self.settings['server_ip'], self.settings['data_port'])
 
         if self.args.role == 'server':
-            control_socket.bind(('', self.settings['server_control_port']))
-            address = (self.settings['client_ip'], self.settings['data_port'])
-
-            self.send_socket.sendto(
-                "settings OK, sending",
+            self.send_socket.sendto("settings OK, sending",
                 (self.settings['client_ip'], self.settings['client_control_port']))
+            control_socket.bind(('', self.settings['server_control_port']))
 
-        start = time.time()
-        end = start
+        address = (self.settings['other_ip'], self.settings['data_port'])
 
-        for i in range(1, self.settings['symbols'] + self.settings['redundant_symbols']+1):
+        sent = 0
+        start = end = time.time()
+
+
+        while sent < self.settings['symbols']* self.settings['max_redundancy']:
             packet = encoder.encode()
-            self.send_socket.sendto(packet,address)
+            self.send_socket.sendto(packet, address)
+            sent += 1
 
             try:
                 ack = control_socket.recv(1024)
                 if end == start:
                     end = time.time()
-                    print end-start
-                print ("Stopping after " + str(i) + " sent packets" )
+                #~ print ("Stopping after " + str(i) + " sent packets" )
                 break
             except socket.timeout:
                 continue
@@ -169,15 +173,12 @@ class Base:
 
         control_socket.close()
 
-        size = encoder.block_size() * (1. + float(self.settings['redundant_symbols']) /
-                   self.settings['symbols'])
-
-        print("Sent " + str(self.settings['symbols']+self.settings['redundant_symbols']) +
-                  " packets, " + str(size/1000) + " kB, in " + str(end-start) +
-                  " s, at " + str(size * 8 / 1000 / (end-start)) + " kb/s.")
-
+        size = encoder.block_size() * (float(sent) / self.settings['symbols'])
+        print("Sent " + str(sent) + " packets, " + str(size/1000) + " kB, in " +
+              str(end-start) + " s, at " + str(size * 8 / 1000 / (end-start)) + " kb/s.")
 
     def receive_data(self):
+        """Receive data from the other node"""
 
         # Setup kodo encoder_factory and decoder
         decoder_factory = kodo.full_rlnc_decoder_factory_binary(
@@ -195,14 +196,12 @@ class Base:
             self.send_settings()
 
         if self.args.role == 'server':
-            self.send_socket.sendto(
-                "self.settings OK, receiving",
+            self.send_socket.sendto("self.settings OK, receiving",
                 (self.settings['client_ip'], self.settings['client_control_port']))
 
         # Decode coded packets
         received = 0
-        start = time.time()
-        end = start
+        start = end = time.time()
 
         while 1:
             try:
@@ -216,27 +215,25 @@ class Base:
                     if end == start:
                         end = time.time() #stopping time once
                     self.send_socket.sendto("Stop sending",
-                        (self.settings['server_ip'], self.settings['server_control_port']))
+                        (self.settings['other_ip'], self.settings['other_control_port']))
 
             except socket.timeout:
                 #~print("Timeout - stopped receiving")
                 break # no more data arriving
 
-        print("Decoded after " + str(received) + " packets, received " +
-              str(float(decoder.block_size()) / 1000 ) + " kB, in " + str(end-start) +
-              " s, at " + str(decoder.block_size() * 8 / 1000 / (end-start))
-              + " kb/s.")
+        # in case we did not complete
+        if end == start:
+            end = time.time()
 
         data_socket.close()
 
+        size = decoder.block_size() * (float(received) / self.settings['symbols'])
+        print("Decoded after " + str(received) + " packets, received " +
+              str(size/1000 ) + " kB, in " + str(end-start) + " s, at " +
+              str(decoder.block_size() * 8 / 1000 / (end-start)) + " kb/s.")
+
 
 class Server(Base):
-
-    def __init__(self,args):
-
-        self.args = args
-
-        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def start(self):
 
@@ -250,10 +247,12 @@ class Server(Base):
             try:
                 settings = json.loads(data)
             except Exception:
-                print("Message not understood.")
+                print("Settings Message not understood.")
                 continue
 
             settings['client_ip'] = address[0]
+            settings['other_ip'] = address[0]
+            settings['other_control_port'] = settings['client_control_port']
             self.settings = settings
 
             if settings['direction'] == 'server->client':
@@ -264,14 +263,12 @@ class Server(Base):
 
 class Client(Base):
 
-    def __init__(self,args):
-
-        self.args = args
-        self.settings = vars(args)
-
-        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
     def start(self):
+
+        settings = vars(self.args)
+        settings['other_ip'] = settings['server_ip']
+        settings['other_control_port'] = settings['server_control_port']
+        self.settings = settings
 
         if self.settings['direction'] == 'server->client':
             self.receive_data()
@@ -287,8 +284,8 @@ class Client(Base):
 
     def send_settings(self):
         """
-        Send settings to server, block until confirmation received that self.settings
-        was correctly understood and everything is set up
+        Send settings to server, block until confirmation received that settings
+        was correctly received
         """
 
         control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -313,3 +310,4 @@ class Client(Base):
 
 if __name__ == "__main__":
     main()
+
