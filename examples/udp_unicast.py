@@ -114,8 +114,7 @@ def main():
 
     if args.role == 'client':
         client(args)
-
-    if args.role == 'server':
+    else: #server
         server(args)
 
 def send_data(settings):
@@ -137,15 +136,14 @@ def send_data(settings):
     control_socket.settimeout(0.00000000000000000001)
 
     if settings['role'] == 'client':
+        address = (settings['server_ip'], settings['data_port'])
         send_settings(settings)
         control_socket.bind(('', settings['client_control_port']))
-
-    if settings['role'] == 'server':
+    else: # server
+        address = (settings['client_ip'], settings['data_port'])
+        control_socket.bind(('', settings['server_control_port']))
         send_socket.sendto("settings OK, sending",
             (settings['client_ip'], settings['client_control_port']))
-        control_socket.bind(('', settings['server_control_port']))
-
-    address = (settings['other_ip'], settings['data_port'])
 
     sent = 0
     start = end = time.time()
@@ -191,12 +189,11 @@ def receive_data(settings):
     data_socket.settimeout(settings['timeout'])
     data_socket.bind(('', settings['data_port']))
 
-    address = (settings['other_ip'], settings['other_control_port'])
-
     if settings['role'] == 'client':
+        address = (settings['server_ip'], settings['server_control_port'])
         send_settings(settings)
-
-    if settings['role'] == 'server':
+    else: #server
+        address = (settings['client_ip'], settings['client_control_port'])
         send_socket.sendto("settings OK, receiving", address)
 
     # Decode coded packets
@@ -278,29 +275,23 @@ def server(args):
 
         settings['role'] = 'server'
         settings['client_ip'] = address[0]
-        settings['other_ip'] = address[0]
-        settings['other_control_port'] = settings['client_control_port']
 
         if settings['direction'] == 'server->client':
             send_data(settings)
-        elif settings['direction'] == 'client->server':
+
+        if settings['direction'] == 'client->server':
             receive_data(settings)
 
 def client(args):
 
     settings = vars(args)
-    settings['other_ip'] = settings['server_ip']
-    settings['other_control_port'] = settings['server_control_port']
+    direction = settings.pop('direction')
 
-    if settings['direction'] == 'server->client':
-        receive_data(settings)
-
-    elif settings['direction'] == 'client->server':
-        send_data(settings)
-
-    elif settings['direction'] == 'client->server->client':
+    if 'server->client' in direction:
         settings['direction'] = 'server->client'
         receive_data(settings)
+
+    if 'client->server' in direction:
         settings['direction'] = 'client->server'
         send_data(settings)
 
