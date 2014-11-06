@@ -66,6 +66,7 @@ namespace kodo_python
         boost::python::class_<Coder<Field, TraceTag>, boost::noncopyable>
     {
         using namespace boost::python;
+        using boost::python::arg;
 
         typedef Coder<Field, TraceTag> coder_type;
         auto coder_class = class_<coder_type, boost::noncopyable>(
@@ -95,10 +96,12 @@ namespace kodo_python
             "\t:returns: The rank.\n"
         )
         .def("is_symbol_pivot", &coder_type::is_symbol_pivot,
+            arg("symbol_index"),
             "Check if a certain symbol is a pivot.\n\n"
             "A symbol is pivot if it is available to either the encoder or "
             "decoder. A coefficient generator may use this information when "
             "generating coding coefficients.\n\n"
+            "\t:param symbol_index: The index of the symbol.\n"
             "\t:returns: True if the symbol is available.\n"
         );
 

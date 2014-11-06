@@ -11,6 +11,7 @@ Latest
 * Minor: Added ``sparse_full_rlnc_encoder``.
 * Minor: Added guide on how to extend the bindings.
 * Patch: Fix the docstrings to follow the pep257 style guide.
+* Patch: Added keyword argument for the ``is_symbol_pivot`` method.
 
 3.0.0
 -----
