@@ -30,6 +30,12 @@ def main():
         help='settings port on the server.',
         default=41001)
 
+    parser.add_argument(
+        '--direction',
+        help='direction of data transmission',
+        choices=['client->server', 'server->client', 'client->server->client'],
+        default='client->server->client')
+
     subparsers = parser.add_subparsers(
         dest='role', help='help for subcommand')
     subparsers.add_parser('server', help='server help')
@@ -79,12 +85,6 @@ def main():
         default=200)
 
     client_parser.add_argument(
-        '--direction',
-        help='direction of data transmission',
-        choices=['client->server', 'server->client', 'client->server->client'],
-        default='client->server->client')
-
-    client_parser.add_argument(
         '--timeout',
         type=float,
         help='timeout used for various sockets, in seconds.',
@@ -108,7 +108,6 @@ def main():
 
 
 def server(args):
-
     settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     settings_socket.bind(('', args.settings_port))
 
@@ -301,6 +300,15 @@ def send_settings(settings):
 
 
 def send(socket, message, address):
+    """
+    Send message to address using the provide socket.
+
+    Works for both python2 and python3
+
+    :param socket: The socket to use.
+    :param message: The message to send.
+    :param address: The address to send to.
+    """
     if sys.version_info[0] == 2:
         message = message
     else:
@@ -310,6 +318,14 @@ def send(socket, message, address):
 
 
 def receive(socket, number_of_bytes):
+    """
+    Receive an amount of bytes.
+
+    Works for both python2 and python3
+
+    :param socket: The socket to use.
+    :param number_of_bytes: The number of bytes to receive.
+    """
     data, address = socket.recvfrom(number_of_bytes)
     if sys.version_info[0] == 2:
         return data, address
