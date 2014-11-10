@@ -9,11 +9,13 @@
 import os
 import socket
 import time
+import sys
 
 import argparse
 import json
 
 import kodo
+
 
 def main():
     """
@@ -22,109 +24,141 @@ def main():
 
     parser = argparse.ArgumentParser(description=main.__doc__)
 
-    # parser.add_argument(
-    #     '--data-size',
-    #     type=int,
-    #     help='KB of data to be send or recieved.',
-    #     default=100)
-
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Run without network use, for testing purposes')
-
     parser.add_argument(
         '--settings-port',
         type=int,
         help='settings port on the server.',
         default=41001)
 
-    parser.add_argument(
-        '--role',
-        help = 'intended role, a server is waiting for test settings \
-            from a client.',
-        choices=['server', 'client'],
-        default='client')
+    subparsers = parser.add_subparsers(
+        dest='role', help='help for subcommand')
+    subparsers.add_parser('server', help='server help')
 
-    client_group = parser.add_argument_group('Client arguments',
-        'Arguments set on the client defining test parameters.')
+    client_parser = subparsers.add_parser('client', help='client help')
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--server-ip',
         type=str,
         help='ip of the server.',
         default='127.0.0.1')
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--client-control-port',
         type=int,
         help='control port on the client side, used for signaling.',
         default=41003)
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--server-control-port',
         type=int,
         help='control port on the server side, used for signaling.',
         default=41005)
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--data-port',
         type=int,
         help='port used for data transmission.',
         default=41011)
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--symbols',
         type=int,
         help='number of symbols in each generation/block.',
         default=64)
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--symbol-size',
         type=int,
         help='size of each symbol, in bytes.',
         default=1400)
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--max-redundancy',
         type=float,
         help='maximum amount of redundancy to be sent, in percent.',
         default=200)
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--direction',
         help='direction of data transmission',
         choices=['client->server', 'server->client', 'client->server->client'],
         default='client->server->client')
 
-    client_group.add_argument(
+    client_parser.add_argument(
         '--timeout',
         type=float,
         help='timeout used for various sockets, in seconds.',
         default=.2)
 
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Run without network use, for testing purposes')
+    # We have to use syg.argv for the dry-run parameter, otherwise a subcommand
+    # is required.
+    if '--dry-run' in sys.argv:
+        return
+
     args = parser.parse_args()
-
-    if args.dry_run:
-        return
-
-    if args.symbol_size > 65000:
-        Print("Resulting packets too big, reduce symbol size")
-        return
 
     if args.role == 'client':
         client(args)
-    else: #server
+    else:
         server(args)
 
-def send_data(settings):
+
+def server(args):
+
+    settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    settings_socket.bind(('', args.settings_port))
+
+    # Wait for settings connections
+    print("Server running, press ctrl+c to stop.")
+    while True:
+        data, address = receive(settings_socket, 1024)
+        try:
+            settings = json.loads(data)
+        except Exception:
+            print("Settings message invalid.")
+            continue
+
+        settings['role'] = 'server'
+        settings['client_ip'] = address[0]
+
+        if settings['direction'] == 'server->client':
+            send_data(settings, 'server')
+
+        if settings['direction'] == 'client->server':
+            receive_data(settings, 'server')
+
+
+def client(args):
+
+    if args.symbol_size > 65000:
+        print("Resulting packets too big, reduce symbol size")
+        return
+
+    settings = vars(args)
+    direction = settings.pop('direction')
+
+    if 'server->client' in direction:
+        settings['direction'] = 'server->client'
+        receive_data(settings, 'client')
+
+    if 'client->server' in direction:
+        settings['direction'] = 'client->server'
+        send_data(settings, 'client')
+
+
+def send_data(settings, role):
     """
     Send data to the other node
     """
 
     # Setup kodo encoder_factory and encoder
     encoder_factory = kodo.full_rlnc_encoder_factory_binary(
-        settings['symbols'], settings['symbol_size'])
+        settings['symbols'],
+        settings['symbol_size'])
 
     encoder = encoder_factory.build()
     data_in = os.urandom(encoder.block_size())
@@ -135,44 +169,47 @@ def send_data(settings):
     control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     control_socket.settimeout(0.00000000000000000001)
 
-    if settings['role'] == 'client':
+    if role == 'client':
         address = (settings['server_ip'], settings['data_port'])
         send_settings(settings)
         control_socket.bind(('', settings['client_control_port']))
-    else: # server
+    else:  # server
         address = (settings['client_ip'], settings['data_port'])
+        server_address = (
+            settings['server_ip'],
+            settings['client_control_port'])
         control_socket.bind(('', settings['server_control_port']))
-        send_socket.sendto("settings OK, sending",
-            (settings['client_ip'], settings['client_control_port']))
+        send(send_socket, "settings OK, sending", server_address)
 
     sent = 0
-    start = end = time.time()
-
-    while sent < settings['symbols']* settings['max_redundancy']/100:
+    start = time.time()
+    end = None
+    while sent < settings['symbols'] * settings['max_redundancy'] / 100:
         packet = encoder.encode()
-        send_socket.sendto(packet, address)
+        send(send_socket, packet, address)
         sent += 1
 
         try:
             control_socket.recv(1024)
-            if end == start:
+            if end is None:
                 end = time.time()
             break
         except socket.timeout:
             continue
 
     # if no ack was received we sent all packets
-    if end == start:
+    if end is None:
         end = time.time()
 
     control_socket.close()
 
     size = encoder.block_size() * (float(sent) / settings['symbols'])
-    print("Sent " + str(sent) + " packets, " + str(size/1000) +
-          " kB, in " + str(end-start) + " s, at " +
-          str(size * 8 / 1000 / (end-start)) + " kb/s.")
+    seconds = end - start
+    print("Sent {0} packets, {1} kB, in {2}s, at {3:.2f} kb/s.".format(
+        sent, size / 1000, seconds, size * 8 / 1000 / seconds))
 
-def receive_data(settings):
+
+def receive_data(settings, role):
     """Receive data from the other node"""
 
     # Setup kodo encoder_factory and decoder
@@ -189,36 +226,35 @@ def receive_data(settings):
     data_socket.settimeout(settings['timeout'])
     data_socket.bind(('', settings['data_port']))
 
-    if settings['role'] == 'client':
+    if role == 'client':
         address = (settings['server_ip'], settings['server_control_port'])
         send_settings(settings)
-    else: #server
+    else:  # server
         address = (settings['client_ip'], settings['client_control_port'])
-        send_socket.sendto("settings OK, receiving", address)
+        send(send_socket, "settings OK, receiving", address)
 
     # Decode coded packets
     received = 0
-    start = end = time.time()
-
+    start = time.time()
+    end = None
     while 1:
         try:
-            packet = data_socket.recv(settings['symbol_size']+100)
+            packet = data_socket.recv(settings['symbol_size'] + 100)
 
             if not decoder.is_complete():
                 decoder.decode(packet)
                 received += 1
 
             if decoder.is_complete():
-                if end == start:
-                    end = time.time() #stopping time once
-                send_socket.sendto("Stop sending", address)
+                if end is None:
+                    end = time.time()  # stopping time once
+                send(send_socket, "Stop sending", address)
 
         except socket.timeout:
-            #~ print("Timeout - stopped receiving")
-            break # no more data arriving
+            break  # no more data arriving
 
     # in case we did not complete
-    if end == start:
+    if end is None:
         end = time.time()
 
     data_socket.close()
@@ -227,9 +263,14 @@ def receive_data(settings):
         print("Decoding failed")
 
     size = decoder.block_size() * (float(received) / settings['symbols'])
-    print("Received " + str(received) + " packets, totalling " +
-          str(size/1000 ) + " kB, in " + str(end-start) + " s, at " +
-          str(decoder.block_size() * 8 / 1000 / (end-start)) + " kb/s.")
+    seconds = end-start
+    print("Received {0} packets, {1}kB, in {2}s, at {3:.2f} kb/s.".format(
+        received,
+        size / 1000,
+        seconds,
+        decoder.block_size() * 8 / 1000 / seconds
+    ))
+
 
 def send_settings(settings):
     """
@@ -242,58 +283,39 @@ def send_settings(settings):
     control_socket.bind(('', settings['client_control_port']))
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    send_address = (settings['server_ip'], settings['settings_port'])
 
     message = json.dumps(settings)
     ack = None
     address = ''
     while ack is None:
         # Send settings
-        send_socket.sendto(
-            message, (settings['server_ip'], settings['settings_port']))
+        send(send_socket, message, send_address)
         # Waiting for respons
         try:
-            ack, address = control_socket.recvfrom(1024) #Server ack
+            ack, address = receive(control_socket, 1024)  # Server ack
         except socket.timeout:
             print("Timeout - server not responding to settings.")
 
     control_socket.close()
 
-def server(args):
 
-    settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    settings_socket.bind(('', args.settings_port))
+def send(socket, message, address):
+    if sys.version_info[0] == 2:
+        message = message
+    else:
+        if isinstance(message, str):
+            message = bytes(message, 'utf-8')
+    socket.sendto(message, address)
 
-    # Wait for settings connections
-    print("Server running, press ctrl+c to stop.")
-    while True:
-        data, address = settings_socket.recvfrom(1024)
-        try:
-            settings = json.loads(data)
-        except Exception:
-            print("Settings Message not understood.")
-            continue
 
-        settings['role'] = 'server'
-        settings['client_ip'] = address[0]
-
-        if settings['direction'] == 'server->client':
-            send_data(settings)
-
-        if settings['direction'] == 'client->server':
-            receive_data(settings)
-
-def client(args):
-
-    settings = vars(args)
-    direction = settings.pop('direction')
-
-    if 'server->client' in direction:
-        settings['direction'] = 'server->client'
-        receive_data(settings)
-
-    if 'client->server' in direction:
-        settings['direction'] = 'client->server'
-        send_data(settings)
+def receive(socket, number_of_bytes):
+    data, address = socket.recvfrom(number_of_bytes)
+    if sys.version_info[0] == 2:
+        return data, address
+    else:
+        if isinstance(data, bytes):
+            return str(data, 'utf-8'), address
 
 if __name__ == "__main__":
     main()
