@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+4.0.0
+-----
 * Major: Upgrade to Fifi 14.
 * Major: Upgrade to Kodo 19.
 * Minor: Added ``sparse_full_rlnc_encoder``.
