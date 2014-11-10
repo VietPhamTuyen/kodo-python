@@ -31,16 +31,21 @@ def main():
         default=41001)
 
     parser.add_argument(
-        '--direction',
-        help='direction of data transmission',
-        choices=['client->server', 'server->client', 'client->server->client'],
-        default='client->server->client')
+        '--dry-run',
+        action='store_true',
+        help='Run without network use, for testing purposes')
 
     subparsers = parser.add_subparsers(
         dest='role', help='help for subcommand')
-    subparsers.add_parser('server', help='server help')
+    subparsers.add_parser(
+        'server',
+        description="UDP server for sending and receiving files.",
+        help='Start a server')
 
-    client_parser = subparsers.add_parser('client', help='client help')
+    client_parser = subparsers.add_parser(
+        'client',
+        description="UDP client for sending and receiving files.",
+        help='Start a client')
 
     client_parser.add_argument(
         '--server-ip',
@@ -67,6 +72,15 @@ def main():
         default=41011)
 
     client_parser.add_argument(
+        '--direction',
+        help='direction of data transmission',
+        choices=[
+            'client_to_server',
+            'server_to_client',
+            'client_to_server_to_client'],
+        default='client_to_server_to_client')
+
+    client_parser.add_argument(
         '--symbols',
         type=int,
         help='number of symbols in each generation/block.',
@@ -90,10 +104,6 @@ def main():
         help='timeout used for various sockets, in seconds.',
         default=.2)
 
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Run without network use, for testing purposes')
     # We have to use syg.argv for the dry-run parameter, otherwise a subcommand
     # is required.
     if '--dry-run' in sys.argv:
@@ -124,11 +134,13 @@ def server(args):
         settings['role'] = 'server'
         settings['client_ip'] = address[0]
 
-        if settings['direction'] == 'server->client':
+        if settings['direction'] == 'server_to_client':
             send_data(settings, 'server')
-
-        if settings['direction'] == 'client->server':
+        elif settings['direction'] == 'client_to_server':
             receive_data(settings, 'server')
+        else:
+            print("Invalid direction.")
+            continue
 
 
 def client(args):
@@ -140,12 +152,13 @@ def client(args):
     settings = vars(args)
     direction = settings.pop('direction')
 
-    if 'server->client' in direction:
-        settings['direction'] = 'server->client'
+    # Note: "server>client>server" matches both cases.
+    if 'server_to_client' in direction:
+        settings['direction'] = 'server_to_client'
         receive_data(settings, 'client')
 
-    if 'client->server' in direction:
-        settings['direction'] = 'client->server'
+    if 'client_to_server' in direction:
+        settings['direction'] = 'client_to_server'
         send_data(settings, 'client')
 
 
