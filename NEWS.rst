@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Minor: Added ``symbols`` and ``symbol_size`` methods to factory.
 
 4.0.0
 -----
