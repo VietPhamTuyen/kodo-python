@@ -47,14 +47,22 @@ namespace kodo_python
             "Set the number of symbols.\n\n"
             "\t:param symbols: The number of symbols.\n"
         )
+        .def("symbols", &factory_type::symbols,
+            "Return the number of symbols in a block.\n\n"
+            "\t:returns: The number of symbols in a block.\n"
+        )
+        .def("max_symbols", &factory_type::max_symbols,
+            "Return the maximum number of symbols in a block.\n\n"
+            "\t:returns: The maximum number of symbols in a block.\n"
+        )
         .def("set_symbol_size", &factory_type::set_symbol_size,
             arg("symbol_size"),
             "Set the symbol size.\n\n"
             "\t:param symbols_size: The symbol size.\n"
         )
-        .def("max_symbols", &factory_type::max_symbols,
-            "Return the maximum number of symbols in a block.\n\n"
-            "\t:returns: The maximum number of symbols in a block.\n"
+        .def("symbol_size", &factory_type::symbol_size,
+            "Return the symbol size in bytes.\n\n"
+            "\t:returns: The symbol size in bytes.\n"
         )
         .def("max_symbol_size", &factory_type::max_symbol_size,
             "Return the maximum symbol size in bytes.\n\n"
