@@ -7,6 +7,7 @@
 # http://www.steinwurf.com/licensing
 
 from __future__ import print_function
+from __future__ import division
 
 import pygame
 import pygame.locals
@@ -123,7 +124,7 @@ def main():
                 decoder.decode(packet)
 
             # limit the number of times we write to the screen (it's expensive)
-            if packets % (symbols / 20) == 0 or decoder.is_complete():
+            if packets % (symbols // 20) == 0 or decoder.is_complete():
                 image_viewer.set_image(decoder.copy_symbols())
 
         # Let the user see the photo before closing the application
