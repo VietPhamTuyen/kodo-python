@@ -9,8 +9,14 @@
 from __future__ import print_function
 from __future__ import division
 
-import pygame
-import pygame.locals
+try:
+    import pygame
+    import pygame.locals
+except:
+    import sys
+    print("pygame not available")
+    sys.exit()
+
 import numpy
 import threading
 import random
@@ -124,7 +130,7 @@ def main():
                 decoder.decode(packet)
 
             # limit the number of times we write to the screen (it's expensive)
-            if packets % (symbols // 20) == 0 or decoder.is_complete():
+            if packets % (symbols // 100) == 0 or decoder.is_complete():
                 image_viewer.set_image(decoder.copy_symbols())
 
         # Let the user see the photo before closing the application
