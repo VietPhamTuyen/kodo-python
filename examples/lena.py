@@ -79,6 +79,10 @@ class ImageViewer(object):
             image_string[:self.data_size],
             dtype=numpy.uint8)
         image_array.shape = self.size + (3,)
+
+        # Show picture from top to buttom
+        image_array = numpy.rot90(image_array)
+
         with self.lock:
             pygame.surfarray.blit_array(self.screen, image_array)
 
@@ -91,7 +95,8 @@ def main():
     image_viewer = ImageViewer(image.get_width(), image.get_height())
 
     # Convert the image into a string representation of a 3d (numpy) array
-    data_in = pygame.surfarray.array3d(image).tostring()
+    # Rotate the array 270 degrees so that it's shown top down.
+    data_in = numpy.rot90(pygame.surfarray.array3d(image), 3).tostring()
 
     # Pick a symbol size
     symbol_size = 64
