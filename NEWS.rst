@@ -15,6 +15,7 @@ Latest
 * Major: Rename classes to follow the new naming of kodo.
 * Major: Use proper python naming style for classes. E.g., the
   ``full_vector_encoder_binary``is now called ``FullVectorEncoderBinary``.
+* Minor: Added graphical print_coefficients example.
 
 4.0.0
 -----
