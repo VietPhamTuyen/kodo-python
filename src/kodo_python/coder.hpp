@@ -11,7 +11,6 @@
 #include <kodo/has_trace.hpp>
 
 #include <string>
-
 #include <Python.h>
 
 namespace kodo_python
@@ -20,17 +19,19 @@ namespace kodo_python
     template<class Coder>
     void trace(Coder& coder)
     {
-        kodo::trace(coder, std::cout);
+        kodo::trace(coder);
     }
 
     template<class Coder>
-    void filtered_trace(Coder& coder, PyObject* function)
+    void custom_trace(Coder& coder, PyObject* function)
     {
-        auto filter = [&function](const std::string& zone)
+        auto callback = [function](
+            const std::string& zone, const std::string& message)
         {
-            return boost::python::call<bool>(function, zone);
+            boost::python::call<void>(function, zone, message);
         };
-        kodo::trace(coder, std::cout, filter);
+
+        kodo::trace(coder, callback);
     }
 
     template<class TraceTag, bool has_trace, class Type>
@@ -51,13 +52,13 @@ namespace kodo_python
         {
             coder_class
             .def("trace", &trace<Type>,
-                "Write the trace information to stdout.\n"
+                "Use a default callback to trace debug info to stdout.\n"
             )
-            .def("filtered_trace", &filtered_trace<Type>,
-                boost::python::arg("filter"),
-                "Write the filtered trace information to stdout.\n\n"
-                "\t:param filter: The \"zone\" filter which allows control "
-                "over what output will be produced by the trace.");
+            .def("custom_trace", &custom_trace<Type>,
+                boost::python::arg("callback"),
+                "Write the trace information to a callback.\n\n"
+                "\t:param callback: The callback which is called with the zone "
+                "and message.");
         }
     };
 

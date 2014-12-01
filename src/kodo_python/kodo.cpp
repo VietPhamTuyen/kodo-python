@@ -4,7 +4,6 @@
 // http://www.steinwurf.com/licensing
 
 #include <boost/python.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/docstring_options.hpp>
 
 #include <fifi/binary.hpp>
@@ -12,15 +11,13 @@
 #include <fifi/binary8.hpp>
 #include <fifi/binary16.hpp>
 
-#include <kodo/rlnc/full_rlnc_codes.hpp>
+#include <kodo/rlnc/full_vector_codes.hpp>
 #include <kodo/rlnc/on_the_fly_codes.hpp>
 #include <kodo/rlnc/sliding_window_decoder.hpp>
 #include <kodo/rlnc/sliding_window_encoder.hpp>
-#include <kodo/rlnc/sparse_full_rlnc_encoder.hpp>
+#include <kodo/rlnc/sparse_full_vector_encoder.hpp>
 #include <kodo/disable_trace.hpp>
 #include <kodo/enable_trace.hpp>
-
-#include <sak/storage.hpp>
 
 #include "decoder.hpp"
 #include "encoder.hpp"
@@ -54,7 +51,7 @@ namespace kodo_python
     {
         create_coder(const std::string& stack, bool trace)
         {
-            factory<Coder, Field, TraceTag>(stack, trace, "encoder");
+            factory<Coder, Field, TraceTag>(stack, trace, "Encoder");
             encoder<Coder, Field, TraceTag>(stack, trace);
         }
     };
@@ -67,7 +64,7 @@ namespace kodo_python
     {
         create_coder(const std::string& stack, bool trace)
         {
-            factory<Coder, Field, TraceTag>(stack, trace, "decoder");
+            factory<Coder, Field, TraceTag>(stack, trace, "Decoder");
             decoder<Coder, Field, TraceTag>(stack, trace);
         }
     };
@@ -103,16 +100,17 @@ namespace kodo_python
 
     void create_stacks()
     {
-        create_trace<kodo::full_rlnc_encoder>("full_rlnc");
-        create_trace<kodo::full_rlnc_decoder>("full_rlnc");
+        create_trace<kodo::rlnc::full_vector_encoder>("FullVector");
+        create_trace<kodo::rlnc::full_vector_decoder>("FullVector");
 
-        create_trace<kodo::sparse_full_rlnc_encoder>("sparse_full_rlnc");
+        create_trace<kodo::rlnc::sparse_full_vector_encoder>(
+            "SparseFullVector");
 
-        create_trace<kodo::on_the_fly_encoder>("on_the_fly");
-        create_trace<kodo::on_the_fly_decoder>("on_the_fly");
+        create_trace<kodo::rlnc::on_the_fly_encoder>("OnTheFly");
+        create_trace<kodo::rlnc::on_the_fly_decoder>("OnTheFly");
 
-        create_trace<kodo::sliding_window_encoder>("sliding_window");
-        create_trace<kodo::sliding_window_decoder>("sliding_window");
+        create_trace<kodo::rlnc::sliding_window_encoder>("SlidingWindow");
+        create_trace<kodo::rlnc::sliding_window_decoder>("SlidingWindow");
     }
 
     BOOST_PYTHON_MODULE(kodo)

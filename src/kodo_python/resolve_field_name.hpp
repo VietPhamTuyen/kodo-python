@@ -22,24 +22,24 @@ namespace kodo_python
     template<>
     std::string resolve_field_name<fifi::binary>()
     {
-        return "binary";
+        return "Binary";
     }
 
     template<>
     std::string resolve_field_name<fifi::binary4>()
     {
-        return "binary4";
+        return "Binary4";
     }
 
     template<>
     std::string resolve_field_name<fifi::binary8>()
     {
-        return "binary8";
+        return "Binary8";
     }
 
     template<>
     std::string resolve_field_name<fifi::binary16>()
     {
-        return "binary16";
+        return "Binary16";
     }
 }

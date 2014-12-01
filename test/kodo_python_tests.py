@@ -8,80 +8,80 @@ import kodo
 
 test_sets = [
     # Full RLNC
-    (kodo.full_rlnc_encoder_factory_binary,
-     kodo.full_rlnc_decoder_factory_binary),
-    (kodo.full_rlnc_encoder_factory_binary4,
-     kodo.full_rlnc_decoder_factory_binary4),
-    (kodo.full_rlnc_encoder_factory_binary8,
-     kodo.full_rlnc_decoder_factory_binary8),
-    (kodo.full_rlnc_encoder_factory_binary16,
-     kodo.full_rlnc_decoder_factory_binary16),
+    (kodo.FullVectorEncoderFactoryBinary,
+     kodo.FullVectorDecoderFactoryBinary),
+    (kodo.FullVectorEncoderFactoryBinary4,
+     kodo.FullVectorDecoderFactoryBinary4),
+    (kodo.FullVectorEncoderFactoryBinary8,
+     kodo.FullVectorDecoderFactoryBinary8),
+    (kodo.FullVectorEncoderFactoryBinary16,
+     kodo.FullVectorDecoderFactoryBinary16),
     # Full RLNC Trace
-    (kodo.full_rlnc_encoder_factory_binary_trace,
-     kodo.full_rlnc_decoder_factory_binary_trace),
-    (kodo.full_rlnc_encoder_factory_binary4_trace,
-     kodo.full_rlnc_decoder_factory_binary4_trace),
-    (kodo.full_rlnc_encoder_factory_binary8_trace,
-     kodo.full_rlnc_decoder_factory_binary8_trace),
-    (kodo.full_rlnc_encoder_factory_binary16_trace,
-     kodo.full_rlnc_decoder_factory_binary16_trace),
+    (kodo.FullVectorEncoderFactoryBinaryTrace,
+     kodo.FullVectorDecoderFactoryBinaryTrace),
+    (kodo.FullVectorEncoderFactoryBinary4Trace,
+     kodo.FullVectorDecoderFactoryBinary4Trace),
+    (kodo.FullVectorEncoderFactoryBinary8Trace,
+     kodo.FullVectorDecoderFactoryBinary8Trace),
+    (kodo.FullVectorEncoderFactoryBinary16Trace,
+     kodo.FullVectorDecoderFactoryBinary16Trace),
 
     # Sparse Full RLNC
-    (kodo.sparse_full_rlnc_encoder_factory_binary,
-     kodo.full_rlnc_decoder_factory_binary),
-    (kodo.sparse_full_rlnc_encoder_factory_binary4,
-     kodo.full_rlnc_decoder_factory_binary4),
-    (kodo.sparse_full_rlnc_encoder_factory_binary8,
-     kodo.full_rlnc_decoder_factory_binary8),
-    (kodo.sparse_full_rlnc_encoder_factory_binary16,
-     kodo.full_rlnc_decoder_factory_binary16),
+    (kodo.SparseFullVectorEncoderFactoryBinary,
+     kodo.FullVectorDecoderFactoryBinary),
+    (kodo.SparseFullVectorEncoderFactoryBinary4,
+     kodo.FullVectorDecoderFactoryBinary4),
+    (kodo.SparseFullVectorEncoderFactoryBinary8,
+     kodo.FullVectorDecoderFactoryBinary8),
+    (kodo.SparseFullVectorEncoderFactoryBinary16,
+     kodo.FullVectorDecoderFactoryBinary16),
     # Sparse Full RLNC Trace
-    (kodo.sparse_full_rlnc_encoder_factory_binary_trace,
-     kodo.full_rlnc_decoder_factory_binary_trace),
-    (kodo.sparse_full_rlnc_encoder_factory_binary4_trace,
-     kodo.full_rlnc_decoder_factory_binary4_trace),
-    (kodo.sparse_full_rlnc_encoder_factory_binary8_trace,
-     kodo.full_rlnc_decoder_factory_binary8_trace),
-    (kodo.sparse_full_rlnc_encoder_factory_binary16_trace,
-     kodo.full_rlnc_decoder_factory_binary16_trace),
+    (kodo.SparseFullVectorEncoderFactoryBinaryTrace,
+     kodo.FullVectorDecoderFactoryBinaryTrace),
+    (kodo.SparseFullVectorEncoderFactoryBinary4Trace,
+     kodo.FullVectorDecoderFactoryBinary4Trace),
+    (kodo.SparseFullVectorEncoderFactoryBinary8Trace,
+     kodo.FullVectorDecoderFactoryBinary8Trace),
+    (kodo.SparseFullVectorEncoderFactoryBinary16Trace,
+     kodo.FullVectorDecoderFactoryBinary16Trace),
 
     # On The Fly
-    (kodo.on_the_fly_encoder_factory_binary,
-     kodo.on_the_fly_decoder_factory_binary),
-    (kodo.on_the_fly_encoder_factory_binary4,
-     kodo.on_the_fly_decoder_factory_binary4),
-    (kodo.on_the_fly_encoder_factory_binary8,
-     kodo.on_the_fly_decoder_factory_binary8),
-    (kodo.on_the_fly_encoder_factory_binary16,
-     kodo.on_the_fly_decoder_factory_binary16),
+    (kodo.OnTheFlyEncoderFactoryBinary,
+     kodo.OnTheFlyDecoderFactoryBinary),
+    (kodo.OnTheFlyEncoderFactoryBinary4,
+     kodo.OnTheFlyDecoderFactoryBinary4),
+    (kodo.OnTheFlyEncoderFactoryBinary8,
+     kodo.OnTheFlyDecoderFactoryBinary8),
+    (kodo.OnTheFlyEncoderFactoryBinary16,
+     kodo.OnTheFlyDecoderFactoryBinary16),
     # On The Fly Trace
-    (kodo.on_the_fly_encoder_factory_binary_trace,
-     kodo.on_the_fly_decoder_factory_binary_trace),
-    (kodo.on_the_fly_encoder_factory_binary4_trace,
-     kodo.on_the_fly_decoder_factory_binary4_trace),
-    (kodo.on_the_fly_encoder_factory_binary8_trace,
-     kodo.on_the_fly_decoder_factory_binary8_trace),
-    (kodo.on_the_fly_encoder_factory_binary16_trace,
-     kodo.on_the_fly_decoder_factory_binary16_trace),
+    (kodo.OnTheFlyEncoderFactoryBinaryTrace,
+     kodo.OnTheFlyDecoderFactoryBinaryTrace),
+    (kodo.OnTheFlyEncoderFactoryBinary4Trace,
+     kodo.OnTheFlyDecoderFactoryBinary4Trace),
+    (kodo.OnTheFlyEncoderFactoryBinary8Trace,
+     kodo.OnTheFlyDecoderFactoryBinary8Trace),
+    (kodo.OnTheFlyEncoderFactoryBinary16Trace,
+     kodo.OnTheFlyDecoderFactoryBinary16Trace),
 
     # Sliding Window
-    (kodo.sliding_window_encoder_factory_binary,
-     kodo.sliding_window_decoder_factory_binary),
-    (kodo.sliding_window_encoder_factory_binary4,
-     kodo.sliding_window_decoder_factory_binary4),
-    (kodo.sliding_window_encoder_factory_binary8,
-     kodo.sliding_window_decoder_factory_binary8),
-    (kodo.sliding_window_encoder_factory_binary16,
-     kodo.sliding_window_decoder_factory_binary16),
+    (kodo.SlidingWindowEncoderFactoryBinary,
+     kodo.SlidingWindowDecoderFactoryBinary),
+    (kodo.SlidingWindowEncoderFactoryBinary4,
+     kodo.SlidingWindowDecoderFactoryBinary4),
+    (kodo.SlidingWindowEncoderFactoryBinary8,
+     kodo.SlidingWindowDecoderFactoryBinary8),
+    (kodo.SlidingWindowEncoderFactoryBinary16,
+     kodo.SlidingWindowDecoderFactoryBinary16),
     # Sliding Window Trace
-    (kodo.sliding_window_encoder_factory_binary_trace,
-     kodo.sliding_window_decoder_factory_binary_trace),
-    (kodo.sliding_window_encoder_factory_binary4_trace,
-     kodo.sliding_window_decoder_factory_binary4_trace),
-    (kodo.sliding_window_encoder_factory_binary8_trace,
-     kodo.sliding_window_decoder_factory_binary8_trace),
-    (kodo.sliding_window_encoder_factory_binary16_trace,
-     kodo.sliding_window_decoder_factory_binary16_trace),
+    (kodo.SlidingWindowEncoderFactoryBinaryTrace,
+     kodo.SlidingWindowDecoderFactoryBinaryTrace),
+    (kodo.SlidingWindowEncoderFactoryBinary4Trace,
+     kodo.SlidingWindowDecoderFactoryBinary4Trace),
+    (kodo.SlidingWindowEncoderFactoryBinary8Trace,
+     kodo.SlidingWindowDecoderFactoryBinary8Trace),
+    (kodo.SlidingWindowEncoderFactoryBinary16Trace,
+     kodo.SlidingWindowDecoderFactoryBinary16Trace),
 ]
 
 
@@ -91,7 +91,7 @@ class TestEncodeDecode(unittest.TestCase):
         for test_set in test_sets:
             self.encode_decode_simple(*test_set)
 
-    def encode_decode_simple(self, encoder_factory, decoder_factory):
+    def encode_decode_simple(self, EncoderFactory, DecoderFactory):
         # Set the number of symbols (i.e. the generation size in RLNC
         # terminology) and the size of a symbol in bytes
         symbols = 8
@@ -99,10 +99,10 @@ class TestEncodeDecode(unittest.TestCase):
 
         # In the following we will make an encoder/decoder factory.
         # The factories are used to build actual encoders/decoders
-        encoder_factory = encoder_factory(symbols, symbol_size)
+        encoder_factory = EncoderFactory(symbols, symbol_size)
         encoder = encoder_factory.build()
 
-        decoder_factory = decoder_factory(symbols, symbol_size)
+        decoder_factory = DecoderFactory(symbols, symbol_size)
         decoder = decoder_factory.build()
 
         # Create some data to encode. In this case we make a buffer

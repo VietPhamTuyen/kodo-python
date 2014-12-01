@@ -136,7 +136,7 @@ namespace kodo_python
     };
 
     template<class Type>
-    struct extra_decoder_methods<kodo::sliding_window_decoder, Type>
+    struct extra_decoder_methods<kodo::rlnc::sliding_window_decoder, Type>
     {
         template<class DecoderClass>
         extra_decoder_methods(DecoderClass& decoder_class)
@@ -158,11 +158,9 @@ namespace kodo_python
         using boost::python::arg;
 
         std::string field = resolve_field_name<Field>();
-
-        std::string s = "_";
-        std::string kind = "decoder";
-        std::string trace_string = trace ? "_trace" : "";
-        std::string name = stack + s + kind + s + field + trace_string;
+        std::string kind = "Decoder";
+        std::string trace_string = trace ? "Trace" : "";
+        std::string name = stack + kind + field + trace_string;
 
         typedef Coder<Field, TraceTag> decoder_type;
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
