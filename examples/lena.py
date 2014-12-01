@@ -92,6 +92,24 @@ class ImageViewer(object):
             pygame.surfarray.blit_array(self.screen, image_array)
 
 
+class ForceSystematicEncoder(object):
+    """Wrapper class to force an encoder to stay in systematic mode"""
+    def __init__(self, encoder):
+        self.encoder = encoder
+        self.packets = []
+        self.packet_count = 0
+
+    def encode(self):
+        self.packet_count += 1
+        if self.packet_count != self.encoder.rank():
+            self.packets.append(self.encoder.encode())
+
+        return self.packets[(self.packet_count-1) % self.encoder.rank()-1]
+
+    def set_symbols(self, symbols):
+        return self.encoder.set_symbols(symbols)
+
+
 def main():
 
     # Get directory of this file
@@ -146,7 +164,7 @@ def main():
                 decoder.decode(packet)
 
             # limit the number of times we write to the screen (it's expensive)
-            if packets % (symbols // 1000) == 0 or decoder.is_complete():
+            if packets % (symbols // 5) == 0 or decoder.is_complete():
                 image_viewer.set_image(decoder.copy_symbols())
 
         # Let the user see the photo before closing the application
