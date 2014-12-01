@@ -17,6 +17,7 @@ Latest
 * Patch: Fix the docstrings to follow the pep257 style guide.
 * Patch: Added keyword argument for the ``is_symbol_pivot`` method.
 * Minor: Added UDP unicast example.
+* Minor: Added graphical Lena example.
 
 3.0.0
 -----

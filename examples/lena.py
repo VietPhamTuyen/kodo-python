@@ -14,7 +14,7 @@ try:
     import pygame.locals
 except:
     import sys
-    print("pygame not available")
+    print("Unable to import pygame module, please make sure it is installed.")
     sys.exit()
 
 import numpy
