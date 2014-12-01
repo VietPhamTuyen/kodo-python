@@ -9,11 +9,13 @@
 from __future__ import print_function
 from __future__ import division
 
-
 import kodo
+
 import math
-import numpy
 import os
+import random
+import threading
+import time
 
 try:
     import pygame
@@ -23,9 +25,7 @@ except:
     print("Unable to import pygame module, please make sure it is installed.")
     sys.exit()
 
-import random
-import threading
-import time
+import numpy
 
 
 class ImageViewer(object):
