@@ -23,7 +23,7 @@ namespace kodo_python
     }
 
     template<class Coder>
-    void custom_trace(Coder& coder, PyObject* function)
+    void trace_with_callback(Coder& coder, PyObject* function)
     {
         auto callback = [function](
             const std::string& zone, const std::string& message)
@@ -54,7 +54,7 @@ namespace kodo_python
             .def("trace", &trace<Type>,
                 "Use a default callback to trace debug info to stdout.\n"
             )
-            .def("custom_trace", &custom_trace<Type>,
+            .def("trace", &trace_with_callback<Type>,
                 boost::python::arg("callback"),
                 "Write the trace information to a callback.\n\n"
                 "\t:param callback: The callback which is called with the zone "

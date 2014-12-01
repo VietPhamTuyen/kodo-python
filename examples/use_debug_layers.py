@@ -39,10 +39,7 @@ def main():
     # Just for fun - fill the input data with random data
     data_in = os.urandom(encoder.block_size())
 
-    # Assign the data buffer to the encoder so that we may start
-    # to produce encoded symbols from it
-    encoder.set_symbols(data_in)
-
+    # Setup tracing
     if 'trace' in dir(encoder):
         encoder.trace()
 
@@ -52,8 +49,11 @@ def main():
                 print("{}:".format(zone))
                 print(message)
 
-        decoder.custom_trace(callback_function)
+        decoder.trace(callback_function)
 
+    # Assign the data buffer to the encoder so that we may start
+    # to produce encoded symbols from it
+    encoder.set_symbols(data_in)
     while not decoder.is_complete():
 
         # Encode a packet into the payload buffer

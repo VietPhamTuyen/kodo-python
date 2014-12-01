@@ -50,12 +50,14 @@ class ImageViewer(object):
 
     def start(self):
         """Start a thread which runs the viewer logic"""
-        self.running = True
         self.thread.start()
+        while not self.running:
+            pass
 
     def __start(self):
         """Start pygame and create a game loop"""
         with self.lock:
+            self.running = True
             pygame.init()
             pygame.display.set_caption('Kodo-python ImageViewer')
             self.screen = pygame.display.set_mode(self.size, pygame.NOFRAME)
@@ -113,14 +115,14 @@ def main():
     symbols = int(math.ceil(float(len(data_in)) / symbol_size))
 
     # Create encoder
-    encoder_factory = kodo.OnTheFlyEncoderFactoryBinary(
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
 
     encoder = encoder_factory.build()
 
     # Create decoder
-    decoder_factory = kodo.OnTheFlyDecoderFactoryBinary(
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
 
@@ -149,8 +151,6 @@ def main():
 
         # Let the user see the photo before closing the application
         time.sleep(1)
-    except Exception as e:
-        raise e
     finally:
         image_viewer.stop()
 
