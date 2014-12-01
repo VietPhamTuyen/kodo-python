@@ -168,9 +168,9 @@ def send_data(settings, role):
     """
 
     # Setup kodo encoder_factory and encoder
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary(
-        settings['symbols'],
-        settings['symbol_size'])
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
+        max_symbols=settings['symbols'],
+        max_symbol_size=settings['symbol_size'])
 
     encoder = encoder_factory.build()
     data_in = os.urandom(encoder.block_size())
@@ -225,7 +225,7 @@ def receive_data(settings, role):
     """Receive data from the other node"""
 
     # Setup kodo encoder_factory and decoder
-    decoder_factory = kodo.full_rlnc_decoder_factory_binary(
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary(
         max_symbols=settings['symbols'],
         max_symbol_size=settings['symbol_size'])
 

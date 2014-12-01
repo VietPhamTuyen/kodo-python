@@ -34,12 +34,12 @@ def options(opt):
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='fifi',
         git_repository='github.com/steinwurf/fifi.git',
-        major_version=14))
+        major_version=15))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='kodo',
         git_repository='github.com/steinwurf/kodo.git',
-        major_version=19))
+        major_version=20))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='platform',
@@ -47,9 +47,14 @@ def options(opt):
         major_version=1))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
+        name='recycle',
+        git_repository='github.com/steinwurf/recycle.git',
+        major_version=1))
+
+    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='sak',
         git_repository='github.com/steinwurf/sak.git',
-        major_version=12))
+        major_version=13))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='waf-tools',
@@ -79,6 +84,7 @@ def configure(conf):
         recurse_helper(conf, 'fifi')
         recurse_helper(conf, 'kodo')
         recurse_helper(conf, 'platform')
+        recurse_helper(conf, 'recycle')
         recurse_helper(conf, 'sak')
 
     #Ensure that Python is configured properly
@@ -111,6 +117,7 @@ def build(bld):
         recurse_helper(bld, 'fifi')
         recurse_helper(bld, 'kodo')
         recurse_helper(bld, 'platform')
+        recurse_helper(bld, 'recycle')
         recurse_helper(bld, 'sak')
 
     bld.recurse('src/kodo_python')

@@ -22,12 +22,15 @@ def main():
 
     # In the following we will make an encoder/decoder factory.
     # The factories are used to build actual encoders/decoders
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary8_trace(symbols,
-                                                                   symbol_size)
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary8Trace(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
     encoder = encoder_factory.build()
 
-    decoder_factory = kodo.full_rlnc_decoder_factory_binary8_trace(symbols,
-                                                                   symbol_size)
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary8Trace(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
+
     decoder = decoder_factory.build()
 
     # Create some data to encode. In this case we make a buffer
@@ -36,19 +39,25 @@ def main():
     # Just for fun - fill the input data with random data
     data_in = os.urandom(encoder.block_size())
 
+    # Setup tracing
+    if 'trace' in dir(encoder):
+        encoder.trace()
+
+    if 'trace' in dir(decoder):
+        def callback_function(zone, message):
+            if zone in ["decoder_state", "input_symbol_coefficients"]:
+                print("{}:".format(zone))
+                print(message)
+
+        decoder.trace(callback_function)
+
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it
     encoder.set_symbols(data_in)
-
     while not decoder.is_complete():
 
         # Encode a packet into the payload buffer
         packet = encoder.encode()
-
-        if 'trace' in dir(encoder):
-            print("Trace encoder:")
-            sys.stdout.flush()
-            encoder.trace()
 
         # Here we "simulate" a packet loss of approximately 50%
         # by dropping half of the encoded packets.
@@ -62,18 +71,6 @@ def main():
 
         # Pass that packet to the decoder
         decoder.decode(packet)
-        if 'trace' in dir(decoder):
-            filter_function = lambda zone: zone in [
-                "decoder_state",
-                "input_symbol_coefficients"]
-
-            print("Trace decoder:")
-            sys.stdout.flush()
-            # Try to run without a filter to see the full amount of
-            # output produced by the trace function. You can then
-            # modify the filter to only view the information you are
-            # interested in.
-            decoder.filtered_trace(filter_function)
 
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()

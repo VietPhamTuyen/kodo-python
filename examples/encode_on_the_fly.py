@@ -29,12 +29,15 @@ def main():
 
     # In the following we will make an encoder/decoder factory.
     # The factories are used to build actual encoders/decoders
-    encoder_factory = kodo.on_the_fly_encoder_factory_binary(symbols,
-                                                             symbol_size)
+    encoder_factory = kodo.OnTheFlyEncoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
     encoder = encoder_factory.build()
 
-    decoder_factory = kodo.on_the_fly_decoder_factory_binary(symbols,
-                                                             symbol_size)
+    decoder_factory = kodo.OnTheFlyDecoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
+
     decoder = decoder_factory.build()
 
     # Create some data to encode. In this case we make a buffer

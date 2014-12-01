@@ -24,9 +24,9 @@ namespace kodo_python
         std::string field = resolve_field_name<Field>();
 
         std::string s = "_";
-        std::string kind = coder + s + std::string("factory");
-        std::string trace_string = trace ? "_trace" : "";
-        std::string name = stack + s + kind + s + field + trace_string;
+        std::string kind = coder + std::string("Factory");
+        std::string trace_string = trace ? "Trace" : "";
+        std::string name = stack + kind + field + trace_string;
 
         typedef typename Coder<Field, TraceTag>::factory factory_type;
         auto factory = class_<factory_type, boost::noncopyable>(

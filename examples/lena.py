@@ -9,6 +9,14 @@
 from __future__ import print_function
 from __future__ import division
 
+import kodo
+
+import math
+import os
+import random
+import threading
+import time
+
 try:
     import pygame
     import pygame.locals
@@ -18,11 +26,6 @@ except:
     sys.exit()
 
 import numpy
-import threading
-import random
-import time
-import kodo
-import math
 
 
 class ImageViewer(object):
@@ -47,12 +50,14 @@ class ImageViewer(object):
 
     def start(self):
         """Start a thread which runs the viewer logic"""
-        self.running = True
         self.thread.start()
+        while not self.running:
+            pass
 
     def __start(self):
         """Start pygame and create a game loop"""
         with self.lock:
+            self.running = True
             pygame.init()
             pygame.display.set_caption('Kodo-python ImageViewer')
             self.screen = pygame.display.set_mode(self.size, pygame.NOFRAME)
@@ -88,8 +93,12 @@ class ImageViewer(object):
 
 
 def main():
+
+    # Get directory of this file
+    directory = os.path.dirname(os.path.realpath(__file__))
+
     # Load the image
-    image = pygame.image.load('lena.jpg')
+    image = pygame.image.load(os.path.join(directory, 'lena.jpg'))
 
     # Create an image viewer (the width and height of the image is needed).
     image_viewer = ImageViewer(image.get_width(), image.get_height())
@@ -106,15 +115,17 @@ def main():
     symbols = int(math.ceil(float(len(data_in)) / symbol_size))
 
     # Create encoder
-    encoder_factory = kodo.on_the_fly_encoder_factory_binary(
-        symbols,
-        symbol_size)
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
+
     encoder = encoder_factory.build()
 
     # Create decoder
-    decoder_factory = kodo.on_the_fly_decoder_factory_binary(
-        symbols,
-        symbol_size)
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
+
     decoder = decoder_factory.build()
 
     # Set the converted image data
@@ -135,13 +146,11 @@ def main():
                 decoder.decode(packet)
 
             # limit the number of times we write to the screen (it's expensive)
-            if packets % (symbols // 100) == 0 or decoder.is_complete():
+            if packets % (symbols // 1000) == 0 or decoder.is_complete():
                 image_viewer.set_image(decoder.copy_symbols())
 
         # Let the user see the photo before closing the application
         time.sleep(1)
-    except Exception as e:
-        raise e
     finally:
         image_viewer.stop()
 

@@ -57,8 +57,10 @@ def main():
 
     # In the following we will make an encoder factory.
     # The factories are used to build actual encoder
-    encoder_factory = kodo.full_rlnc_encoder_factory_binary(symbols,
-                                                            symbol_size)
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
+
     encoder = encoder_factory.build()
 
     sock = socket.socket(

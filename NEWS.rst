@@ -7,6 +7,14 @@ every change, see the Git log.
 Latest
 ------
 * Minor: Added ``symbols`` and ``symbol_size`` methods to factory.
+* Minor: Added graphical Lena example.
+* Major: Update kodo to version 20.
+* Major: Update sak to version 13.
+* Major: Update fifi to version 15.
+* Major: Added recycle as a dependency.
+* Major: Rename classes to follow the new naming of kodo.
+* Major: Use proper python naming style for classes. E.g., the
+  ``full_vector_encoder_binary``is now called ``FullVectorEncoderBinary``.
 
 4.0.0
 -----
@@ -17,7 +25,6 @@ Latest
 * Patch: Fix the docstrings to follow the pep257 style guide.
 * Patch: Added keyword argument for the ``is_symbol_pivot`` method.
 * Minor: Added UDP unicast example.
-* Minor: Added graphical Lena example.
 
 3.0.0
 -----

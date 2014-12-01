@@ -10,14 +10,12 @@
 
 #include <boost/python/args.hpp>
 
-#include <kodo/disable_trace.hpp>
-#include <kodo/enable_trace.hpp>
 #include <kodo/has_systematic_encoder.hpp>
 #include <kodo/is_systematic_on.hpp>
 #include <kodo/set_systematic_off.hpp>
 #include <kodo/set_systematic_on.hpp>
 #include <kodo/write_feedback.hpp>
-#include <kodo/rlnc/sparse_full_rlnc_encoder.hpp>
+#include <kodo/rlnc/sparse_full_vector_encoder.hpp>
 
 #include <string>
 #include <vector>
@@ -124,7 +122,7 @@ namespace kodo_python
     };
 
     template<class Type>
-    struct extra_encoder_methods<kodo::sliding_window_encoder, Type>
+    struct extra_encoder_methods<kodo::rlnc::sliding_window_encoder, Type>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
@@ -141,7 +139,7 @@ namespace kodo_python
     };
 
     template<class Type>
-    struct extra_encoder_methods<kodo::sparse_full_rlnc_encoder, Type>
+    struct extra_encoder_methods<kodo::rlnc::sparse_full_vector_encoder, Type>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
@@ -172,10 +170,9 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
 
-        std::string s = "_";
-        std::string kind = "encoder";
-        std::string trace_string = trace ? "_trace" : "";
-        std::string name = stack + s + kind + s + field + trace_string;
+        std::string kind = "Encoder";
+        std::string trace_string = trace ? "Trace" : "";
+        std::string name = stack + kind + field + trace_string;
 
         typedef Coder<Field, TraceTag> encoder_type;
         auto encoder_class = coder<Coder, Field, TraceTag>(name)

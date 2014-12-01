@@ -24,5 +24,6 @@ bld(
         'fifi_includes',
         'kodo_includes',
         'sak_includes',
+        'recycle_includes',
     ]
 )
