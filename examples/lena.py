@@ -6,215 +6,77 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-from __future__ import print_function
-from __future__ import division
-
 import kodo
+import helpers
 
+import Image
 import math
 import os
 import random
-import threading
 import time
-
-try:
-    import pygame
-    import pygame.locals
-    import pygame.gfxdraw
-except:
-    import sys
-    print("Unable to import pygame module, please make sure it is installed.")
-    sys.exit()
-
-import numpy
-
-
-class CanvasEngine(object):
-    def __init__(self, width, height):
-        self.lock = threading.Lock()
-        self.screen = None
-        self.running = False
-        self.size = (width, height)
-        self.thread = threading.Thread(name='canvas', target=self.__start)
-
-    def start(self):
-        """Start a thread which runs the viewer logic"""
-        self.thread.start()
-        while not self.running:
-            pass
-
-    def __start(self):
-        """Start pygame and create a game loop"""
-        with self.lock:
-            self.running = True
-            pygame.init()
-            pygame.display.set_caption('Example Canvas')
-            self.screen = pygame.display.set_mode(self.size, pygame.NOFRAME)
-            self.screen.fill((250, 250, 250))
-
-        while(self.running):
-            with self.lock:
-                pygame.display.flip()
-        pygame.quit()
-
-    def stop(self):
-        """Stops the game loop and joins the thread"""
-        self.running = False
-        self.thread.join()
-
-    def add_surface(self, surface, position):
-        with self.lock:
-            self.screen.blit(surface, position)
-
-
-class ImageViewer(object):
-    """
-    A class containing the logic for displaying an image during decoding
-    """
-    def __init__(self, width, height, canvas, canvas_position=(0, 0)):
-        """
-        Construct ImageViewer object
-
-        :param width: the width of the picture to be displayed
-        :param height: the height of the picture to be displayed
-        """
-        super(ImageViewer, self).__init__()
-        self.size = (width, height)
-        self.data_size = width * height * 3
-        self.canvas = canvas
-        self.canvas_position = canvas_position
-
-    def set_image(self, image_string):
-        """
-        Displays the provided string as an image.
-
-        The string should be a string representation of a numpy 3d array,
-        and it should be equal to or larger than width * height * 3.
-        """
-        image_array = numpy.fromstring(
-            image_string[:self.data_size], dtype=numpy.uint8)
-
-        image_array.shape = self.size + (3,)
-
-        # Show picture from top to buttom
-        image_array = numpy.rot90(image_array)
-        image_surface = pygame.Surface(self.size)
-        pygame.surfarray.blit_array(image_surface, image_array)
-        self.canvas.add_surface(
-            image_surface,
-            self.canvas_position)
-
-
-class DecodeStateViewer(object):
-    """Class for displaying the decoding coefficients"""
-    def __init__(self, symbols, size, canvas, canvas_position):
-        super(DecodeStateViewer, self).__init__()
-        self.surface = pygame.Surface((size, size))
-        self.padding = 10.0
-        self.diameter = (size - self.padding * 2.0) / symbols
-        self.canvas = canvas
-        self.canvas_position = canvas_position
-
-    def trace_callback(self, zone, message):
-        """Callback to be used with the decoder trace API"""
-        # We are only interested in the decoder state.
-        if zone != "decoder_state":
-            return
-
-        decode_state = []
-        for line in message.split('\n'):
-            if not line:
-                continue
-            line = line.split()
-
-            decode_state.append({
-                'state': line[1][0],
-                'data': [int(i) for i in line[2:]]
-            })
-
-        self.show_decode_state(decode_state)
-
-    def show_decode_state(self, decode_state):
-        """
-        Use the decoding state to print a graphical representation.
-
-        :param decode_state: A list of dictionaries containing the symbol
-                             coefficients.
-        """
-
-        self.surface.fill((0,)*3)
-        y = self.padding + self.diameter / 2
-        for symbol in decode_state:
-            x = self.padding + self.diameter / 2
-            for data in symbol['data']:
-                x += self.diameter
-                if data == 0:
-                    continue
-                color = (255,)*3
-                if data != 1:
-                    color = (data % 255,) * 3
-                pygame.gfxdraw.circle(
-                    self.surface,
-                    int(x - self.diameter),
-                    int(y),
-                    int(self.diameter / 2),
-                    color)
-            y += self.diameter
-
-        self.canvas.add_surface(
-            self.surface,
-            self.canvas_position)
+import sys
 
 
 def main():
+
     # Get directory of this file
     directory = os.path.dirname(os.path.realpath(__file__))
 
-    # Load the image
-    image = pygame.image.load(os.path.join(directory, 'lena.jpg'))
+    # The name of the file to use for the test
+    filename = 'lena.jpg'
 
-    # Create example canvas.
-    canvas = CanvasEngine(image.get_width()*2, image.get_height())
+    # Open the image convert it to RGB and get the height and width
+    image = Image.open(os.path.join(directory, filename)).convert("RGB")
+    image_width = image.size[0]
+    image_height = image.size[1]
 
-    # Create an image viewer
-    image_viewer = ImageViewer(image.get_width(), image.get_height(), canvas)
+    # The canvas should be able to contain both the image and the decoding
+    # state. Note the decoding state is the same width as the image height.
+    canvas_width = image_width + image_height
 
-    # Convert the image into a string representation of a 3d (numpy) array
-    # Rotate the array 270 degrees so that it's shown top down.
-    data_in = numpy.rot90(pygame.surfarray.array3d(image), 3).tostring()
+    # Create the canvas
+    canvas = helpers.CanvasScreenEngine(
+        width=canvas_width,
+        height=image_height)
 
-    # Pick a symbol size
-    symbol_size = image.get_width()*3
+    # Create the image viewer
+    image_viewer = helpers.ImageViewer(
+        width=image_width,
+        height=image_height,
+        canvas=canvas)
+
+    # Create the decoding coefficient viewer
+    state_viewer = helpers.DecodeStateViewer(
+        size=image_height,
+        canvas=canvas,
+        canvas_position=(image_width, 0))
+
+    # Pick a symbol size (image_width * 3 will create a packet for each
+    # horizontal line of the image)
+    symbol_size = image_width * 3
 
     # Based on the size of the image and the symbol size, calculate the number
-    # of symbols needed for containing this image in a single generation.
-    symbols = int(math.ceil(float(len(data_in)) / symbol_size))
+    # of symbols needed for containing the image in a single generation.
+    symbols = int(math.ceil(image_width * image_height * 3.0 / symbol_size))
 
-    # Create an coefficient viewer
-    decode_state_viewer = DecodeStateViewer(
-        symbols=symbols,
-        size=max(image.get_width(), image.get_height()),
-        canvas=canvas,
-        canvas_position=(image.get_width(), 0))
-
-    # Create encoder
-    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
+    # Create encoder factory and encoder
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary8(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
-
     encoder = encoder_factory.build()
 
-    # Create decoder
-    decoder_factory = kodo.FullVectorDecoderFactoryBinaryTrace(
+    # Create decoder factory and decoder
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary8Trace(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
-
     decoder = decoder_factory.build()
 
-    # Set up tracing
-    if 'trace' in dir(decoder):
-        cb = lambda zone, msg: decode_state_viewer.trace_callback(zone, msg)
-        decoder.trace(cb)
+    # Connect the tracing callback to the decode state viewer
+    callback = lambda zone, msg: state_viewer.trace_callback(zone, msg)
+    decoder.trace(callback)
+
+    # Create a byte array from the image to use in the encoding
+    data_in = image.tobytes()
 
     # Set the converted image data
     encoder.set_symbols(data_in)
@@ -241,6 +103,16 @@ def main():
         time.sleep(1)
     finally:
         canvas.stop()
+
+    # The decoder is complete, now copy the symbols from the decoder
+    data_out = decoder.copy_symbols()
+
+    # Check we properly decoded the data
+    if data_out[:len(data_in)] == data_in:
+        print("Data decoded correctly")
+    else:
+        print("Unexpected failure to decode please file a bug report :)")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
