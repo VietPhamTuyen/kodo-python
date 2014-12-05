@@ -10,7 +10,7 @@ from __future__ import print_function
 from __future__ import division
 
 import kodo
-import helpers
+import kodo_helpers
 
 import os
 import random
@@ -22,8 +22,8 @@ def main():
 
     # Setup canvas and viewer
     size = 1024
-    canvas = helpers.CanvasScreenEngine(size, size)
-    viewer = helpers.DecodeStateViewer(
+    canvas = kodo_helpers.CanvasScreenEngine(size, size)
+    viewer = kodo_helpers.DecodeStateViewer(
         size=size,
         canvas=canvas)
 
