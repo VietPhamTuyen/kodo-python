@@ -9,7 +9,7 @@
 import os
 import sys
 
-import pykodo as kodo
+import kodo
 
 
 def main():
