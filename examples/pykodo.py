@@ -9,6 +9,29 @@
 import kodo
 import re
 
+"""
+A Simplified API for kodo python.
+
+Usage:
+
+    import pykodo as kodo
+
+    algorithm = kodo.full_vector
+    field = kodo.binary8
+
+    symbols = 20
+    symbol_size = 150
+
+    encoder_factory = kodo.encoder_factory(
+        algorithm, field, symbols, symbol_size)
+    encoder = encoder_factory.build()
+
+    decoder_factory = kodo.decoder_factory(
+        algorithm, field, symbols, symbol_size)
+    decoder = decoder_factory.build()
+
+"""
+
 
 def split_upper_case(s):
     return [a for a in re.split(r'([A-Z][a-z]*\d*)', s) if a]
