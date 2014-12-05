@@ -7,7 +7,7 @@
 # http://www.steinwurf.com/licensing
 
 import kodo
-import helpers
+import kodo_helpers
 
 import Image
 import math
@@ -35,18 +35,18 @@ def main():
     canvas_width = image_width + image_height
 
     # Create the canvas
-    canvas = helpers.CanvasScreenEngine(
+    canvas = kodo_helpers.CanvasScreenEngine(
         width=canvas_width,
         height=image_height)
 
     # Create the image viewer
-    image_viewer = helpers.ImageViewer(
+    image_viewer = kodo_helpers.ImageViewer(
         width=image_width,
         height=image_height,
         canvas=canvas)
 
     # Create the decoding coefficient viewer
-    state_viewer = helpers.DecodeStateViewer(
+    state_viewer = kodo_helpers.DecodeStateViewer(
         size=image_height,
         canvas=canvas,
         canvas_position=(image_width, 0))
