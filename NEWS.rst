@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+5.0.0
+-----
 * Minor: Added ``symbols`` and ``symbol_size`` methods to factory.
 * Minor: Added graphical Lena example.
 * Major: Update kodo to version 20.
@@ -17,7 +21,7 @@ Latest
   ``full_vector_encoder_binary``is now called ``FullVectorEncoderBinary``.
 * Minor: Added graphical print_coefficients example.
 * Minor: Added a more simple kodo python API, ``pykodo``.
-* Minor: Collected example helper logic for graphical examplicifcation and put
+* Minor: Collected example helper logic for graphical exemplification and put
   it in ``kodo_helper`` module.
 
 4.0.0
