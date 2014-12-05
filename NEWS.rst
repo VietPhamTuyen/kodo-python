@@ -12,10 +12,13 @@ Latest
 * Major: Update sak to version 13.
 * Major: Update fifi to version 15.
 * Major: Added recycle as a dependency.
-* Major: Rename classes to follow the new naming of kodo.
+* Major: Rename classes to follow the new naming scheme of kodo.
 * Major: Use proper python naming style for classes. E.g., the
   ``full_vector_encoder_binary``is now called ``FullVectorEncoderBinary``.
 * Minor: Added graphical print_coefficients example.
+* Minor: Added a more simple kodo python API, ``pykodo``.
+* Minor: Collected example helper logic for graphical examplicifcation and put
+  it in ``kodo_helper`` module.
 
 4.0.0
 -----
