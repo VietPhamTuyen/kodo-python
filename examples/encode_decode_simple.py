@@ -9,7 +9,7 @@
 import os
 import sys
 
-import pykodo as kodo
+import kodo
 
 
 def main():
@@ -19,15 +19,12 @@ def main():
     symbols = 8
     symbol_size = 160
 
-    field = kodo.binary
-    stack = kodo.full_vector
-
     # In the following we will make an encoder/decoder factory.
     # The factories are used to build actual encoders/decoders
-    encoder_factory = kodo.encoder_factory(stack, field, symbols, symbol_size)
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary(symbols, symbol_size)
     encoder = encoder_factory.build()
 
-    decoder_factory = kodo.decoder_factory(stack, field, symbols, symbol_size)
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary(symbols, symbol_size)
     decoder = decoder_factory.build()
 
     # Create some data to encode. In this case we make a buffer
