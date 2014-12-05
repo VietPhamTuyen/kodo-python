@@ -76,7 +76,7 @@ for algorithm in __kodo_stacks:
     algorithms.append(algorithm)
 
 fields = []
-for field in __kodo_stacks.items()[0][1]:
+for field in list(__kodo_stacks.items())[0][1]:
     globals()[field] = field
     fields.append(field)
 
