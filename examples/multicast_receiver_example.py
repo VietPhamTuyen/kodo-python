@@ -56,8 +56,10 @@ def main():
 
     # In the following we will make an decoder factory.
     # The factories are used to build actual decoder
-    decoder_factory = kodo.full_rlnc_decoder_factory_binary(symbols,
-                                                            symbol_size)
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
+
     decoder = decoder_factory.build()
 
     sock = socket.socket(
