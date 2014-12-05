@@ -1,4 +1,9 @@
 import kodo
+import re
+
+
+def split_upper_case(s):
+    return [a for a in re.split(r'([A-Z][a-z]*\d*)', s) if a]
 
 
 def __get_stacks():
@@ -7,18 +12,19 @@ def __get_stacks():
         if stack.startswith('__'):
             continue
 
-        stack_pieces = stack.split('_')
+        stack_pieces = split_upper_case(stack)
         trace = 'no_trace'
-        if stack_pieces[-1] == 'trace':
+        if stack_pieces[-1] == 'Trace':
             trace = 'trace'
             stack_pieces.pop()
-        field = stack_pieces.pop()
-        if stack_pieces[-1] != "factory":
+        field = stack_pieces.pop().lower()
+
+        if stack_pieces[-1] != "Factory":
             continue
         stack_pieces.pop()
-        coder_type = stack_pieces.pop()
+        coder_type = stack_pieces.pop().lower()
 
-        algorithm = "_".join(stack_pieces)
+        algorithm = "_".join(stack_pieces).lower()
 
         if algorithm not in result:
             result[algorithm] = {}
@@ -33,12 +39,14 @@ def __get_stacks():
 
 __kodo_stacks = __get_stacks()
 
-
 for algorithm in __kodo_stacks:
     globals()[algorithm] = algorithm
 
 for field in __kodo_stacks.items()[0][1]:
     globals()[field] = field
+
+globals()['trace'] = True
+globals()['no_trace'] = False
 
 
 def decoder_factory(algorithm, field, max_symbols, max_symbol_size,
