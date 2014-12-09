@@ -7,6 +7,8 @@
 
 #include <boost/python/args.hpp>
 
+#include <kodo/has_trace.hpp>
+
 #include <string>
 
 #include "resolve_field_name.hpp"
@@ -14,21 +16,20 @@
 namespace kodo_python
 {
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void factory(const std::string& stack, bool trace, const std::string& coder)
+    void factory(const std::string& stack, const std::string& coder)
     {
         using boost::python::arg;
         using boost::python::args;
         using boost::python::class_;
         using boost::python::init;
+        using factory_type = typename Coder<Field, TraceTag>::factory;
 
         std::string field = resolve_field_name<Field>();
 
-        std::string s = "_";
         std::string kind = coder + std::string("Factory");
-        std::string trace_string = trace ? "Trace" : "";
-        std::string name = stack + kind + field + trace_string;
+        std::string trace = kodo::has_trace<factory_type>::value ? "Trace" : "";
+        std::string name = stack + kind + field + trace;
 
-        typedef typename Coder<Field, TraceTag>::factory factory_type;
         auto factory = class_<factory_type, boost::noncopyable>(
             name.c_str(),
             (std::string("Factory for creating ") + coder + std::string("s.")

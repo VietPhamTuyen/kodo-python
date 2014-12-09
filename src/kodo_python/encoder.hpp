@@ -10,6 +10,7 @@
 
 #include <boost/python/args.hpp>
 
+#include <kodo/has_trace.hpp>
 #include <kodo/has_systematic_encoder.hpp>
 #include <kodo/is_systematic_on.hpp>
 #include <kodo/set_systematic_off.hpp>
@@ -163,18 +164,17 @@ namespace kodo_python
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void encoder(const std::string& stack, bool trace)
+    void encoder(const std::string& stack)
     {
         using boost::python::arg;
         using boost::python::args;
+        using encoder_type = Coder<Field, TraceTag>;
 
         std::string field = resolve_field_name<Field>();
-
         std::string kind = "Encoder";
-        std::string trace_string = trace ? "Trace" : "";
-        std::string name = stack + kind + field + trace_string;
+        std::string trace = kodo::has_trace<encoder_type>::value ? "Trace" : "";
+        std::string name = stack + kind + field + trace;
 
-        typedef Coder<Field, TraceTag> encoder_type;
         auto encoder_class = coder<Coder, Field, TraceTag>(name)
         .def("encode", &encode<encoder_type>,
             "Encode a symbol.\n\n"
