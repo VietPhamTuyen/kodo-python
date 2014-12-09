@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 namespace kodo_python
 {
     /// Helper that allows compile time detection of whether a

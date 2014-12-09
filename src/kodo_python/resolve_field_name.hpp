@@ -10,6 +10,7 @@
 #include <fifi/binary4.hpp>
 #include <fifi/binary8.hpp>
 #include <fifi/binary16.hpp>
+#include <fifi/prime2325.hpp>
 
 namespace kodo_python
 {
@@ -41,5 +42,11 @@ namespace kodo_python
     std::string resolve_field_name<fifi::binary16>()
     {
         return "Binary16";
+    }
+
+    template<>
+    std::string resolve_field_name<fifi::prime2325>()
+    {
+        return "Prime2325";
     }
 }

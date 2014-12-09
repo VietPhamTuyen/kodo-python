@@ -12,28 +12,30 @@
 #include <string>
 
 #include "resolve_field_name.hpp"
+#include "is_encoder.hpp"
 
 namespace kodo_python
 {
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void factory(const std::string& stack, const std::string& coder)
+    void factory(const std::string& stack)
     {
         using boost::python::arg;
         using boost::python::args;
         using boost::python::class_;
         using boost::python::init;
-        using factory_type = typename Coder<Field, TraceTag>::factory;
+        using stack_type = Coder<Field, TraceTag>;
+        using factory_type = typename stack_type::factory;
 
         std::string field = resolve_field_name<Field>();
-
+        std::string coder =
+            is_encoder<stack_type>::value ? "Encoder" : "Decoder";
         std::string kind = coder + std::string("Factory");
-        std::string trace = kodo::has_trace<factory_type>::value ? "Trace" : "";
+        std::string trace = kodo::has_trace<stack_type>::value ? "Trace" : "";
         std::string name = stack + kind + field + trace;
 
         auto factory = class_<factory_type, boost::noncopyable>(
             name.c_str(),
-            (std::string("Factory for creating ") + coder + std::string("s.")
-                ).c_str(),
+            "Factory for creating encoders/decoders.",
             init<uint32_t, uint32_t>(
                 args("max_symbols", "max_symbol_size"),
                 "Factory constructor.\n\n"
@@ -75,7 +77,7 @@ namespace kodo_python
         );
 
         std::string max_block_size_desc;
-        if (coder == std::string("encoder"))
+        if (coder == std::string("Encoder"))
         {
             max_block_size_desc =
             "Return the maximum amount of data encoded in bytes.\n\n"
@@ -83,13 +85,18 @@ namespace kodo_python
             "encoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data encoded in bytes\n";
         }
-        else if (coder == std::string("decoder"))
+        else if (coder == std::string("Decoder"))
         {
             max_block_size_desc =
             "Return the maximum amount of data decoded in bytes.\n\n"
             "This is calculated by multiplying the maximum number of symbols "
             "decoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data decoded in bytes\n";
+        }
+        else
+        {
+            // If it's not a decoder or encoder factory, what is it?
+            assert(0);
         }
         factory.def("max_block_size", &factory_type::max_block_size,
             max_block_size_desc.c_str()

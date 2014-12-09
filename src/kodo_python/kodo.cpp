@@ -16,8 +16,6 @@
 #include <kodo/rlnc/sliding_window_decoder.hpp>
 #include <kodo/rlnc/sliding_window_encoder.hpp>
 #include <kodo/rlnc/sparse_full_vector_encoder.hpp>
-#include <kodo/nocode/carousel_encoder.hpp>
-#include <kodo/nocode/carousel_decoder.hpp>
 
 #include <kodo/disable_trace.hpp>
 #include <kodo/enable_trace.hpp>
@@ -53,7 +51,6 @@ namespace kodo_python
     {
         create_coder(const std::string& stack)
         {
-            factory<Coder, Field, TraceTag>(stack, "Encoder");
             encoder<Coder, Field, TraceTag>(stack);
         }
     };
@@ -66,7 +63,6 @@ namespace kodo_python
     {
         create_coder(const std::string& stack)
         {
-            factory<Coder, Field, TraceTag>(stack, "Decoder");
             decoder<Coder, Field, TraceTag>(stack);
         }
     };
@@ -77,6 +73,7 @@ namespace kodo_python
         class TraceTag>
     void create(const std::string& stack)
     {
+        factory<Coder, Field, TraceTag>(stack);
         create_coder<Coder, Field, TraceTag,
             is_encoder<Coder<Field, TraceTag>>::value>coder(stack);
     }
