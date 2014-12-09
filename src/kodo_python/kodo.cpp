@@ -29,24 +29,11 @@
 
 namespace kodo_python
 {
-    template<
-        template<class, class> class Coder,
-        class Field,
-        class TraceTag,
+    template<template<class, class> class Coder, class Field, class TraceTag,
         bool IsEncoder>
-    struct create_coder
-    {
-        create_coder(const std::string& stack)
-        {
-            (void) stack;
-            assert(0);
-        }
-    };
+    struct create_coder;
 
-    template<
-        template<class, class> class Coder,
-        class Field,
-        class TraceTag>
+    template<template<class, class> class Coder, class Field, class TraceTag>
     struct create_coder<Coder, Field, TraceTag, true>
     {
         create_coder(const std::string& stack)
@@ -55,10 +42,7 @@ namespace kodo_python
         }
     };
 
-    template<
-        template<class, class> class Coder,
-        class Field,
-        class TraceTag>
+    template<template<class, class> class Coder, class Field, class TraceTag>
     struct create_coder<Coder, Field, TraceTag, false>
     {
         create_coder(const std::string& stack)
@@ -67,10 +51,7 @@ namespace kodo_python
         }
     };
 
-    template<
-        template<class, class> class Coder,
-        class Field,
-        class TraceTag>
+    template< template<class, class> class Coder, class Field, class TraceTag>
     void create(const std::string& stack)
     {
         factory<Coder, Field, TraceTag>(stack);
@@ -78,38 +59,36 @@ namespace kodo_python
             is_encoder<Coder<Field, TraceTag>>::value>coder(stack);
     }
 
-    template<
-        template<class, class> class Coder,
-        class TraceTag>
-    void create_field(const std::string& stack)
-    {
-        create<Coder, fifi::binary, TraceTag>(stack);
-        create<Coder, fifi::binary4, TraceTag>(stack);
-        create<Coder, fifi::binary8, TraceTag>(stack);
-        create<Coder, fifi::binary16, TraceTag>(stack);
-    }
-
-    template<
-        template<class, class> class Coder>
+    template<template<class, class> class Coder, class Field>
     void create_trace(const std::string& stack)
     {
-        create_field<Coder, kodo::disable_trace>(stack);
-        create_field<Coder, kodo::enable_trace>(stack);
+        create<Coder, Field, kodo::disable_trace>(stack);
+        create<Coder, Field, kodo::enable_trace>(stack);
+    }
+
+    template<template<class, class> class Coder>
+    void create_field(const std::string& stack)
+    {
+        create_trace<Coder, fifi::binary>(stack);
+        create_trace<Coder, fifi::binary4>(stack);
+        create_trace<Coder, fifi::binary8>(stack);
+        create_trace<Coder, fifi::binary16>(stack);
     }
 
     void create_stacks()
     {
-        create_trace<kodo::rlnc::full_vector_encoder>("FullVector");
-        create_trace<kodo::rlnc::full_vector_decoder>("FullVector");
+        using namespace kodo;
 
-        create_trace<kodo::rlnc::sparse_full_vector_encoder>(
-            "SparseFullVector");
+        create_field<rlnc::full_vector_encoder>("FullVector");
+        create_field<rlnc::full_vector_decoder>("FullVector");
 
-        create_trace<kodo::rlnc::on_the_fly_encoder>("OnTheFly");
-        create_trace<kodo::rlnc::on_the_fly_decoder>("OnTheFly");
+        create_field<rlnc::sparse_full_vector_encoder>("SparseFullVector");
 
-        create_trace<kodo::rlnc::sliding_window_encoder>("SlidingWindow");
-        create_trace<kodo::rlnc::sliding_window_decoder>("SlidingWindow");
+        create_field<rlnc::on_the_fly_encoder>("OnTheFly");
+        create_field<rlnc::on_the_fly_decoder>("OnTheFly");
+
+        create_field<rlnc::sliding_window_encoder>("SlidingWindow");
+        create_field<rlnc::sliding_window_decoder>("SlidingWindow");
     }
 
     BOOST_PYTHON_MODULE(kodo)
