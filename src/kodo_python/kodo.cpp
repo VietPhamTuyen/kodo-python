@@ -16,6 +16,7 @@
 #include <kodo/rlnc/sliding_window_decoder.hpp>
 #include <kodo/rlnc/sliding_window_encoder.hpp>
 #include <kodo/rlnc/sparse_full_vector_encoder.hpp>
+
 #include <kodo/disable_trace.hpp>
 #include <kodo/enable_trace.hpp>
 
@@ -35,10 +36,9 @@ namespace kodo_python
         bool IsEncoder>
     struct create_coder
     {
-        create_coder(const std::string& stack, bool trace)
+        create_coder(const std::string& stack)
         {
             (void) stack;
-            (void) trace;
             assert(0);
         }
     };
@@ -49,10 +49,9 @@ namespace kodo_python
         class TraceTag>
     struct create_coder<Coder, Field, TraceTag, true>
     {
-        create_coder(const std::string& stack, bool trace)
+        create_coder(const std::string& stack)
         {
-            factory<Coder, Field, TraceTag>(stack, trace, "Encoder");
-            encoder<Coder, Field, TraceTag>(stack, trace);
+            encoder<Coder, Field, TraceTag>(stack);
         }
     };
 
@@ -62,10 +61,9 @@ namespace kodo_python
         class TraceTag>
     struct create_coder<Coder, Field, TraceTag, false>
     {
-        create_coder(const std::string& stack, bool trace)
+        create_coder(const std::string& stack)
         {
-            factory<Coder, Field, TraceTag>(stack, trace, "Decoder");
-            decoder<Coder, Field, TraceTag>(stack, trace);
+            decoder<Coder, Field, TraceTag>(stack);
         }
     };
 
@@ -73,29 +71,30 @@ namespace kodo_python
         template<class, class> class Coder,
         class Field,
         class TraceTag>
-    void create(const std::string& stack, bool trace)
+    void create(const std::string& stack)
     {
+        factory<Coder, Field, TraceTag>(stack);
         create_coder<Coder, Field, TraceTag,
-            is_encoder<Coder<Field, TraceTag>>::value>coder(stack, trace);
+            is_encoder<Coder<Field, TraceTag>>::value>coder(stack);
     }
 
     template<
         template<class, class> class Coder,
         class TraceTag>
-    void create_field(const std::string& stack, bool trace)
+    void create_field(const std::string& stack)
     {
-        create<Coder, fifi::binary, TraceTag>(stack, trace);
-        create<Coder, fifi::binary4, TraceTag>(stack, trace);
-        create<Coder, fifi::binary8, TraceTag>(stack, trace);
-        create<Coder, fifi::binary16, TraceTag>(stack, trace);
+        create<Coder, fifi::binary, TraceTag>(stack);
+        create<Coder, fifi::binary4, TraceTag>(stack);
+        create<Coder, fifi::binary8, TraceTag>(stack);
+        create<Coder, fifi::binary16, TraceTag>(stack);
     }
 
     template<
         template<class, class> class Coder>
     void create_trace(const std::string& stack)
     {
-        create_field<Coder, kodo::disable_trace>(stack, false);
-        create_field<Coder, kodo::enable_trace>(stack, true);
+        create_field<Coder, kodo::disable_trace>(stack);
+        create_field<Coder, kodo::enable_trace>(stack);
     }
 
     void create_stacks()

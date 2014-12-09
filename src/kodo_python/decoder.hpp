@@ -153,16 +153,16 @@ namespace kodo_python
     };
 
     template<template<class, class> class Coder, class Field, class TraceTag>
-    void decoder(const std::string& stack, bool trace)
+    void decoder(const std::string& stack)
     {
         using boost::python::arg;
+        using decoder_type = Coder<Field, TraceTag>;
 
         std::string field = resolve_field_name<Field>();
         std::string kind = "Decoder";
-        std::string trace_string = trace ? "Trace" : "";
-        std::string name = stack + kind + field + trace_string;
+        std::string trace = kodo::has_trace<decoder_type>::value ? "Trace" : "";
+        std::string name = stack + kind + field + trace;
 
-        typedef Coder<Field, TraceTag> decoder_type;
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
         .def("recode", &recode<decoder_type>,
             "Recode symbol.\n\n"
