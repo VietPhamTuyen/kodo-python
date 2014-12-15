@@ -20,6 +20,15 @@ namespace kodo_python
         assert(0);
     }
 
+    class no_field
+    { };
+
+    template<>
+    std::string resolve_field_name<no_field>()
+    {
+        return "";
+    }
+
     template<>
     std::string resolve_field_name<fifi::binary>()
     {

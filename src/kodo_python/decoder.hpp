@@ -16,12 +16,13 @@
 
 #include <sak/storage.hpp>
 
+#include "has_recode.hpp"
+#include "coder.hpp"
+#include "resolve_field_name.hpp"
+
 #include <algorithm>
 #include <string>
 #include <vector>
-
-#include "coder.hpp"
-#include "resolve_field_name.hpp"
 
 namespace kodo_python
 {
@@ -61,26 +62,6 @@ namespace kodo_python
         std::vector<uint8_t> payload(data.length());
         std::copy(data.c_str(), data.c_str() + data.length(), payload.data());
         decoder.decode(payload.data());
-    }
-
-    template<class Decoder>
-    void decode_symbol(Decoder& decoder, const std::string& symbol_data,
-        const std::string& symbol_coefficients)
-    {
-        std::vector<uint8_t> _symbol_data(decoder.symbol_size());
-        std::vector<uint8_t> _symbol_coefficients(decoder.symbol_size());
-
-        std::copy(
-            symbol_data.c_str(),
-            symbol_data.c_str() + symbol_data.length(),
-            _symbol_data.data());
-
-        std::copy(
-            symbol_coefficients.c_str(),
-            symbol_coefficients.c_str() + symbol_coefficients.length(),
-            _symbol_coefficients.data());
-
-        decoder.decode_symbol(_symbol_data.data(), _symbol_coefficients.data());
     }
 
     template<class Decoder>
@@ -125,6 +106,30 @@ namespace kodo_python
         }
     };
 
+    template<bool HAS_RECODE, class Type>
+    struct recode_method
+    {
+        template<class DecoderClass>
+        recode_method(DecoderClass& decoder_class)
+        {
+            (void) decoder_class;
+        }
+    };
+
+    template<class Type>
+    struct recode_method<true, Type>
+    {
+        template<class DecoderClass>
+        recode_method(DecoderClass& decoder_class)
+        {
+            decoder_class
+            .def("recode", &recode<Type>,
+                "Recode symbol.\n\n"
+                "\t:returns: The recoded symbol.\n"
+            );
+        }
+    };
+
     template<template<class, class> class Coder, class Type>
     struct extra_decoder_methods
     {
@@ -164,20 +169,9 @@ namespace kodo_python
         std::string name = stack + kind + field + trace;
 
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
-        .def("recode", &recode<decoder_type>,
-            "Recode symbol.\n\n"
-            "\t:returns: The recoded symbol.\n"
-        )
         .def("decode", &decode<decoder_type>, arg("symbol_data"),
             "Decode the provided encoded symbol.\n\n"
             "\t:param symbol_data: The encoded symbol.\n"
-        )
-        .def("decode_symbol", &decode_symbol<decoder_type>,
-            arg("symbol_data"), arg("symbol_coefficients"),
-            "Decode encoded symbol according to the coding coefficients.\n\n"
-            "\t:param symbol_data: The encoded symbol.\n"
-            "\t:param symbol_coefficients: The coding coefficients used to "
-            "create the encoded symbol.\n"
         )
         .def("is_complete", &decoder_type::is_complete,
             "Check whether decoding is complete.\n\n"
@@ -190,22 +184,14 @@ namespace kodo_python
         .def("copy_symbols", &copy_symbols<decoder_type>,
             "Return the decoded symbols.\n\n"
             "\t:returns: The decoded symbols.\n"
-        )
-        .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded,
-            arg("index"),
-            "Return whether the symbol is uncoded or not.\n\n"
-            "\t:param index: Index of the symbol to check.\n"
-            "\t:returns: True if the symbol is uncoded, and otherwise false.\n"
         );
 
-        void (decoder_type::*decode_symbol2)(uint8_t*, uint32_t) =
-            &decoder_type::decode_symbol;
-        decoder_class.def("decode_symbol_at_index", decode_symbol2);
+        (recode_method<has_recode<decoder_type>::value, decoder_type>
+            (decoder_class));
 
-        is_partial_complete_method<
+        (is_partial_complete_method<
             kodo::has_partial_decoding_tracker<decoder_type>::value,
-            decoder_type>
-            is_partial_complete_method(decoder_class);
+            decoder_type> (decoder_class));
 
         extra_decoder_methods<Coder, decoder_type> extra_decoder_methods(
             decoder_class);

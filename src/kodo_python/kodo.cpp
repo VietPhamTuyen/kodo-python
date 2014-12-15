@@ -17,13 +17,19 @@
 #include <kodo/rlnc/sliding_window_encoder.hpp>
 #include <kodo/rlnc/sparse_full_vector_encoder.hpp>
 
+#include <kodo/nocode/carousel_decoder.hpp>
+#include <kodo/nocode/carousel_encoder.hpp>
+
 #include <kodo/disable_trace.hpp>
 #include <kodo/enable_trace.hpp>
+
+#include <kodo/pool_factory.hpp>
 
 #include "decoder.hpp"
 #include "encoder.hpp"
 #include "factory.hpp"
-#include "is_encoder.hpp"
+#include "has_encode.hpp"
+#include "resolve_field_name.hpp"
 
 #include <string>
 
@@ -56,7 +62,7 @@ namespace kodo_python
     {
         factory<Coder, Field, TraceTag>(stack);
         create_coder<Coder, Field, TraceTag,
-            is_encoder<Coder<Field, TraceTag>>::value>coder(stack);
+            has_encode<Coder<Field, TraceTag>>::value>coder(stack);
     }
 
     template<template<class, class> class Coder, class Field>
@@ -75,6 +81,28 @@ namespace kodo_python
         create_trace<Coder, fifi::binary16>(stack);
     }
 
+    template<class Field, class TraceTag>
+    class carousel_decoder_wrapper : public
+        kodo::nocode::carousel_decoder<TraceTag>
+    {
+    public:
+        using factory = kodo::pool_factory<carousel_decoder_wrapper>;
+
+    public:
+        uint32_t symbols_uncoded()
+        {
+            return kodo::nocode::carousel_decoder<TraceTag>::rank();
+        }
+    };
+
+    template<class Field, class TraceTag>
+    class carousel_encoder_wrapper : public
+        kodo::nocode::carousel_encoder<TraceTag>
+    {
+    public:
+        using factory = kodo::pool_factory<carousel_encoder_wrapper>;
+    };
+
     void create_stacks()
     {
         using namespace kodo;
@@ -89,6 +117,9 @@ namespace kodo_python
 
         create_field<rlnc::sliding_window_encoder>("SlidingWindow");
         create_field<rlnc::sliding_window_decoder>("SlidingWindow");
+
+        create_trace<carousel_decoder_wrapper, no_field>("NoCode");
+        create_trace<carousel_encoder_wrapper, no_field>("NoCode");
     }
 
     BOOST_PYTHON_MODULE(kodo)
