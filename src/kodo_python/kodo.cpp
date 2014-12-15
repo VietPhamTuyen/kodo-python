@@ -24,6 +24,7 @@
 #include <kodo/enable_trace.hpp>
 
 #include <kodo/pool_factory.hpp>
+#include <kodo/rebind_factory.hpp>
 
 #include "decoder.hpp"
 #include "encoder.hpp"
@@ -86,7 +87,9 @@ namespace kodo_python
         kodo::nocode::carousel_decoder<TraceTag>
     {
     public:
-        using factory = kodo::pool_factory<carousel_decoder_wrapper>;
+        using factory = kodo::rebind_factory<
+            kodo::nocode::carousel_encoder<TraceTag>,
+            carousel_decoder_wrapper<Field, TraceTag>>;
 
     public:
         uint32_t symbols_uncoded()
@@ -100,7 +103,9 @@ namespace kodo_python
         kodo::nocode::carousel_encoder<TraceTag>
     {
     public:
-        using factory = kodo::pool_factory<carousel_encoder_wrapper>;
+        using factory = kodo::rebind_factory<
+            kodo::nocode::carousel_encoder<TraceTag>,
+            carousel_encoder_wrapper<Field, TraceTag>>;
     };
 
     void create_stacks()
