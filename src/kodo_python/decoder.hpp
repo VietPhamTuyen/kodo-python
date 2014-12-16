@@ -193,8 +193,7 @@ namespace kodo_python
             kodo::has_partial_decoding_tracker<decoder_type>::value,
             decoder_type> (decoder_class));
 
-        extra_decoder_methods<Coder, decoder_type> extra_decoder_methods(
-            decoder_class);
+        (extra_decoder_methods<Coder, decoder_type>(decoder_class));
     }
 }
 

@@ -62,8 +62,8 @@ namespace kodo_python
     void create(const std::string& stack)
     {
         factory<Coder, Field, TraceTag>(stack);
-        create_coder<Coder, Field, TraceTag,
-            has_encode<Coder<Field, TraceTag>>::value>coder(stack);
+        (create_coder<Coder, Field, TraceTag,
+            has_encode<Coder<Field, TraceTag>>::value>(stack));
     }
 
     template<template<class, class> class Coder, class Field>

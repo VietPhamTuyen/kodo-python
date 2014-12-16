@@ -77,7 +77,7 @@ namespace kodo_python
         );
 
         std::string max_block_size_desc;
-        if (coder == std::string("Encoder"))
+        if (has_encode<stack_type>::value)
         {
             max_block_size_desc =
             "Return the maximum amount of data encoded in bytes.\n\n"
@@ -85,7 +85,7 @@ namespace kodo_python
             "encoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data encoded in bytes\n";
         }
-        else if (coder == std::string("Decoder"))
+        else
         {
             max_block_size_desc =
             "Return the maximum amount of data decoded in bytes.\n\n"
@@ -93,11 +93,7 @@ namespace kodo_python
             "decoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data decoded in bytes\n";
         }
-        else
-        {
-            // If it's not a decoder or encoder factory, what is it?
-            assert(0);
-        }
+
         factory.def("max_block_size", &factory_type::max_block_size,
             max_block_size_desc.c_str()
         );
