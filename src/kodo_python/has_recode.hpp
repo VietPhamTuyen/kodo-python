@@ -16,13 +16,13 @@ namespace kodo_python
     ///
     /// typedef kodo::full_rlnc8_encoder encoder_t;
     ///
-    /// if(kodo_python::is_encoder<encoder_t>::value)
+    /// if(kodo_python::has_recode<encoder_t>::value)
     /// {
     ///     // Do something here
     /// }
 
     template<typename T>
-    struct is_encoder
+    struct has_recode
     {
     private:
         typedef std::true_type yes;
@@ -30,7 +30,7 @@ namespace kodo_python
 
         template<typename U>
         static auto test(int) ->
-            decltype(std::declval<U>().encode(0), yes());
+            decltype(std::declval<U>().recode(0), yes());
 
         template<typename> static no test(...);
 

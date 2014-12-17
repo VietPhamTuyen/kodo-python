@@ -12,7 +12,7 @@
 #include <string>
 
 #include "resolve_field_name.hpp"
-#include "is_encoder.hpp"
+#include "has_encode.hpp"
 
 namespace kodo_python
 {
@@ -28,7 +28,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string coder =
-            is_encoder<stack_type>::value ? "Encoder" : "Decoder";
+            has_encode<stack_type>::value ? "Encoder" : "Decoder";
         std::string kind = coder + std::string("Factory");
         std::string trace = kodo::has_trace<stack_type>::value ? "Trace" : "";
         std::string name = stack + kind + field + trace;
@@ -77,7 +77,7 @@ namespace kodo_python
         );
 
         std::string max_block_size_desc;
-        if (coder == std::string("Encoder"))
+        if (has_encode<stack_type>::value)
         {
             max_block_size_desc =
             "Return the maximum amount of data encoded in bytes.\n\n"
@@ -85,7 +85,7 @@ namespace kodo_python
             "encoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data encoded in bytes\n";
         }
-        else if (coder == std::string("Decoder"))
+        else
         {
             max_block_size_desc =
             "Return the maximum amount of data decoded in bytes.\n\n"
@@ -93,16 +93,12 @@ namespace kodo_python
             "decoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data decoded in bytes\n";
         }
-        else
-        {
-            // If it's not a decoder or encoder factory, what is it?
-            assert(0);
-        }
+
         factory.def("max_block_size", &factory_type::max_block_size,
             max_block_size_desc.c_str()
         );
         // Enable boost to map from the c++ pointer type to the python coder
-        // type. E.g., from std::shared_ptr<Codec> to python [Codec]_encoder.
+        // type. E.g., from std::shared_ptr<Codec> to python [Codec]Encoder.
         boost::python::register_ptr_to_python<typename factory_type::pointer>();
     }
 }

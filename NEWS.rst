@@ -6,7 +6,9 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Minor: Added ``no_code`` algorithm.
+* Major: Removed decoder methods: ``is_symbol_uncoded``, ``decode_symbol`` and
+  ``decode_symbol_at_index``.
 
 5.0.0
 -----

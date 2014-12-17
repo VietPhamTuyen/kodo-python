@@ -15,9 +15,15 @@
 namespace kodo_python
 {
     template<class Field>
-    std::string resolve_field_name()
+    std::string resolve_field_name();
+
+    class no_field
+    { };
+
+    template<>
+    std::string resolve_field_name<no_field>()
     {
-        assert(0);
+        return "";
     }
 
     template<>

@@ -189,12 +189,10 @@ namespace kodo_python
             "\t:param index: The index of the symbol in the coding block.\n"
             "\t:param symbol: The actual data of that symbol.\n");
 
-        extra_encoder_methods<Coder, encoder_type> extra_encoder_methods(
-            encoder_class);
+        (extra_encoder_methods<Coder, encoder_type>(encoder_class));
 
-        systematic_encoder_methods<
-            kodo::has_systematic_encoder<encoder_type>::value,
-            encoder_type>
-            systematic_encoder_methods(encoder_class);
+        (systematic_encoder_methods<
+            kodo::has_systematic_encoder<encoder_type>::value, encoder_type>
+            (encoder_class));
     }
 }
