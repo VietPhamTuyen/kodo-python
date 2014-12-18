@@ -24,11 +24,12 @@ import numpy
 class CanvasScreenEngine(object):
     """Canvas engine for displaying images to the screen"""
     def __init__(self, width, height):
-        self.lock = threading.Lock()
         self.screen = None
         self.running = False
         # Add a little padding
         self.size = (width + 1, height + 1)
+
+        self.lock = threading.Lock()
         self.thread = threading.Thread(name='canvas', target=self.__start)
 
     def start(self):
@@ -64,26 +65,62 @@ class CanvasScreenEngine(object):
 
 
 class CanvasFileEngine(object):
-    """Canvas engine for writing images to files"""
+    """
+    Canvas engine for writing images to files.
+
+    This is especially useful if you want to create a video or view specific
+    parts of the coding.
+
+    If you want to create a video you can use the following command (tested on
+    ubuntu):
+
+      avconv -r 60 -b 65536k -qscale 5 -i %07d.png out.mp4
+
+    """
     def __init__(self, width, height, directory):
-        # Add a little padding
-        self.size = (width + 1, height + 1)
+        self.size = (width, height)
         self.files = 0
         self.directory = directory
+        self.screen = pygame.Surface(self.size)
+        self.dirty = False
+
+        self.lock = threading.Lock()
+        self.thread = threading.Thread(name='canvas', target=self.__start)
 
     def start(self):
-        pass
+        """Start a thread which runs the viewer logic"""
+        self.thread.start()
+        # Busy wait for the engine to start.
+        while not self.running:
+            pass
 
-    def stop(self):
-        pass
+    def __start(self):
+        """Start pygame and create a game loop"""
+        with self.lock:
+            self.running = True
 
-    def add_surface(self, surface, position):
-        screen = pygame.Surface(self.size)
-        screen.blit(surface, position)
+        while(self.running):
+            if not self.dirty:
+                continue
+            with self.lock:
+                self.store_file()
+                self.dirty = False
+
+    def store_file(self):
         filename = "{:07d}.png".format(self.files)
         self.files += 1
         pygame.image.save(
             self.screen, os.path.join(self.directory, filename))
+
+    def stop(self):
+        """Stops the game loop and joins the thread"""
+        self.running = False
+        self.thread.join()
+
+    def add_surface(self, surface, position):
+        with self.lock:
+            self.screen.blit(surface, position)
+            self.dirty = True
 
 
 class DecodeStateViewer(object):

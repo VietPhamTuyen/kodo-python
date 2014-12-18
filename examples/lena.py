@@ -95,9 +95,7 @@ def main():
             if random.choice([True, False]):
                 decoder.decode(packet)
 
-            # limit the number of times we write to the screen (it's expensive)
-            if packets % (symbols // 20) == 0 or decoder.is_complete():
-                image_viewer.set_image(decoder.copy_symbols())
+            image_viewer.set_image(decoder.copy_symbols())
 
         # Let the user see the photo before closing the application
         time.sleep(1)
