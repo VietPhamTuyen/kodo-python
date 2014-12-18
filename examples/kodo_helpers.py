@@ -106,13 +106,6 @@ class CanvasFileEngine(object):
                 self.store_file()
                 self.dirty = False
 
-        # Store the last image multiple times so that the video doesn't end so
-        # sudden.
-        for i in range(self.files/10):
-            self.store_file()
-
-        pygame.quit()
-
     def store_file(self):
         filename = "{:07d}.png".format(self.files)
         self.files += 1
