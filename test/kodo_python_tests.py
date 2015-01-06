@@ -85,6 +85,17 @@ test_sets = [
 ]
 
 
+class TestVersion(unittest.TestCase):
+
+    def test_version(self):
+        versions = kodo.__version__.split('\n')
+        for version in versions:
+            # Make sure that a version number is available for all
+            # dependencies.
+            self.assertNotEqual(
+                version.split(':')[1].strip(), '', msg=version.strip())
+
+
 class TestEncodeDecode(unittest.TestCase):
 
     def test_all(self):

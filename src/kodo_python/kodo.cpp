@@ -5,6 +5,7 @@
 
 #include <boost/python.hpp>
 #include <boost/python/docstring_options.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <fifi/binary.hpp>
 #include <fifi/binary4.hpp>
@@ -127,10 +128,55 @@ namespace kodo_python
         create_trace<carousel_encoder_wrapper, no_field>("NoCode");
     }
 
+    std::string version()
+    {
+        std::string version = std::string("kodo-python: ");
+        version += STEINWURF_KODO_PYTHON_VERSION;
+
+        // Add dependency versions:
+        version += std::string("\n\tboost: ");
+#ifdef STEINWURF_BOOST_VERSION
+        version += std::string(STEINWURF_BOOST_VERSION);
+#endif
+        version += std::string("\n\tcpuid: ");
+#ifdef STEINWURF_CPUID_VERSION
+        version += std::string(STEINWURF_CPUID_VERSION);
+#endif
+        version += std::string("\n\tfifi: ");
+#ifdef STEINWURF_FIFI_VERSION
+        version += std::string(STEINWURF_FIFI_VERSION);
+#endif
+        version += std::string("\n\tkodo: ");
+#ifdef STEINWURF_KODO_VERSION
+        version += std::string(STEINWURF_KODO_VERSION);
+#endif
+        version += std::string("\n\tplatform: ");
+#ifdef STEINWURF_PLATFORM_VERSION
+        version += std::string(STEINWURF_PLATFORM_VERSION);
+#endif
+        version += std::string("\n\trecycle: ");
+#ifdef STEINWURF_RECYCLE_VERSION
+        version += std::string(STEINWURF_RECYCLE_VERSION);
+#endif
+        version += std::string("\n\tsak: ");
+#ifdef STEINWURF_SAK_VERSION
+        version += std::string(STEINWURF_SAK_VERSION);
+#endif
+
+        return version;
+    }
+
+    void create_version_function()
+    {
+        using namespace boost::python;
+        scope().attr("__version__") = version();
+    }
+
     BOOST_PYTHON_MODULE(kodo)
     {
         boost::python::docstring_options doc_options;
         doc_options.disable_signatures();
+        create_version_function();
         create_stacks();
     }
 }
