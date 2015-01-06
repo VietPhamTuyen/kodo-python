@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* Minor: Add version attribute to kodo python module.
+* Major: Update kodo to version 22.
+* Major: Update sak to version 14.
+* Major: Update fifi to version 17.
 * Minor: Added ``no_code`` algorithm.
 * Major: Removed decoder methods: ``is_symbol_uncoded``, ``decode_symbol`` and
   ``decode_symbol_at_index``.
