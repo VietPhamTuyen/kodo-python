@@ -1,10 +1,10 @@
 kodo-python
 ===========
 
-kodo-python is a set of high-level python bindings for the Kodo Network Coding
-C++ library. The bindings provide access to basic functionality provided by
-Kodo, such as encoding and decoding of data. The examples folder provides sample
-applications showing usage of the python API.
+kodo-python contains a set of high-level python bindings for the Kodo Network
+Coding C++ library. The bindings provide access to basic functionality provided
+by Kodo, such as encoding and decoding of data. The examples folder provides
+sample applications showing usage of the python API.
 
 .. image:: http://buildbot.steinwurf.dk/svgstatus?project=kodo-python
     :target: http://buildbot.steinwurf.dk/stats?projects=kodo-python
@@ -100,8 +100,12 @@ When you are ready to install the package, you can simply type::
 
 Building From Source
 ====================
-Now that you have all requirements, you are ready to clone, configure and build
-the project::
+If you prefer not to use pip, you can also build the bindings yourself.
+
+Before doing anything, make sure you've installed the requirements specified in
+the previous section.
+
+When you have installed all dependencies, you can clone the project::
 
     git clone https://github.com/steinwurf/kodo-python.git
 
