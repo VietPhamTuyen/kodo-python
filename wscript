@@ -122,6 +122,10 @@ def build(bld):
 
     bld.recurse('src/kodo_python')
 
+    bld.env.append_unique(
+        'DEFINES_STEINWURF_VERSION',
+        'STEINWURF_KODO_PYTHON_VERSION="{}"'.format(VERSION))
+
 
 @feature('pyext')
 @after_method('apply_link')
