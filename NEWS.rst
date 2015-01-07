@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+6.0.0
+-----
 * Minor: Add version attribute to kodo python module.
 * Major: Update kodo to version 22.
 * Major: Update sak to version 14.
