@@ -5,7 +5,6 @@
 
 #include <boost/python.hpp>
 #include <boost/python/docstring_options.hpp>
-#include <boost/python/raw_function.hpp>
 
 #include <fifi/binary.hpp>
 #include <fifi/binary4.hpp>
