@@ -8,6 +8,10 @@ Latest
 ------
 * tbd
 
+6.0.1
+-----
+* Patch: Fix version function.
+
 6.0.0
 -----
 * Minor: Add version attribute to kodo python module.
