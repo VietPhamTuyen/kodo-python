@@ -7,6 +7,7 @@ every change, see the Git log.
 Latest
 ------
 * Patch: Updated README to reflect new licensing requirements.
+* Patch: Update waf.
 
 6.0.1
 -----
