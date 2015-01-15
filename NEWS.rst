@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Updated README to reflect new licensing requirements.
 
 6.0.1
 -----

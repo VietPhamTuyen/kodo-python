@@ -27,11 +27,11 @@ sample applications showing usage of the python API.
 License
 =======
 
-If you wish to use this library, please obtain a valid license. To do so
-**you must fill out the license request** form_.
+A valid license is required if you wish to use and install this library. Please
+request a license by filling out the license request** form_.
 
-This project is available under a research- and educational-friendly license,
-see the details in the `LICENSE.rst file
+Note, this project is available under a research- and educational-friendly
+license, see the details in the `LICENSE.rst file
 <https://github.com/steinwurf/kodo-python/blob/master/LICENSE.rst>`_.
 
 .. _form: http://steinwurf.com/license/
