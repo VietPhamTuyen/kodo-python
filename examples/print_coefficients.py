@@ -54,7 +54,9 @@ def main():
 
         # Set up tracing callback
         if 'trace' in dir(decoder):
-            callback = lambda zone, msg: viewer.trace_callback(zone, msg)
+            def callback(zone, msg):
+                viewer.trace_callback(zone, msg)
+
             decoder.trace(callback)
 
         # Assign the data buffer to the encoder so that we may start

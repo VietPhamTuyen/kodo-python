@@ -72,7 +72,9 @@ def main():
     decoder = decoder_factory.build()
 
     # Connect the tracing callback to the decode state viewer
-    callback = lambda zone, msg: state_viewer.trace_callback(zone, msg)
+    def callback(zone, msg):
+        state_viewer.trace_callback(zone, msg)
+
     decoder.trace(callback)
 
     # Create a byte array from the image to use in the encoding
