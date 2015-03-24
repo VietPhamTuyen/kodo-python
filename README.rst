@@ -30,8 +30,8 @@ License
 A valid license is required if you wish to use and install this library. Please
 request a license by filling out the license request** form_.
 
-Note, this project is available under a research- and educational-friendly
-license, see the details in the `LICENSE.rst file
+This project is available under a research- and education-friendly license,
+see the details in the `LICENSE.rst file
 <https://github.com/steinwurf/kodo-python/blob/master/LICENSE.rst>`_.
 
 .. _form: http://steinwurf.com/license/
@@ -39,17 +39,16 @@ license, see the details in the `LICENSE.rst file
 
 Installation
 ============
-We provide a pip package for easy installation of the kodo-python library.
+We provide a pip package for the easy installation of the kodo-python library.
 
 To install this you'll need python and pip installed:
  - To get python `go here <https://www.python.org/downloads/>`_.
  - To install pip `follow this guide
    <https://pip.pypa.io/en/latest/installing.html>`_.
 
-Depending on your platform, you will need a set of tools and libraries to build
-the library.
+You will need a set of tools and packages to build the library.
 
-Common for all platforms is that you will need a recent C++11 compiler.
+On all platforms, you will need a recent C++11 compiler.
 The compilers used by Steinwurf are listed on the
 `buildbot page <http://buildbot.steinwurf.com>`_.
 
@@ -69,13 +68,12 @@ When you are ready to install the package, you can simply type::
 
   sudo pip install kodo
 
-MacOS
------
-
+MacOSX
+------
 Follow `this guide
 <https://help.github.com/articles/set-up-git#setting-up-git>`_ to install git.
 
-Install Xcode and Command-line Tools from the Mac Store.
+Install the latest XCode and Command-line Tools from the Mac Store.
 
 When you are ready to install the package, you can simply type::
 
@@ -83,8 +81,8 @@ When you are ready to install the package, you can simply type::
 
 Windows
 -------
-Install Python 2.7 32-bit and Visual Studio 2013 (Express).
-Now set the following environment variable ``VS90COMNTOOLS`` to::
+Install Python 2.7 (32-bit) and Visual Studio Express 2013 for Windows Desktop.
+Then set the ``VS90COMNTOOLS`` environment variable to::
 
   C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\
 
@@ -100,26 +98,28 @@ When you are ready to install the package, you can simply type::
 
 Building From Source
 ====================
-If you prefer not to use pip, you can also build the bindings yourself.
+You can also build the bindings from source, if you don't want to use pip.
 
-Before doing anything, make sure you've installed the requirements specified in
-the previous section.
+Before doing anything, please install the requirements specified in
+the previous section (you can ignore the parts about pip).
 
-When you have installed all dependencies, you can clone the project::
+After that you can clone the project::
 
-    git clone https://github.com/steinwurf/kodo-python.git
+  git clone git@github.com:steinwurf/kodo-python.git
 
-configure and build the project::
+Configure and build the project::
 
   cd kodo-python
   python waf configure
   python waf build
 
 Now the project is built and you should be able to find the resulting
-kodo.so file here (the actual path and extension is dependent on
-your OS and python version.)::
+``kodo.so`` or ``kodo.pyd`` file here (the actual path and extension is
+dependent on your OS and Python version)::
 
   build/linux/src/kodo_python/kodo.so
+  build/darwin/src/kodo_python/kodo.so
+  build/win32/src/kodo_python/kodo.pyd
 
 You can add this path to your PYTHONPATH and import the module in your Python
 script::
