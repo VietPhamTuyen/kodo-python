@@ -87,6 +87,11 @@ class CanvasFileEngine(object):
         self.lock = threading.Lock()
         self.thread = threading.Thread(name='canvas', target=self.__start)
 
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
+            print("Created directory: {}".format(
+                os.path.abspath(self.directory)))
+
     def start(self):
         """Start a thread which runs the viewer logic"""
         self.thread.start()

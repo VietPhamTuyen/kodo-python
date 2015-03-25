@@ -57,33 +57,45 @@ def main():
     ]
 
     while not decoder.is_complete():
-
-        # Encode a packet into the payload buffer
-        packet = encoder.encode()
-
-        # Send the data to the decoders, here we just for fun
-        # simulate that we are loosing 50% of the packets
-        if random.choice([True, False]):
-            continue
-
-        # Packet got through - pass that packet to the decoder
-        decoder.decode(packet)
-
         # Randomly choose to insert a symbol
         if random.choice([True, False]) and encoder.rank() < symbols:
             # For an encoder the rank specifies the number of symbols
             # it has available for encoding
             rank = encoder.rank()
             encoder.set_symbol(rank, symbol_storage[rank])
+            print("Symbol {} added to the encoder".format(rank))
+
+        if encoder.rank() == 0:
+            continue
+
+        # Encode a packet into the payload buffer
+        packet = encoder.encode()
+        print("Packet encoded")
+
+        # Send the data to the decoders, here we just for fun
+        # simulate that we are loosing 50% of the packets
+        if random.choice([True, False]):
+            print("Packet dropped on channel")
+            continue
+
+        # Packet got through - pass that packet to the decoder
+        decoder.decode(packet)
+        print("Decoder received packet")
+
+        print("Encoder rank = {}".format(encoder.rank()))
+        print("Decoder rank = {}".format(decoder.rank()))
+        print("Decoder uncoded = {}".format(decoder.symbols_uncoded()))
 
         # Transmit the feedback
         feedback = decoder.write_feedback()
 
         # Simulate loss of feedback
         if random.choice([True, False]):
+            print("Lost feedback from decoder")
             continue
 
         encoder.read_feedback(feedback)
+        print("Received feedback from decoder")
 
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()
