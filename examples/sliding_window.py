@@ -78,10 +78,9 @@ def main():
             print("Packet dropped on channel")
             continue
 
-        print("Decoder received packet")
-
         # Packet got through - pass that packet to the decoder
         decoder.decode(packet)
+        print("Decoder received packet")
 
         print("Encoder rank = {}".format(encoder.rank()))
         print("Decoder rank = {}".format(decoder.rank()))
@@ -95,8 +94,8 @@ def main():
             print("Lost feedback from decoder")
             continue
 
-        print("Received feedback from decoder")
         encoder.read_feedback(feedback)
+        print("Received feedback from decoder")
 
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()
