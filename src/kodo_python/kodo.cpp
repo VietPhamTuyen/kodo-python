@@ -26,10 +26,11 @@
 #include <kodo/pool_factory.hpp>
 #include <kodo/rebind_factory.hpp>
 
+#include "has_is_complete.hpp"
+
 #include "decoder.hpp"
 #include "encoder.hpp"
 #include "factory.hpp"
-#include "has_encode.hpp"
 #include "resolve_field_name.hpp"
 
 #include <string>
@@ -45,7 +46,7 @@ namespace kodo_python
     {
         create_coder(const std::string& stack)
         {
-            encoder<Coder, Field, TraceTag>(stack);
+            decoder<Coder, Field, TraceTag>(stack);
         }
     };
 
@@ -54,7 +55,7 @@ namespace kodo_python
     {
         create_coder(const std::string& stack)
         {
-            decoder<Coder, Field, TraceTag>(stack);
+            encoder<Coder, Field, TraceTag>(stack);
         }
     };
 
@@ -63,7 +64,7 @@ namespace kodo_python
     {
         factory<Coder, Field, TraceTag>(stack);
         (create_coder<Coder, Field, TraceTag,
-            has_encode<Coder<Field, TraceTag>>::value>(stack));
+            has_is_complete<Coder<Field, TraceTag>>::value>(stack));
     }
 
     template<template<class, class> class Coder, class Field>

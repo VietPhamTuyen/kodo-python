@@ -11,7 +11,7 @@
 #include <boost/python/args.hpp>
 
 #include <kodo/has_trace.hpp>
-#include <kodo/has_systematic_encoder.hpp>
+#include <kodo/has_set_systematic_off.hpp>
 #include <kodo/is_systematic_on.hpp>
 #include <kodo/set_systematic_off.hpp>
 #include <kodo/set_systematic_on.hpp>
@@ -61,10 +61,10 @@ namespace kodo_python
     }
 
     template<class Encoder>
-    PyObject* encode(Encoder& encoder)
+    PyObject* encoder_write_payload(Encoder& encoder)
     {
         std::vector<uint8_t> payload(encoder.payload_size());
-        uint32_t length = encoder.encode(payload.data());
+        uint32_t length = encoder.write_payload(payload.data());
         #if PY_MAJOR_VERSION >= 3
         return PyBytes_FromStringAndSize((char*)payload.data(), length);
         #else
@@ -176,7 +176,7 @@ namespace kodo_python
         std::string name = stack + kind + field + trace;
 
         auto encoder_class = coder<Coder, Field, TraceTag>(name)
-        .def("encode", &encode<encoder_type>,
+        .def("write_payload", &encoder_write_payload<encoder_type>,
             "Encode a symbol.\n\n"
             "\t:returns: The encoded symbol.\n"
         )
@@ -192,7 +192,7 @@ namespace kodo_python
         (extra_encoder_methods<Coder, encoder_type>(encoder_class));
 
         (systematic_encoder_methods<
-            kodo::has_systematic_encoder<encoder_type>::value, encoder_type>
+            kodo::has_set_systematic_off<encoder_type>::value, encoder_type>
             (encoder_class));
     }
 }

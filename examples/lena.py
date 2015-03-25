@@ -52,7 +52,7 @@ def main():
         canvas_position=(image_width, 0))
 
     # Pick a symbol size (image_width * 3 will create a packet for each
-    # horizontal line of the image)
+    # horizontal line of the image, that is three bytes per pixel (RGB))
     symbol_size = image_width * 3
 
     # Based on the size of the image and the symbol size, calculate the number
@@ -88,14 +88,12 @@ def main():
     # close down the image viewer.
     canvas.start()
     try:
-        packets = 0
         while not decoder.is_complete():
-            packet = encoder.encode()
-            packets += 1
+            packet = encoder.write_payload()
 
             # Drop some packets
             if random.choice([True, False]):
-                decoder.decode(packet)
+                decoder.read_payload(packet)
 
             image_viewer.set_image(decoder.copy_symbols())
 

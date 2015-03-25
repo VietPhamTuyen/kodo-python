@@ -197,7 +197,7 @@ def send_data(settings, role):
     start = time.time()
     end = None
     while sent < settings['symbols'] * settings['max_redundancy'] / 100:
-        packet = encoder.encode()
+        packet = encoder.write_payload()
         send(send_socket, packet, address)
         sent += 1
 
@@ -254,7 +254,7 @@ def receive_data(settings, role):
             packet = data_socket.recv(settings['symbol_size'] + 100)
 
             if not decoder.is_complete():
-                decoder.decode(packet)
+                decoder.read_payload(packet)
                 received += 1
 
             if decoder.is_complete():

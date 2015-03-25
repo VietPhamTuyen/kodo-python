@@ -129,9 +129,9 @@ class TestEncodeDecode(unittest.TestCase):
 
         while not decoder.is_complete():
             # Generate an encoded packet
-            packet = encoder.encode()
+            packet = encoder.write_payload()
             # Decode the encoded packet
-            decoder.decode(packet)
+            decoder.read_payload(packet)
 
         # The decoder is complete, now copy the symbols from the decoder
         data_out = decoder.copy_symbols()

@@ -71,14 +71,14 @@ def main():
                     encoder.set_systematic_on()
 
         # Encode a packet into the payload buffer
-        packet = encoder.encode()
+        packet = encoder.write_payload()
 
         if random.choice([True, False]):
             print("Drop packet")
             continue
 
         # Pass that packet to the decoder
-        decoder.decode(packet)
+        decoder.read_payload(packet)
 
         print("Rank of decoder {}".format(decoder.rank()))
 

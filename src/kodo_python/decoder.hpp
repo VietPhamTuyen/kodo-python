@@ -11,12 +11,12 @@
 #include <boost/python/args.hpp>
 
 #include <kodo/has_partial_decoding_tracker.hpp>
+#include <kodo/has_write_payload.hpp>
 #include <kodo/is_partial_complete.hpp>
 #include <kodo/write_feedback.hpp>
 
 #include <sak/storage.hpp>
 
-#include "has_recode.hpp"
 #include "coder.hpp"
 #include "resolve_field_name.hpp"
 
@@ -44,10 +44,10 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    PyObject* recode(Decoder& decoder)
+    PyObject* decoder_write_payload(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.payload_size());
-        auto length = decoder.recode(payload.data());
+        auto length = decoder.write_payload(payload.data());
 
         #if PY_MAJOR_VERSION >= 3
         return PyBytes_FromStringAndSize((char*)payload.data(), length);
@@ -57,11 +57,11 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    void decode(Decoder& decoder, const std::string& data)
+    void read_payload(Decoder& decoder, const std::string& data)
     {
         std::vector<uint8_t> payload(data.length());
         std::copy(data.c_str(), data.c_str() + data.length(), payload.data());
-        decoder.decode(payload.data());
+        decoder.read_payload(payload.data());
     }
 
     template<class Decoder>
@@ -106,24 +106,24 @@ namespace kodo_python
         }
     };
 
-    template<bool HAS_RECODE, class Type>
-    struct recode_method
+    template<bool HAS_WRITE_PAYLOAD, class Type>
+    struct write_payload_method
     {
         template<class DecoderClass>
-        recode_method(DecoderClass& decoder_class)
+        write_payload_method(DecoderClass& decoder_class)
         {
             (void) decoder_class;
         }
     };
 
     template<class Type>
-    struct recode_method<true, Type>
+    struct write_payload_method<true, Type>
     {
         template<class DecoderClass>
-        recode_method(DecoderClass& decoder_class)
+        write_payload_method(DecoderClass& decoder_class)
         {
             decoder_class
-            .def("recode", &recode<Type>,
+            .def("write_payload", &decoder_write_payload<Type>,
                 "Recode symbol.\n\n"
                 "\t:returns: The recoded symbol.\n"
             );
@@ -169,7 +169,7 @@ namespace kodo_python
         std::string name = stack + kind + field + trace;
 
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
-        .def("decode", &decode<decoder_type>, arg("symbol_data"),
+        .def("read_payload", &read_payload<decoder_type>, arg("symbol_data"),
             "Decode the provided encoded symbol.\n\n"
             "\t:param symbol_data: The encoded symbol.\n"
         )
@@ -186,7 +186,8 @@ namespace kodo_python
             "\t:returns: The decoded symbols.\n"
         );
 
-        (recode_method<has_recode<decoder_type>::value, decoder_type>
+        (write_payload_method<
+            kodo::has_write_payload<decoder_type>::value, decoder_type>
             (decoder_class));
 
         (is_partial_complete_method<

@@ -10,11 +10,11 @@
 namespace kodo_python
 {
     /// Helper that allows compile time detection of whether a
-    /// stack is an encoder or decoder stack.
+    /// stack has the is_symbol_pivot member function.
     ///
     /// Example:
     ///
-    /// typedef kodo::full_rlnc8_encoder encoder_t;
+    /// typedef kodo::full_rlnc_encoder<fifi::binary8> encoder_t;
     ///
     /// if(kodo_python::has_is_symbol_pivot<encoder_t>::value)
     /// {

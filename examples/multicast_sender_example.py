@@ -85,7 +85,7 @@ def main():
     while True and not args.dry_run:
         time.sleep(0.2)
         # Generate an encoded packet
-        packet = encoder.encode()
+        packet = encoder.write_payload()
         print("Packet encoded!")
 
         # Send the packet.
