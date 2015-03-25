@@ -44,7 +44,7 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    static PyObject* decoder_write_payload(Decoder& decoder)
+    PyObject* decoder_write_payload(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.payload_size());
         auto length = decoder.write_payload(payload.data());
