@@ -10,19 +10,20 @@
 namespace kodo_python
 {
     /// Helper that allows compile time detection of whether a
-    /// stack is an encoder or decoder stack.
+    /// stack has the is_complete member function, i.e., whether it's a decoder
+    /// or an encoder stack.
     ///
     /// Example:
     ///
-    /// typedef kodo::full_rlnc8_encoder encoder_t;
+    /// typedef kodo::full_rlnc_encoder<fifi::binary8> encoder_t;
     ///
-    /// if(kodo_python::has_recode<encoder_t>::value)
+    /// if(kodo_python::has_is_complete<encoder_t>::value)
     /// {
     ///     // Do something here
     /// }
 
     template<typename T>
-    struct has_recode
+    struct has_is_complete
     {
     private:
         typedef std::true_type yes;
@@ -30,13 +31,12 @@ namespace kodo_python
 
         template<typename U>
         static auto test(int) ->
-            decltype(std::declval<U>().recode(0), yes());
+            decltype(std::declval<U>().is_complete(), yes());
 
         template<typename> static no test(...);
 
     public:
 
-        enum { value = std::is_same<decltype(test<T>(0)),yes>::value };
+        enum { value = std::is_same<decltype(test<T>(0)), yes>::value };
     };
-
 }

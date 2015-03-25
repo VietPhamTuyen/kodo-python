@@ -7,12 +7,12 @@
 
 #include <boost/python/args.hpp>
 
+#include "has_is_complete.hpp"
 #include <kodo/has_trace.hpp>
 
 #include <string>
 
 #include "resolve_field_name.hpp"
-#include "has_encode.hpp"
 
 namespace kodo_python
 {
@@ -28,7 +28,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string coder =
-            has_encode<stack_type>::value ? "Encoder" : "Decoder";
+            has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
         std::string kind = coder + std::string("Factory");
         std::string trace = kodo::has_trace<stack_type>::value ? "Trace" : "";
         std::string name = stack + kind + field + trace;
@@ -77,21 +77,21 @@ namespace kodo_python
         );
 
         std::string max_block_size_desc;
-        if (has_encode<stack_type>::value)
-        {
-            max_block_size_desc =
-            "Return the maximum amount of data encoded in bytes.\n\n"
-            "This is calculated by multiplying the maximum number of symbols "
-            "encoded by the maximum size of a symbol.\n\n"
-            "\t:returns: The maximum amount of data encoded in bytes\n";
-        }
-        else
+        if (has_is_complete<stack_type>::value)
         {
             max_block_size_desc =
             "Return the maximum amount of data decoded in bytes.\n\n"
             "This is calculated by multiplying the maximum number of symbols "
             "decoded by the maximum size of a symbol.\n\n"
             "\t:returns: The maximum amount of data decoded in bytes\n";
+        }
+        else
+        {
+            max_block_size_desc =
+            "Return the maximum amount of data encoded in bytes.\n\n"
+            "This is calculated by multiplying the maximum number of symbols "
+            "encoded by the maximum size of a symbol.\n\n"
+            "\t:returns: The maximum amount of data encoded in bytes\n";
         }
 
         factory.def("max_block_size", &factory_type::max_block_size,

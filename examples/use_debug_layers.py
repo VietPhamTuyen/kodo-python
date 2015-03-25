@@ -57,7 +57,7 @@ def main():
     while not decoder.is_complete():
 
         # Encode a packet into the payload buffer
-        packet = encoder.encode()
+        packet = encoder.write_payload()
 
         # Here we "simulate" a packet loss of approximately 50%
         # by dropping half of the encoded packets.
@@ -70,7 +70,7 @@ def main():
             continue
 
         # Pass that packet to the decoder
-        decoder.decode(packet)
+        decoder.read_payload(packet)
 
     # The decoder is complete, now copy the symbols from the decoder
     data_out = decoder.copy_symbols()

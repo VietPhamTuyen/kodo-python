@@ -71,17 +71,17 @@ def main():
     while not decoder2.is_complete():
 
         # Encode a packet into the payload buffer
-        packet = encoder.encode()
+        packet = encoder.write_payload()
 
         # Pass that packet to decoder1
-        decoder1.decode(packet)
+        decoder1.read_payload(packet)
 
         # Now produce a new recoded packet from the current
         # decoding buffer, and place it into the payload buffer
-        packet = decoder1.recode()
+        packet = decoder1.write_payload()
 
         # Pass the recoded packet to decoder2
-        decoder2.decode(packet)
+        decoder2.read_payload(packet)
 
     # Both decoder1 and decoder2 should now be complete,
     # copy the symbols from the decoders

@@ -69,7 +69,7 @@ def main():
             continue
 
         # Encode a packet into the payload buffer
-        packet = encoder.encode()
+        packet = encoder.write_payload()
         print("Packet encoded")
 
         # Send the data to the decoders, here we just for fun
@@ -79,7 +79,7 @@ def main():
             continue
 
         # Packet got through - pass that packet to the decoder
-        decoder.decode(packet)
+        decoder.read_payload(packet)
         print("Decoder received packet")
 
         print("Encoder rank = {}".format(encoder.rank()))

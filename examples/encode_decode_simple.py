@@ -41,11 +41,11 @@ def main():
     packet_number = 0
     while not decoder.is_complete():
         # Generate an encoded packet
-        packet = encoder.encode()
+        packet = encoder.write_payload()
         print("Packet {} encoded!".format(packet_number))
 
         # Pass that packet to the decoder
-        decoder.decode(packet)
+        decoder.read_payload(packet)
         print("Packet {} decoded!".format(packet_number))
         packet_number += 1
         print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
