@@ -6,6 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
+* Minor: Added perpetual codes + example.
 * Major: Update kodo to version 25.
 * Major: Update fifi to version 19.
 * Major: Rename ``encode``, ``decode``, and ``recode`` to ``write_payload``,

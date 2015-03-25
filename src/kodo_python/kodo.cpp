@@ -1,4 +1,4 @@
-// Copyright Steinwurf ApS 2011-2013.
+// Copyright Steinwurf ApS 2015.
 // Distributed under the "STEINWURF RESEARCH LICENSE 1.0".
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
@@ -13,6 +13,7 @@
 
 #include <kodo/rlnc/full_vector_codes.hpp>
 #include <kodo/rlnc/on_the_fly_codes.hpp>
+#include <kodo/rlnc/perpetual_codes.hpp>
 #include <kodo/rlnc/sliding_window_decoder.hpp>
 #include <kodo/rlnc/sliding_window_encoder.hpp>
 #include <kodo/rlnc/sparse_full_vector_encoder.hpp>
@@ -123,6 +124,9 @@ namespace kodo_python
 
         create_field<rlnc::sliding_window_encoder>("SlidingWindow");
         create_field<rlnc::sliding_window_decoder>("SlidingWindow");
+
+        create_field<rlnc::perpetual_encoder>("Perpetual");
+        create_field<rlnc::perpetual_decoder>("Perpetual");
 
         create_trace<carousel_decoder_wrapper, no_field>("NoCode");
         create_trace<carousel_encoder_wrapper, no_field>("NoCode");
