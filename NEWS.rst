@@ -8,8 +8,8 @@ Latest
 ------
 * Major: Update kodo to version 25.
 * Major: Update fifi to version 19.
-* Major: Rename `encode`, `decode`, and `recode` to `write_payload`,
-  `read_payload`, and `write_payload`, respectively.
+* Major: Rename ``encode``, ``decode``, and ``recode`` to ``write_payload``,
+  ``read_payload``, and ``write_payload``, respectively.
 
 6.0.2
 -----
