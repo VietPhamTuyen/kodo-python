@@ -60,7 +60,7 @@ def main():
     encoder.set_width(6)
     print("The width was set to: {}".format(encoder.width()))
     encoder.set_width_ratio(0.2)
-    print("The width was set to: {}".format(encoder.width()))
+    print("The width ratio was set to: {}".format(encoder.width_ratio()))
 
     # Create some data to encode. In this case we make a buffer
     # with the same size as the encoder's block size (the max.
