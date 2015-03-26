@@ -33,13 +33,58 @@ def main():
     # The perpetual encoder supports three operation modes;
     #
     # 1) Random pivot mode (default)
-    # 2) Pseudo systematic
-    # 3) Pre-charging
+    #    The pivot element is drawn at random for each coding symbol
     #
-    # See src/kodo/rlnc/perpetual_generator.hpp for a description of the
-    # operation in the different modes. The operation mode is set in the
-    # following. Note that if both pre-charging and pseudo-systematic is
-    # enabled, pre-charging takes precedence.
+    #    example generated vectors (for width = 2)
+    #
+    #    0 0 1 X X 0
+    #    X X 0 0 0 1
+    #    X 0 0 0 1 X
+    #    X X 0 0 0 1
+    #    0 1 X X 0 0
+    #    0 1 X X 0 0
+    #
+    #    1 X X 0 0 0
+    #    0 0 0 1 X X
+    #         .
+    #         .
+    #
+    # 2) Pseudo systematic
+    #    Pivot elements are generated with indices 0,1,2, ... , n,
+    #    after which the generator reverts to the default random pivot
+    #
+    #    example generated vectors (for width = 2)
+    #
+    #    1 X X 0 0 0
+    #    0 1 X X 0 0
+    #    0 0 1 X X 0
+    #    0 0 0 1 X X
+    #    X 0 0 0 1 X
+    #    X X 0 0 0 1
+    #
+    #    (additional vectors generated using the random mode)
+    #
+    # 3) Pre-charging
+    #    For the first "width" symbols, the pivot index is 0. After that,
+    #    the pseudo-systematic mode is used. Finally, pivots are drawn at
+    #    random resulting in the indices 0 (width times), 1,2, ... , n
+    #
+    #    example generated vectors (for width = 2)
+    #
+    #    1 X X 0 0 0
+    #    1 X X 0 0 0
+    #    0 1 X X 0 0
+    #    0 0 1 X X 0
+    #    0 0 0 1 X X
+    #
+    #    X 0 0 0 1 X
+    #    X X 0 0 0 1
+    #
+    #    (additional vectors generated using the random mode)
+    #
+    # The operation mode is set in the following. Note that if both
+    # pre-charging and pseudo-systematic is enabled, pre-charging takes
+    # precedence.
 
     # Enable the pseudo-systematic operation mode - faster
     encoder.set_pseudo_systematic(True)
