@@ -93,19 +93,24 @@ def main():
     # encoder.set_pre_charging(True);
 
     print("Pseudo-systematic is {}\nPre-charging is {}".format(
-        encoder.pseudo_systematic(),
-        encoder.pre_charging()))
+        "on" if encoder.pseudo_systematic() else "off",
+        "on" if encoder.pre_charging() else "off"))
 
     # The width of the perpetual code can be set either as a number of symbols
     # using set_width(), or as a ratio of the generation size using
     # set_width_ratio().
     #
     # The default width is set to 10% of the generation size.
-    print("The width defaulted to: {}".format(encoder.width()))
+    print("The width ratio defaults to: {} (therefore the calculated width is "
+          "{})".format(encoder.width_ratio(), encoder.width()))
     encoder.set_width(6)
-    print("The width was set to: {}".format(encoder.width()))
+
+    print("The width was set to: {} (therefore the calculated width ratio is "
+          "{})".format(encoder.width(), encoder.width_ratio()))
+
     encoder.set_width_ratio(0.2)
-    print("The width ratio was set to: {}".format(encoder.width_ratio()))
+    print("The width ratio was set to: {} (therefore the calculated width is "
+          "{})".format(encoder.width_ratio(), encoder.width()))
 
     # Create some data to encode. In this case we make a buffer
     # with the same size as the encoder's block size (the max.
