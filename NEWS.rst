@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+7.0.0
+-----
 * Minor: Added perpetual codes + example.
 * Major: Update kodo to version 25.
 * Major: Update fifi to version 19.

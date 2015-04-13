@@ -5,7 +5,7 @@ import os
 from waflib.TaskGen import feature, after_method
 
 APPNAME = 'kodo-python'
-VERSION = '6.0.2'
+VERSION = '7.0.0'
 
 
 def recurse_helper(ctx, name):
