@@ -1,10 +1,10 @@
 kodo-python
 ===========
 
-kodo-python contains a set of high-level python bindings for the Kodo Network
+kodo-python contains a set of high-level Python bindings for the Kodo Network
 Coding C++ library. The bindings provide access to basic functionality provided
-by Kodo, such as encoding and decoding of data. The examples folder provides
-sample applications showing usage of the python API.
+by Kodo, such as encoding and decoding data. The examples folder contains
+sample applications showing the usage of the Python API.
 
 .. image:: http://buildbot.steinwurf.dk/svgstatus?project=kodo-python
     :target: http://buildbot.steinwurf.dk/stats?projects=kodo-python
@@ -28,7 +28,7 @@ License
 =======
 
 A valid license is required if you wish to use and install this library. Please
-request a license by filling out the license request** form_.
+request a license by **filling out the license request** form_.
 
 This project is available under a research- and education-friendly license,
 see the details in the `LICENSE.rst file
