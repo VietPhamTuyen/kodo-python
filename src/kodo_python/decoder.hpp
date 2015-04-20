@@ -26,7 +26,6 @@
 
 namespace kodo_python
 {
-
     template<class Decoder>
     PyObject* copy_symbols(Decoder& decoder)
     {
@@ -165,8 +164,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string kind = "Decoder";
-        std::string trace = kodo::has_trace<decoder_type>::value ? "Trace" : "";
-        std::string name = stack + kind + field + trace;
+        std::string name = stack + kind + field;
 
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
         .def("read_payload", &read_payload<decoder_type>, arg("symbol_data"),
@@ -197,5 +195,3 @@ namespace kodo_python
         (extra_decoder_methods<Coder, decoder_type>(decoder_class));
     }
 }
-
-

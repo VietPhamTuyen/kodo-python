@@ -224,8 +224,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string kind = "Encoder";
-        std::string trace = kodo::has_trace<encoder_type>::value ? "Trace" : "";
-        std::string name = stack + kind + field + trace;
+        std::string name = stack + kind + field;
 
         auto encoder_class = coder<Coder, Field, TraceTag>(name)
         .def("write_payload", &encoder_write_payload<encoder_type>,

@@ -71,7 +71,6 @@ namespace kodo_python
     template<template<class, class> class Coder, class Field>
     void create_trace(const std::string& stack)
     {
-        create<Coder, Field, kodo::disable_trace>(stack);
         create<Coder, Field, kodo::enable_trace>(stack);
     }
 

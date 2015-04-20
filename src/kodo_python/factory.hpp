@@ -30,8 +30,7 @@ namespace kodo_python
         std::string coder =
             has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
         std::string kind = coder + std::string("Factory");
-        std::string trace = kodo::has_trace<stack_type>::value ? "Trace" : "";
-        std::string name = stack + kind + field + trace;
+        std::string name = stack + kind + field;
 
         auto factory = class_<factory_type, boost::noncopyable>(
             name.c_str(),

@@ -36,12 +36,12 @@ def main():
 
         # In the following we will make an encoder/decoder factory.
         # The factories are used to build actual encoders/decoders
-        encoder_factory = kodo.FullVectorEncoderFactoryBinary8Trace(
+        encoder_factory = kodo.FullVectorEncoderFactoryBinary8(
             max_symbols=symbols,
             max_symbol_size=symbol_size)
         encoder = encoder_factory.build()
 
-        decoder_factory = kodo.FullVectorDecoderFactoryBinary8Trace(
+        decoder_factory = kodo.FullVectorDecoderFactoryBinary8(
             max_symbols=symbols,
             max_symbol_size=symbol_size)
         decoder = decoder_factory.build()
