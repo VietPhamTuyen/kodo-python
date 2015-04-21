@@ -40,19 +40,18 @@ def main():
     data_in = os.urandom(encoder.block_size())
 
     # Setup tracing
-    if 'trace' in dir(encoder):
-        # Enable the default trace function of the encoder (writes to stdout)
-        encoder.trace()
 
-    if 'trace' in dir(decoder):
-        # Define a custom trace function for the decoder which filters the
-        # trace message based on their zones
-        def callback_function(zone, message):
-            if zone in ["decoder_state", "input_symbol_coefficients"]:
-                print("{}:".format(zone))
-                print(message)
+    # Enable the default trace function of the encoder (writes to stdout)
+    encoder.trace()
 
-        decoder.trace(callback_function)
+    # Define a custom trace function for the decoder which filters the
+    # trace message based on their zones
+    def callback_function(zone, message):
+        if zone in ["decoder_state", "input_symbol_coefficients"]:
+            print("{}:".format(zone))
+            print(message)
+
+    decoder.trace(callback_function)
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it
