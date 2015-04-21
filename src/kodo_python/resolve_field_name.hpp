@@ -15,45 +15,50 @@
 
 namespace kodo_python
 {
-    template<class Field>
-    static std::string resolve_field_name();
-
-    class no_field
-    { };
-
-    template<>
-    static std::string resolve_field_name<no_field>()
+    // Put this function in an anonymous namespace to avoid the violation of
+    // the ODR (one-definition-rule) in other translation units
+    namespace
     {
-        return "";
-    }
+        template<class Field>
+        std::string resolve_field_name();
 
-    template<>
-    static std::string resolve_field_name<fifi::binary>()
-    {
-        return "Binary";
-    }
+        class no_field
+        { };
 
-    template<>
-    static std::string resolve_field_name<fifi::binary4>()
-    {
-        return "Binary4";
-    }
+        template<>
+        std::string resolve_field_name<no_field>()
+        {
+            return "";
+        }
 
-    template<>
-    static std::string resolve_field_name<fifi::binary8>()
-    {
-        return "Binary8";
-    }
+        template<>
+        std::string resolve_field_name<fifi::binary>()
+        {
+            return "Binary";
+        }
 
-    template<>
-    static std::string resolve_field_name<fifi::binary16>()
-    {
-        return "Binary16";
-    }
+        template<>
+        std::string resolve_field_name<fifi::binary4>()
+        {
+            return "Binary4";
+        }
 
-    template<>
-    static std::string resolve_field_name<fifi::prime2325>()
-    {
-        return "Prime2325";
+        template<>
+        std::string resolve_field_name<fifi::binary8>()
+        {
+            return "Binary8";
+        }
+
+        template<>
+        std::string resolve_field_name<fifi::binary16>()
+        {
+            return "Binary16";
+        }
+
+        template<>
+        std::string resolve_field_name<fifi::prime2325>()
+        {
+            return "Prime2325";
+        }
     }
 }
