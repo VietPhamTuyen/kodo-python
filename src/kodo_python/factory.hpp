@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <boost/python/args.hpp>
-
-#include "has_is_complete.hpp"
-#include <kodo/has_trace.hpp>
-
 #include <string>
 
+#include <boost/python/args.hpp>
+
+#include <kodo/has_trace.hpp>
+
+#include "has_is_complete.hpp"
 #include "resolve_field_name.hpp"
 
 namespace kodo_python

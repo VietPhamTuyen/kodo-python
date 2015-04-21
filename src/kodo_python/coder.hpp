@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <string>
+
+#include <Python.h>
 #include <boost/python/args.hpp>
 
 #include <kodo/trace.hpp>
@@ -12,9 +15,6 @@
 #include <kodo/has_rank.hpp>
 
 #include "has_is_symbol_pivot.hpp"
-
-#include <string>
-#include <Python.h>
 
 namespace kodo_python
 {

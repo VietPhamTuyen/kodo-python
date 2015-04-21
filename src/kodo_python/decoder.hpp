@@ -5,9 +5,12 @@
 
 #pragma once
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include <Python.h>
 #include <bytesobject.h>
-
 #include <boost/python/args.hpp>
 
 #include <kodo/has_partial_decoding_tracker.hpp>
@@ -19,10 +22,6 @@
 
 #include "coder.hpp"
 #include "resolve_field_name.hpp"
-
-#include <algorithm>
-#include <string>
-#include <vector>
 
 namespace kodo_python
 {
@@ -136,23 +135,6 @@ namespace kodo_python
         extra_decoder_methods(DecoderClass& decoder_class)
         {
             (void) decoder_class;
-        }
-    };
-
-    template<class Type>
-    struct extra_decoder_methods<kodo::rlnc::sliding_window_decoder, Type>
-    {
-        template<class DecoderClass>
-        extra_decoder_methods(DecoderClass& decoder_class)
-        {
-            decoder_class
-            .def("feedback_size", &Type::feedback_size,
-                "Return the required feedback buffer size in bytes.\n\n"
-                "\t:returns: The required feedback buffer size in bytes.\n"
-            )
-            .def("write_feedback", &write_feedback<Type>,
-                "Return a buffer containing the feedback.\n\n"
-                "\t:returns: A buffer containing the feedback.\n");
         }
     };
 
