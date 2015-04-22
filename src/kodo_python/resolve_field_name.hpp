@@ -6,6 +6,7 @@
 #pragma once
 
 #include <string>
+#include <type_traits>
 
 #include <fifi/binary.hpp>
 #include <fifi/binary4.hpp>
@@ -15,48 +16,33 @@
 
 namespace kodo_python
 {
-    // Put this function in an anonymous namespace to avoid the violation of
-    // the ODR (one-definition-rule) in other translation units
-    namespace
+    class no_field
+    { };
+
+    template<class Field>
+    std::string resolve_field_name()
     {
-        template<class Field>
-        std::string resolve_field_name();
-
-        class no_field
-        { };
-
-        template<>
-        std::string resolve_field_name<no_field>()
+        if (std::is_same<Field, no_field>::value)
         {
             return "";
         }
-
-        template<>
-        std::string resolve_field_name<fifi::binary>()
+        else if (std::is_same<Field, fifi::binary>::value)
         {
             return "Binary";
         }
-
-        template<>
-        std::string resolve_field_name<fifi::binary4>()
+        else if (std::is_same<Field, fifi::binary4>::value)
         {
             return "Binary4";
         }
-
-        template<>
-        std::string resolve_field_name<fifi::binary8>()
+        else if (std::is_same<Field, fifi::binary8>::value)
         {
             return "Binary8";
         }
-
-        template<>
-        std::string resolve_field_name<fifi::binary16>()
+        else if (std::is_same<Field, fifi::binary16>::value)
         {
             return "Binary16";
         }
-
-        template<>
-        std::string resolve_field_name<fifi::prime2325>()
+        else if (std::is_same<Field, fifi::prime2325>::value)
         {
             return "Prime2325";
         }
