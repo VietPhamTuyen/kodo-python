@@ -7,6 +7,7 @@
 
 #include <string>
 
+#include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
 #include <kodo/has_trace.hpp>

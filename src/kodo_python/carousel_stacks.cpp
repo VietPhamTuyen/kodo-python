@@ -41,9 +41,9 @@ namespace kodo_python
 
     void create_carousel_stacks()
     {
-        using namespace kodo;
-
-        create_trace<carousel_decoder_wrapper, no_field>("NoCode");
-        create_trace<carousel_encoder_wrapper, no_field>("NoCode");
+        create_factory_and_encoder<carousel_encoder_wrapper,
+                                   no_field>("NoCode");
+        create_factory_and_decoder<carousel_decoder_wrapper,
+                                   no_field>("NoCode");
     }
 }

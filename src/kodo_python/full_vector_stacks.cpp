@@ -37,9 +37,9 @@ namespace kodo_python
     {
         using namespace kodo::rlnc;
 
-        create_field<full_vector_encoder>("FullVector");
-        create_field<full_vector_decoder>("FullVector");
+        create_encoder<full_vector_encoder>("FullVector");
+        create_decoder<full_vector_decoder>("FullVector");
 
-        create_field<sparse_full_vector_encoder>("SparseFullVector");
+        create_encoder<sparse_full_vector_encoder>("SparseFullVector");
     }
 }

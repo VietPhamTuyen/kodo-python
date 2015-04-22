@@ -48,7 +48,7 @@ namespace kodo_python
     {
         using namespace kodo::rlnc;
 
-        create_field<sliding_window_encoder>("SlidingWindow");
-        create_field<sliding_window_decoder>("SlidingWindow");
+        create_encoder<sliding_window_encoder>("SlidingWindow");
+        create_decoder<sliding_window_decoder>("SlidingWindow");
     }
 }

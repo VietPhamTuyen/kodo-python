@@ -13,7 +13,7 @@ namespace kodo_python
     {
         using namespace kodo::rlnc;
 
-        create_field<on_the_fly_encoder>("OnTheFly");
-        create_field<on_the_fly_decoder>("OnTheFly");
+        create_encoder<on_the_fly_encoder>("OnTheFly");
+        create_decoder<on_the_fly_decoder>("OnTheFly");
     }
 }

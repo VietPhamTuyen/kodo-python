@@ -64,7 +64,7 @@ namespace kodo_python
     {
         using namespace kodo::rlnc;
 
-        create_field<perpetual_encoder>("Perpetual");
-        create_field<perpetual_decoder>("Perpetual");
+        create_encoder<perpetual_encoder>("Perpetual");
+        create_decoder<perpetual_decoder>("Perpetual");
     }
 }
