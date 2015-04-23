@@ -117,7 +117,7 @@ def main():
     parser.add_argument(
         '--field',
         type=str,
-        help='The field to use',
+        help='The finite field to use',
         choices=kodo.fields,
         default=kodo.binary8)
 
@@ -142,6 +142,9 @@ def main():
 
     if args.dry_run:
         sys.exit(0)
+
+    print("Algorithm: {} / Finite field: {}".format(
+        args.algorithm, args.field))
 
     print("Symbols: {} / Symbol_size: {}".format(
         args.symbols, args.symbol_size))
