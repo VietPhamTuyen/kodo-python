@@ -38,11 +38,11 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
     # Generate an ample number of coded symbols (considering kodo_binary)
     payload_count = 2 * symbols
 
-    # Assign the data buffer to the encoder
-    encoder.set_symbols(data_in)
-
     # Start the encoding timer
     start = time.clock()
+
+    # Copy the input data to the encoder
+    encoder.set_symbols(data_in)
 
     # Generate coded symbols with the encoder
     for i in range(payload_count):
@@ -66,6 +66,9 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
         if decoder.is_complete():
             break
         decoder.read_payload(payloads[i])
+
+    # Copy the symbols from the decoder
+    data_out = decoder.copy_symbols()
 
     # Stop the decoding timer
     stop = time.clock()
