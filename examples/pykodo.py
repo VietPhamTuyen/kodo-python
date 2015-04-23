@@ -23,11 +23,17 @@ Usage:
     symbol_size = 150
 
     encoder_factory = kodo.encoder_factory(
-        algorithm, field, symbols, symbol_size)
+        algorithm=algorithm,
+        field=field,
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
     encoder = encoder_factory.build()
 
     decoder_factory = kodo.decoder_factory(
-        algorithm, field, symbols, symbol_size)
+        algorithm=algorithm,
+        field=field,
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
     decoder = decoder_factory.build()
 
 """

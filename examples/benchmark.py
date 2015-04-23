@@ -3,70 +3,9 @@
 
 import time
 import os
+import sys
 import argparse
 import pykodo as kodo
-import sys
-
-
-def main():
-    parser = argparse.ArgumentParser(description=run_coding_test.__doc__)
-
-    parser.set_defaults(algorithm=kodo.full_vector)
-    subparsers = parser.add_subparsers(
-        dest='algorithm',
-        help='The algorithm to use')
-
-    for algorithm in kodo.algorithms:
-        subparser = subparsers.add_parser(
-            algorithm, help='Use the {} algorithm.'.format(
-                algorithm.replace("_", " ")))
-
-        if algorithm != kodo.no_code:
-            subparser.add_argument(
-                'field',
-                type=str,
-                nargs='?',
-                help='The field to use',
-                choices=kodo.fields,
-                default=kodo.binary8)
-        else:
-            subparser.set_defaults(field=None)
-
-        subparser.add_argument(
-            'symbols',
-            type=int,
-            nargs='?',
-            help='The number of symbols',
-            default=8)
-
-        subparser.add_argument(
-            'symbol_size',
-            type=int,
-            nargs='?',
-            help='The size of each symbol',
-            default=160)
-
-    args = parser.parse_args(sys.argv[1:] or [kodo.full_vector])
-
-    if 'algorithm' not in dir(args):
-        setattr(args, 'algorithm', kodo.full_vector)
-
-    print("Symbols: {} / Symbol_size: {}".format(
-        args.symbols, args.symbol_size))
-
-    decoding_success, encoding_rate, decoding_rate = run_coding_test(
-        args.algorithm,
-        args.field,
-        args.symbols,
-        args.symbol_size)
-
-    print("Encoding rate: {} MB/s".format(encoding_rate))
-    print("Decoding rate: {} MB/s".format(decoding_rate))
-
-    if decoding_success:
-        print("Data decoded correctly.")
-    else:
-        print("Decoding failed.")
 
 
 def run_coding_test(algorithm, field, symbols, symbol_size):
@@ -91,8 +30,8 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
 
     # Stop the setup timer
     stop = time.clock()
-
-    setup_time = stop - start
+    # Calculate interval in microseconds
+    setup_time = 1e6 * (stop - start)
 
     # We measure pure coding, so we always turn off the systematic mode
     if 'set_systematic_off' in dir(encoder):
@@ -120,8 +59,8 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
 
     # Stop the encoding timer
     stop = time.clock()
-
-    encoding_time = stop - start
+    # Calculate interval in microseconds
+    encoding_time = 1e6 * (stop - start)
 
     # Calculate the encoding rate in megabytes / seconds
     encoded_bytes = payload_count * symbol_size
@@ -141,8 +80,8 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
 
     # Stop the decoding timer
     stop = time.clock()
-
-    decoding_time = stop - start
+    # Calculate interval in microseconds
+    decoding_time = 1e6 * (stop - start)
 
     # Calculate the decoding rate in megabytes / seconds
     decoded_bytes = symbols * symbol_size
@@ -158,6 +97,68 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
     print("Decoding time: {} microsec".format(decoding_time))
 
     return (success, encoding_rate, decoding_rate)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=run_coding_test.__doc__)
+
+    # Disable the algorithms that do not work with the benchmark code
+    algorithms = kodo.algorithms
+    algorithms.remove(kodo.no_code)
+    algorithms.remove(kodo.sparse_full_vector)
+
+    parser.add_argument(
+        '--algorithm',
+        type=str,
+        help='The algorithm to use',
+        choices=algorithms,
+        default=kodo.full_vector)
+
+    parser.add_argument(
+        '--field',
+        type=str,
+        help='The field to use',
+        choices=kodo.fields,
+        default=kodo.binary8)
+
+    parser.add_argument(
+        '--symbols',
+        type=int,
+        help='The number of symbols',
+        default=16)
+
+    parser.add_argument(
+        '--symbol_size',
+        type=int,
+        help='The size of each symbol',
+        default=1600)
+
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Run without the actual benchmark.')
+
+    args = parser.parse_args()
+
+    if args.dry_run:
+        sys.exit(0)
+
+    print("Symbols: {} / Symbol_size: {}".format(
+        args.symbols, args.symbol_size))
+
+    decoding_success, encoding_rate, decoding_rate = run_coding_test(
+        args.algorithm,
+        args.field,
+        args.symbols,
+        args.symbol_size)
+
+    print("Encoding rate: {} MB/s".format(encoding_rate))
+    print("Decoding rate: {} MB/s".format(decoding_rate))
+
+    if decoding_success:
+        print("Data decoded correctly.")
+    else:
+        print("Decoding failed.")
 
 
 if __name__ == "__main__":
