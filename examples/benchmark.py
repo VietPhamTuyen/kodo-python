@@ -5,32 +5,51 @@ import time
 import os
 import argparse
 import pykodo as kodo
+import sys
 
 
 def main():
     parser = argparse.ArgumentParser(description=run_coding_test.__doc__)
-    parser.add_argument(
-        'algorithm',
-        type=str,
-        help='The algorithm to use',
-        choices=kodo.algorithms)
-    parser.add_argument(
-        'field',
-        type=str,
-        help='The field to use',
-        choices=kodo.fields)
 
-    parser.add_argument(
-        'symbols',
-        type=int,
-        help='The number of symbols')
+    parser.set_defaults(algorithm=kodo.full_vector)
+    subparsers = parser.add_subparsers(
+        dest='algorithm',
+        help='The algorithm to use')
 
-    parser.add_argument(
-        'symbol_size',
-        type=int,
-        help='The size of each symbol')
+    for algorithm in kodo.algorithms:
+        subparser = subparsers.add_parser(
+            algorithm, help='Use the {} algorithm.'.format(
+                algorithm.replace("_", " ")))
 
-    args = parser.parse_args()
+        if algorithm != kodo.no_code:
+            subparser.add_argument(
+                'field',
+                type=str,
+                nargs='?',
+                help='The field to use',
+                choices=kodo.fields,
+                default=kodo.binary8)
+        else:
+            subparser.set_defaults(field=None)
+
+        subparser.add_argument(
+            'symbols',
+            type=int,
+            nargs='?',
+            help='The number of symbols',
+            default=8)
+
+        subparser.add_argument(
+            'symbol_size',
+            type=int,
+            nargs='?',
+            help='The size of each symbol',
+            default=160)
+
+    args = parser.parse_args(sys.argv[1:] or [kodo.full_vector])
+
+    if 'algorithm' not in dir(args):
+        setattr(args, 'algorithm', kodo.full_vector)
 
     print("Symbols: {} / Symbol_size: {}".format(
         args.symbols, args.symbol_size))
