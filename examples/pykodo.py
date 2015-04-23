@@ -128,8 +128,32 @@ def __create_factory(algorithm, coder_type, max_symbols,
 
 
 def decoder_factory(**kwargs):
+    """
+    Return a decoder factory matching the given arguments.
+
+    Note: only keyword arguments are allowed for this function.
+
+        :param algorithm: The algorithm to use (required).
+        :param field: The field to use (required for certain stacks).
+        :param max_symbols: The maximum number of symbols for the factory's
+                            decoders.
+        :param max_symbol_size: The maximum size of the symbols for the
+                                factory's decoders.
+    """
     return __create_factory(coder_type="decoder", **kwargs)
 
 
 def encoder_factory(**kwargs):
+    """
+    Return an encoder factory matching the given arguments.
+
+    Note: only keyword arguments are allowed for this function.
+
+        :param algorithm: The algorithm to use (required).
+        :param field: The field to use (required for certain stacks).
+        :param max_symbols: The maximum number of symbols for the factory's
+                            encoders.
+        :param max_symbol_size: The maximum size of the symbols for the
+                                factory's encoders.
+    """
     return __create_factory(coder_type="encoder", **kwargs)

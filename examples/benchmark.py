@@ -2,20 +2,70 @@
 # encoding: utf-8
 
 import time
-import sys
+import os
+import argparse
 import pykodo as kodo
 
+
+def main():
+    parser = argparse.ArgumentParser(description=run_coding_test.__doc__)
+    parser.add_argument(
+        'algorithm',
+        type=str,
+        help='The algorithm to use',
+        choices=kodo.algorithms)
+    parser.add_argument(
+        'field',
+        type=str,
+        help='The field to use',
+        choices=kodo.fields)
+
+    parser.add_argument(
+        'symbols',
+        type=int,
+        help='The number of symbols')
+
+    parser.add_argument(
+        'symbol_size',
+        type=int,
+        help='The size of each symbol')
+
+    args = parser.parse_args()
+
+    print("Symbols: {} / Symbol_size: {}".format(
+        args.symbols, args.symbol_size))
+
+    decoding_success, encoding_rate, decoding_rate = run_coding_test(
+        args.algorithm,
+        args.field,
+        args.symbols,
+        args.symbol_size)
+
+    print("Encoding rate: {} MB/s".format(encoding_rate))
+    print("Decoding rate: {} MB/s".format(decoding_rate))
+
+    if decoding_success:
+        print("Data decoded correctly.")
+    else:
+        print("Decoding failed.")
+
+
 def run_coding_test(algorithm, field, symbols, symbol_size):
-    """Runs a timed encoding and decoding benchmark."""
+    """Run a timed encoding and decoding benchmark."""
 
     # First, we measure the combined setup time for the encoder and decoder
     start = time.clock()
-
     encoder_factory = kodo.encoder_factory(
-        algorithm, field, symbols, symbol_size)
+        algorithm=algorithm,
+        field=field,
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
 
     decoder_factory = kodo.decoder_factory(
-        algorithm, field, symbols, symbol_size)
+        algorithm=algorithm,
+        field=field,
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
 
     encoder = encoder_factory.build()
     decoder = decoder_factory.build()
@@ -92,37 +142,4 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
 
 
 if __name__ == "__main__":
-
-    argv = sys.argv
-
-    if len(argv) != 5:
-        print("Usage: {} <algorithm> <field> <symbols> <symbol_size>"
-              .format(argv[0]))
-        sys.exit(0)
-
-    algorithm = argv[1]
-    if hasattr(kodo, algorithm):
-        algorithm = getattr(kodo, algorithm)
-    else:
-        sys.exit("Invalid algorithm: {0}".format(algorithm))
-
-    field = argv[2]
-    if hasattr(kodo, field):
-        field = getattr(kodo, field)
-    else:
-        sys.exit("Invalid finite field: {0}".format(field))
-
-    symbols = argv[3]
-    symbol_size = argv[4]
-
-    decoding_success, encoding_rate, decoding_rate = \
-        run_coding_test(algorithm, field, symbols, symbol_size)
-
-    print("Symbols: {} / Symbol_size: {}".format(symbols, symbol_size))
-    print("Encoding rate: {} MB/s".format(encoding_rate))
-    print("Decoding rate: {} MB/s".format(decoding_rate))
-
-    if decoding_success:
-        print("Data decoded correctly.")
-    else:
-        print("Decoding failed.")
+    main()
