@@ -103,7 +103,7 @@ def main():
     parser = argparse.ArgumentParser(description=run_coding_test.__doc__)
 
     # Disable the algorithms that do not work with the benchmark code
-    algorithms = kodo.algorithms
+    algorithms = list(kodo.algorithms)
     algorithms.remove(kodo.no_code)
     algorithms.remove(kodo.sparse_full_vector)
 
@@ -146,7 +146,7 @@ def main():
     print("Algorithm: {} / Finite field: {}".format(
         args.algorithm, args.field))
 
-    print("Symbols: {} / Symbol_size: {}".format(
+    print("Symbols: {} / Symbol size: {}".format(
         args.symbols, args.symbol_size))
 
     decoding_success, encoding_rate, decoding_rate = run_coding_test(
