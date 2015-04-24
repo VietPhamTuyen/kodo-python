@@ -6,6 +6,8 @@
 #pragma once
 
 #include <string>
+#include <type_traits>
+
 #include <fifi/binary.hpp>
 #include <fifi/binary4.hpp>
 #include <fifi/binary8.hpp>
@@ -14,45 +16,35 @@
 
 namespace kodo_python
 {
-    template<class Field>
-    std::string resolve_field_name();
-
     class no_field
     { };
 
-    template<>
-    std::string resolve_field_name<no_field>()
+    template<class Field>
+    std::string resolve_field_name()
     {
-        return "";
-    }
-
-    template<>
-    std::string resolve_field_name<fifi::binary>()
-    {
-        return "Binary";
-    }
-
-    template<>
-    std::string resolve_field_name<fifi::binary4>()
-    {
-        return "Binary4";
-    }
-
-    template<>
-    std::string resolve_field_name<fifi::binary8>()
-    {
-        return "Binary8";
-    }
-
-    template<>
-    std::string resolve_field_name<fifi::binary16>()
-    {
-        return "Binary16";
-    }
-
-    template<>
-    std::string resolve_field_name<fifi::prime2325>()
-    {
-        return "Prime2325";
+        if (std::is_same<Field, no_field>::value)
+        {
+            return "";
+        }
+        else if (std::is_same<Field, fifi::binary>::value)
+        {
+            return "Binary";
+        }
+        else if (std::is_same<Field, fifi::binary4>::value)
+        {
+            return "Binary4";
+        }
+        else if (std::is_same<Field, fifi::binary8>::value)
+        {
+            return "Binary8";
+        }
+        else if (std::is_same<Field, fifi::binary16>::value)
+        {
+            return "Binary16";
+        }
+        else if (std::is_same<Field, fifi::prime2325>::value)
+        {
+            return "Prime2325";
+        }
     }
 }

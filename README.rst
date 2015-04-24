@@ -37,50 +37,42 @@ see the details in the `LICENSE.rst file
 .. _form: http://steinwurf.com/license/
 
 
-Installation
+Requirements
 ============
-We provide a pip package for the easy installation of the kodo-python library.
 
-To install this you'll need python and pip installed:
+First of all, follow `this Getting Started guide
+<http://kodo-docs.steinwurf.com/en/latest/getting_started.html>`_ to install
+the basic tools required for the compilation (C++11 compiler, Git, Python).
 
-- To get python `go here <https://www.python.org/downloads/>`_.
-- To install pip `follow this guide <https://pip.pypa.io/en/latest/installing.html>`_.
-
-You will need a set of tools and packages to build the library.
-
-On all platforms, you will need a recent C++11 compiler.
-The compilers used by Steinwurf are listed on the
+The compilers used by Steinwurf are listed at the bottom of the
 `buildbot page <http://buildbot.steinwurf.com>`_.
 
 Linux
------
+.....
+
 These steps may not work with your specific Linux distribution, but they may
 guide you in the right direction.
 
 First, acquire the required packages from your package management system::
 
   sudo apt-get update
-  sudo apt-get install python git build-essential libpython-dev
+  sudo apt-get install python build-essential libpython-dev
 
 If you are using Python 3, you'll need to install ``libpython3-dev`` instead.
 
-When you are ready to install the package, you can simply type::
-
-  sudo pip install kodo
-
 MacOSX
-------
-Follow `this guide
-<https://help.github.com/articles/set-up-git#setting-up-git>`_ to install git.
+......
 
-Install the latest XCode and Command-line Tools from the Mac Store.
+Install the latest XCode and Command Line Tools from the Mac Store.
 
-When you are ready to install the package, you can simply type::
-
-  sudo pip install kodo
+Python 2.7 is pre-installed on OSX, and the required Python headers should
+also be available. If you are having trouble with the pre-installed Python
+version, then you can install a more recent Python version with MacPorts or
+Homebrew.
 
 Windows
--------
+.......
+
 Install Python 2.7 (32-bit) and Visual Studio Express 2013 for Windows Desktop.
 Then set the ``VS90COMNTOOLS`` environment variable to::
 
@@ -88,22 +80,14 @@ Then set the ``VS90COMNTOOLS`` environment variable to::
 
 so that Python distutils can detect your new compiler.
 
-To enable the use of pip from the command line, ensure that the ``Scripts``
-subdirectory of your Python installation is available on the system ``PATH``.
-(This is not done automatically.)
-
-When you are ready to install the package, you can simply type::
-
-  pip install kodo
 
 Building From Source
 ====================
-You can also build the bindings from source, if you don't want to use pip.
 
-Before doing anything, please install the requirements specified in
-the previous section (you can ignore the parts about pip).
+It is recommended to build the Python bindings from source (the other option
+is installing with pip as described below).
 
-After that you can clone the project::
+First, clone the project::
 
   git clone git@github.com:steinwurf/kodo-python.git
 
@@ -113,15 +97,84 @@ Configure and build the project::
   python waf configure
   python waf build
 
-Now the project is built and you should be able to find the resulting
-``kodo.so`` or ``kodo.pyd`` file here (the actual path and extension is
-dependent on your OS and Python version)::
+After building the project, you should find the resulting ``kodo.so``,
+``kodo.dylib`` or ``kodo.pyd`` file here (the actual path and extension
+depend on your OS)::
 
   build/linux/src/kodo_python/kodo.so
   build/darwin/src/kodo_python/kodo.dylib
   build/win32/src/kodo_python/kodo.pyd
 
-You can add this path to your PYTHONPATH and import the module in your Python
-script::
+You can copy this file to the same folder as your Python scripts, or you
+can copy it to your PYTHONPATH (so that you can import it from anywhere).
+
+Then you can import the module in your Python script::
 
   >>> import kodo
+
+Compilation Issues
+..................
+
+The compilation process might take a long time on certain Linux systems if
+less than 4 GB RAM is available. The g++ optimizer might consume a lot of RAM
+during the compilation, so if you see that all your RAM is used up, then
+it is recommended to constrain the number of parallel jobs to one during the
+build step::
+
+    python waf build -j 1
+
+With this change, a fast compilation is possible with 2 GB RAM.
+
+This issue is specific to g++ (which is the default compiler on Linux), but
+the RAM usage and the compilation time could be much better with clang.
+The code produced by clang is also fast.
+
+If the compilation does not work with g++, then you can install clang like
+this (on Ubuntu and Debian)::
+
+    sudo apt-get install clang-3.5
+
+Then you should configure the project with the appropriate mkspec. Use the
+following command on 32-bit Linux::
+
+    python waf configure --options=cxx_mkspec=cxx_clang35_x86
+
+Or use this one on 64-bit Linux::
+
+    python waf configure --options=cxx_mkspec=cxx_clang35_x64
+
+
+Pip Package
+===========
+
+We also provide a pip package for the installation of kodo-python with a
+single command.
+
+If you don't have pip installed, then you can
+`follow this guide <https://pip.pypa.io/en/latest/installing.html>`_.
+
+Of course, you also need to install the required tools specified above.
+
+Note that the pip package might not contain the latest version of kodo-python,
+and it might not work on all systems. In fact, pip will also build the project
+from source, download its dependencies, configure the compiler, but these
+details are largely hidden from you. Debugging pip errors could be difficult,
+so please build the project from source if pip does not work for you.
+
+Linux/MacOSX
+............
+
+Install the package with this command::
+
+  sudo pip install kodo
+
+Windows
+.......
+
+To enable the use of pip from the command line, ensure that the ``Scripts``
+subdirectory of your Python installation is available on the system ``PATH``.
+(This is not done automatically.)
+
+Install the package with this command::
+
+  pip install kodo

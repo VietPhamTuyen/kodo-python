@@ -46,7 +46,7 @@ def main():
     # Just for fun - fill the input data with random data
     data_in = os.urandom(encoder.block_size())
 
-    # Lets split the data into symbols and feed the encoder one symbol at a
+    # Let's split the data into symbols and feed the encoder one symbol at a
     # time
     symbol_storage = [
         data_in[i:i+symbol_size] for i in range(0, len(data_in), symbol_size)

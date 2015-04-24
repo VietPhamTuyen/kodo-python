@@ -23,11 +23,17 @@ Usage:
     symbol_size = 150
 
     encoder_factory = kodo.encoder_factory(
-        algorithm, field, symbols, symbol_size)
+        algorithm=algorithm,
+        field=field,
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
     encoder = encoder_factory.build()
 
     decoder_factory = kodo.decoder_factory(
-        algorithm, field, symbols, symbol_size)
+        algorithm=algorithm,
+        field=field,
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
     decoder = decoder_factory.build()
 
 """
@@ -77,11 +83,6 @@ def __get_stacks():
 
         stack_pieces = split_upper_case(stack)
 
-        trace = 'no_trace'
-        if stack_pieces[-1] == 'Trace':
-            trace = 'trace'
-            stack_pieces.pop()
-
         # NoCode does not have a field
         field = None
         if "".join(stack_pieces[:2]) != "NoCode":
@@ -103,7 +104,7 @@ def __get_stacks():
         if field is not None:
             location += [field]
 
-        location += [coder_type, trace]
+        location += [coder_type]
 
         nested_add(
             kodo_stacks,
@@ -121,24 +122,44 @@ for algorithm in algorithms:
 for field in fields:
     globals()[field] = field
 
-globals()['trace'] = True
-globals()['no_trace'] = False
 
-
-def __create_factory(algorithm, coder_type, trace, max_symbols,
+def __create_factory(algorithm, coder_type, max_symbols,
                      max_symbol_size, field=None):
     location = [algorithm]
     if field is not None:
         location += [field]
-    trace = 'trace' if trace else 'no_trace'
-    location += [coder_type, trace]
+    location += [coder_type]
 
     return nested_get(__kodo_stacks, location)(max_symbols, max_symbol_size)
 
 
-def decoder_factory(trace=False, **kwargs):
-    return __create_factory(coder_type="decoder", trace=trace, **kwargs)
+def decoder_factory(**kwargs):
+    """
+    Return a decoder factory matching the given arguments.
+
+    Note: only keyword arguments are allowed for this function.
+
+        :param algorithm: The algorithm to use (required).
+        :param field: The field to use (required for certain stacks).
+        :param max_symbols: The maximum number of symbols for the factory's
+                            decoders.
+        :param max_symbol_size: The maximum size of the symbols for the
+                                factory's decoders.
+    """
+    return __create_factory(coder_type="decoder", **kwargs)
 
 
-def encoder_factory(trace=False, **kwargs):
-    return __create_factory(coder_type="encoder", trace=trace, **kwargs)
+def encoder_factory(**kwargs):
+    """
+    Return an encoder factory matching the given arguments.
+
+    Note: only keyword arguments are allowed for this function.
+
+        :param algorithm: The algorithm to use (required).
+        :param field: The field to use (required for certain stacks).
+        :param max_symbols: The maximum number of symbols for the factory's
+                            encoders.
+        :param max_symbol_size: The maximum size of the symbols for the
+                                factory's encoders.
+    """
+    return __create_factory(coder_type="encoder", **kwargs)

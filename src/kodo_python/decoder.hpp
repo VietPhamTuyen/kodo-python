@@ -5,9 +5,13 @@
 
 #pragma once
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include <Python.h>
 #include <bytesobject.h>
-
+#include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
 #include <kodo/has_partial_decoding_tracker.hpp>
@@ -20,13 +24,8 @@
 #include "coder.hpp"
 #include "resolve_field_name.hpp"
 
-#include <algorithm>
-#include <string>
-#include <vector>
-
 namespace kodo_python
 {
-
     template<class Decoder>
     PyObject* copy_symbols(Decoder& decoder)
     {
@@ -140,23 +139,6 @@ namespace kodo_python
         }
     };
 
-    template<class Type>
-    struct extra_decoder_methods<kodo::rlnc::sliding_window_decoder, Type>
-    {
-        template<class DecoderClass>
-        extra_decoder_methods(DecoderClass& decoder_class)
-        {
-            decoder_class
-            .def("feedback_size", &Type::feedback_size,
-                "Return the required feedback buffer size in bytes.\n\n"
-                "\t:returns: The required feedback buffer size in bytes.\n"
-            )
-            .def("write_feedback", &write_feedback<Type>,
-                "Return a buffer containing the feedback.\n\n"
-                "\t:returns: A buffer containing the feedback.\n");
-        }
-    };
-
     template<template<class, class> class Coder, class Field, class TraceTag>
     void decoder(const std::string& stack)
     {
@@ -165,8 +147,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string kind = "Decoder";
-        std::string trace = kodo::has_trace<decoder_type>::value ? "Trace" : "";
-        std::string name = stack + kind + field + trace;
+        std::string name = stack + kind + field;
 
         auto decoder_class = coder<Coder, Field, TraceTag>(name)
         .def("read_payload", &read_payload<decoder_type>, arg("symbol_data"),
@@ -197,5 +178,3 @@ namespace kodo_python
         (extra_decoder_methods<Coder, decoder_type>(decoder_class));
     }
 }
-
-

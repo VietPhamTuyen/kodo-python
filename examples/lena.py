@@ -66,7 +66,7 @@ def main():
     encoder = encoder_factory.build()
 
     # Create decoder factory and decoder
-    decoder_factory = kodo.FullVectorDecoderFactoryBinary8Trace(
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary8(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
     decoder = decoder_factory.build()

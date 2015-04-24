@@ -6,6 +6,15 @@ every change, see the Git log.
 
 Latest
 ------
+* Minor: Added a simple benchmark example in ``examples\benchmark.py`` to
+  measure the encoding and decoding throughput with the Python API.
+* Major: Removed the codec types where the tracing functionality was disabled.
+  Tracing is now available in all codecs, but it is not activated by default.
+  This change can significantly lower the RAM usage during the compilation.
+* Minor: Restructured the library so that different codec types are
+  instantiated in separate cpp files. The optimizer might use
+  gigabytes of RAM when instantiating a lot of codec stack variants in a
+  single cpp file. This problem is mitigated with this separation.
 * Major: Upgrade to kodo 26.
 
 7.0.0

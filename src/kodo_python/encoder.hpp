@@ -5,9 +5,12 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <Python.h>
 #include <bytesobject.h>
-
+#include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
 #include <kodo/has_trace.hpp>
@@ -16,10 +19,6 @@
 #include <kodo/set_systematic_off.hpp>
 #include <kodo/set_systematic_on.hpp>
 #include <kodo/write_feedback.hpp>
-#include <kodo/rlnc/sparse_full_vector_encoder.hpp>
-
-#include <string>
-#include <vector>
 
 #include "coder.hpp"
 #include "resolve_field_name.hpp"
@@ -48,7 +47,7 @@ namespace kodo_python
     void set_symbols(Encoder& encoder, const std::string& data)
     {
         auto storage = sak::const_storage(
-            (uint8_t*)data.c_str(), data.length());
+            (uint8_t*)data.c_str(), (uint32_t)data.length());
         encoder.set_symbols(storage);
     }
 
@@ -56,7 +55,7 @@ namespace kodo_python
     void set_symbol(Encoder& encoder, uint32_t index, const std::string& data)
     {
         auto storage = sak::const_storage(
-            (uint8_t*)data.c_str(), data.length());
+            (uint8_t*)data.c_str(), (uint32_t)data.length());
         encoder.set_symbol(index, storage);
     }
 
@@ -122,99 +121,6 @@ namespace kodo_python
         }
     };
 
-    template<class Type>
-    struct extra_encoder_methods<kodo::rlnc::sliding_window_encoder, Type>
-    {
-        template<class EncoderClass>
-        extra_encoder_methods(EncoderClass& encoder_class)
-        {
-            encoder_class
-            .def("feedback_size", &Type::feedback_size,
-                "Return the required feedback buffer size in bytes.\n\n"
-                "\t:returns: The required feedback buffer size in bytes.\n"
-            )
-            .def("read_feedback", &read_feedback<Type>,
-                "Return the feedback information.\n\n"
-                "\t:returns: The feedback information.\n");
-        }
-    };
-
-
-    template<class Type>
-    struct extra_encoder_methods<kodo::rlnc::perpetual_encoder, Type>
-    {
-        template<class EncoderClass>
-        extra_encoder_methods(EncoderClass& encoder_class)
-        {
-            using boost::python::arg;
-
-            encoder_class
-            .def("pseudo_systematic", &Type::pseudo_systematic,
-                "Get the pseudo-systematic property of the generator.\n\n"
-                "\t:returns: The current setting for pseudo-systematic.\n"
-            )
-            .def("set_pseudo_systematic", &Type::set_pseudo_systematic,
-                arg("pseudo_systematic"),
-                "Set the pseudo-systematic property of the generator.\n\n"
-                "\t:param pseudo_systematic: The new setting for "
-                "pseudo-systematic\n"
-            )
-            .def("pre_charging", &Type::pre_charging,
-                "Get the pre-charging property of the generator.\n\n"
-                "\t:returns: The current setting for pseudo-systematic.\n"
-            )
-            .def("set_pre_charging", &Type::set_pre_charging,
-                arg("pre_charging"),
-                "Set the pre-charging property of the generator.\n\n"
-                "\t:param pre_charging: The current setting for pre-charging.\n"
-            )
-            .def("width", &Type::width,
-                "Get the width.\n\n"
-                "\t:returns: The width used by the generator.\n"
-            )
-            .def("set_width", &Type::set_width,
-                arg("width"),
-                "Set the number of non-zero coefficients after the pivot. "
-                "Width ratio is recalculated from this value.\n\n"
-                "\t:param width: The width.\n"
-            )
-            .def("width_ratio", &Type::width_ratio,
-                "Get the ratio that is used to calculate the width.\n\n"
-                "\t:returns: The width ratio of the generator.\n"
-            )
-            .def("set_width_ratio", &Type::set_width_ratio,
-                arg("width_ratio"),
-                "Set the ratio that is used to calculate the number of "
-                "non-zero coefficients after the pivot (i.e. the width).\n\n"
-                "\t:param width_ratio: The width ratio.\n"
-            );
-        }
-    };
-
-    template<class Type>
-    struct extra_encoder_methods<kodo::rlnc::sparse_full_vector_encoder, Type>
-    {
-        template<class EncoderClass>
-        extra_encoder_methods(EncoderClass& encoder_class)
-        {
-            using boost::python::arg;
-            encoder_class
-            .def("set_density", &Type::set_density, arg("density"),
-                "Set the density of the coefficients generated.\n\n"
-                "\t:param density: The coefficients density.\n"
-            )
-            .def("density", &Type::density,
-                "Get the density of the coefficients generated.\n\n"
-                "\t:returns: The density of the generator.\n"
-            )
-            .def("set_average_nonzero_symbols",
-                &Type::set_average_nonzero_symbols, arg("symbols"),
-                "Set the average number of nonzero symbols.\n\n"
-                "\t:param symbols: The average number of nonzero symbols.\n"
-            );
-        }
-    };
-
     template<template<class, class> class Coder, class Field, class TraceTag>
     void encoder(const std::string& stack)
     {
@@ -224,8 +130,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string kind = "Encoder";
-        std::string trace = kodo::has_trace<encoder_type>::value ? "Trace" : "";
-        std::string name = stack + kind + field + trace;
+        std::string name = stack + kind + field;
 
         auto encoder_class = coder<Coder, Field, TraceTag>(name)
         .def("write_payload", &encoder_write_payload<encoder_type>,

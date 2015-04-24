@@ -21,15 +21,6 @@ test_sets = [
      kodo.FullVectorDecoderFactoryBinary8),
     (kodo.FullVectorEncoderFactoryBinary16,
      kodo.FullVectorDecoderFactoryBinary16),
-    # Full RLNC Trace
-    (kodo.FullVectorEncoderFactoryBinaryTrace,
-     kodo.FullVectorDecoderFactoryBinaryTrace),
-    (kodo.FullVectorEncoderFactoryBinary4Trace,
-     kodo.FullVectorDecoderFactoryBinary4Trace),
-    (kodo.FullVectorEncoderFactoryBinary8Trace,
-     kodo.FullVectorDecoderFactoryBinary8Trace),
-    (kodo.FullVectorEncoderFactoryBinary16Trace,
-     kodo.FullVectorDecoderFactoryBinary16Trace),
 
     # Sparse Full RLNC
     (kodo.SparseFullVectorEncoderFactoryBinary,
@@ -40,15 +31,6 @@ test_sets = [
      kodo.FullVectorDecoderFactoryBinary8),
     (kodo.SparseFullVectorEncoderFactoryBinary16,
      kodo.FullVectorDecoderFactoryBinary16),
-    # Sparse Full RLNC Trace
-    (kodo.SparseFullVectorEncoderFactoryBinaryTrace,
-     kodo.FullVectorDecoderFactoryBinaryTrace),
-    (kodo.SparseFullVectorEncoderFactoryBinary4Trace,
-     kodo.FullVectorDecoderFactoryBinary4Trace),
-    (kodo.SparseFullVectorEncoderFactoryBinary8Trace,
-     kodo.FullVectorDecoderFactoryBinary8Trace),
-    (kodo.SparseFullVectorEncoderFactoryBinary16Trace,
-     kodo.FullVectorDecoderFactoryBinary16Trace),
 
     # On The Fly
     (kodo.OnTheFlyEncoderFactoryBinary,
@@ -59,15 +41,6 @@ test_sets = [
      kodo.OnTheFlyDecoderFactoryBinary8),
     (kodo.OnTheFlyEncoderFactoryBinary16,
      kodo.OnTheFlyDecoderFactoryBinary16),
-    # On The Fly Trace
-    (kodo.OnTheFlyEncoderFactoryBinaryTrace,
-     kodo.OnTheFlyDecoderFactoryBinaryTrace),
-    (kodo.OnTheFlyEncoderFactoryBinary4Trace,
-     kodo.OnTheFlyDecoderFactoryBinary4Trace),
-    (kodo.OnTheFlyEncoderFactoryBinary8Trace,
-     kodo.OnTheFlyDecoderFactoryBinary8Trace),
-    (kodo.OnTheFlyEncoderFactoryBinary16Trace,
-     kodo.OnTheFlyDecoderFactoryBinary16Trace),
 
     # Sliding Window
     (kodo.SlidingWindowEncoderFactoryBinary,
@@ -78,15 +51,6 @@ test_sets = [
      kodo.SlidingWindowDecoderFactoryBinary8),
     (kodo.SlidingWindowEncoderFactoryBinary16,
      kodo.SlidingWindowDecoderFactoryBinary16),
-    # Sliding Window Trace
-    (kodo.SlidingWindowEncoderFactoryBinaryTrace,
-     kodo.SlidingWindowDecoderFactoryBinaryTrace),
-    (kodo.SlidingWindowEncoderFactoryBinary4Trace,
-     kodo.SlidingWindowDecoderFactoryBinary4Trace),
-    (kodo.SlidingWindowEncoderFactoryBinary8Trace,
-     kodo.SlidingWindowDecoderFactoryBinary8Trace),
-    (kodo.SlidingWindowEncoderFactoryBinary16Trace,
-     kodo.SlidingWindowDecoderFactoryBinary16Trace),
 ]
 
 

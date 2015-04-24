@@ -22,12 +22,12 @@ def main():
 
     # In the following we will make an encoder/decoder factory.
     # The factories are used to build actual encoders/decoders
-    encoder_factory = kodo.FullVectorEncoderFactoryBinary8Trace(
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary8(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
     encoder = encoder_factory.build()
 
-    decoder_factory = kodo.FullVectorDecoderFactoryBinary8Trace(
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary8(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
 
@@ -40,16 +40,18 @@ def main():
     data_in = os.urandom(encoder.block_size())
 
     # Setup tracing
-    if 'trace' in dir(encoder):
-        encoder.trace()
 
-    if 'trace' in dir(decoder):
-        def callback_function(zone, message):
-            if zone in ["decoder_state", "input_symbol_coefficients"]:
-                print("{}:".format(zone))
-                print(message)
+    # Enable the default trace function of the encoder (writes to stdout)
+    encoder.trace()
 
-        decoder.trace(callback_function)
+    # Define a custom trace function for the decoder which filters the
+    # trace message based on their zones
+    def callback_function(zone, message):
+        if zone in ["decoder_state", "input_symbol_coefficients"]:
+            print("{}:".format(zone))
+            print(message)
+
+    decoder.trace(callback_function)
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it
