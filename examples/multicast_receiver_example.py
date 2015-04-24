@@ -10,6 +10,7 @@ import argparse
 import kodo
 import socket
 import struct
+import sys
 import time
 
 MCAST_GRP = '224.1.1.1'
@@ -74,21 +75,24 @@ def main():
 
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-    print("Processing")
-    while not decoder.is_complete() and not args.dry_run:
+    if args.dry_run:
+        sys.exit(0)
+
+    print("Processing...")
+    while not decoder.is_complete():
         time.sleep(0.2)
         packet = sock.recv(10240)
 
         decoder.read_payload(packet)
-        print("Packet decoded!")
-        print("rank: {}/{}".format(decoder.rank(), decoder.symbols()))
+        print("Packet received!")
+        print("Decoder rank: {}/{}".format(decoder.rank(), decoder.symbols()))
 
-        # Write data to file (it may not be valid until the very end though).
-        f = open(args.output_file, 'wb')
-        f.write(decoder.copy_symbols())
-        f.close()
+    # Write the decoded data to the output file
+    f = open(args.output_file, 'wb')
+    f.write(decoder.copy_symbols())
+    f.close()
 
-    print("Processing finished")
+    print("Processing finished.")
 
 if __name__ == "__main__":
     main()
