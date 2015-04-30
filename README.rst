@@ -24,6 +24,11 @@ sample applications showing the usage of the Python API.
     :target: https://pypi.python.org/pypi/kodo
     :alt: License
 
+If you have any questions or suggestions about this library, please contact
+us at our developer mailing list (hosted at Google Groups):
+
+* http://groups.google.com/group/steinwurf-dev
+
 License
 =======
 
