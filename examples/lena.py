@@ -9,7 +9,11 @@
 import kodo
 import kodo_helpers
 
-import Image
+try:
+    import Image
+except ImportError:
+    from PIL import Image
+
 import math
 import os
 import random
