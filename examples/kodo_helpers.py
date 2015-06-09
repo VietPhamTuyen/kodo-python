@@ -22,8 +22,11 @@ import numpy
 
 
 class CanvasScreenEngine(object):
-    """Canvas engine for displaying images to the screen"""
+
+    """Canvas engine for displaying images to the screen."""
+
     def __init__(self, width, height):
+        """Create CanvasScreenEngine."""
         self.screen = None
         self.running = False
         # Add a little padding
@@ -33,14 +36,14 @@ class CanvasScreenEngine(object):
         self.thread = threading.Thread(name='canvas', target=self.__start)
 
     def start(self):
-        """Start a thread which runs the viewer logic"""
+        """Start a thread which runs the viewer logic."""
         self.thread.start()
         # Busy wait for the engine to start.
         while not self.running:
             pass
 
     def __start(self):
-        """Start pygame and create a game loop"""
+        """Start pygame and create a game loop."""
         with self.lock:
             self.running = True
             pygame.init()
@@ -55,16 +58,18 @@ class CanvasScreenEngine(object):
         pygame.quit()
 
     def stop(self):
-        """Stops the game loop and joins the thread"""
+        """Stop the game loop and joins the thread."""
         self.running = False
         self.thread.join()
 
     def add_surface(self, surface, position):
+        """Thread-safe way of adding a surface to the screen."""
         with self.lock:
             self.screen.blit(surface, position)
 
 
 class CanvasFileEngine(object):
+
     """
     Canvas engine for writing images to files.
 
@@ -77,7 +82,9 @@ class CanvasFileEngine(object):
       avconv -r 60 -b 65536k -qscale 5 -i %07d.png out.mp4
 
     """
+
     def __init__(self, width, height, directory):
+        """Create CanvasFileEngine."""
         self.size = (width, height)
         self.files = 0
         self.directory = directory
@@ -93,14 +100,14 @@ class CanvasFileEngine(object):
                 os.path.abspath(self.directory)))
 
     def start(self):
-        """Start a thread which runs the viewer logic"""
+        """Start a thread which runs the viewer logic."""
         self.thread.start()
         # Busy wait for the engine to start.
         while not self.running:
             pass
 
     def __start(self):
-        """Start pygame and create a game loop"""
+        """Start pygame and create a game loop."""
         with self.lock:
             self.running = True
 
@@ -112,32 +119,37 @@ class CanvasFileEngine(object):
                 self.dirty = False
 
     def store_file(self):
+        """Save canvas to file named after an incremeted integer."""
         filename = "{:07d}.png".format(self.files)
         self.files += 1
         pygame.image.save(
             self.screen, os.path.join(self.directory, filename))
 
     def stop(self):
-        """Stops the game loop and joins the thread"""
+        """Stop the game loop and joins the thread."""
         self.running = False
         self.thread.join()
 
     def add_surface(self, surface, position):
+        """Thread-safe way of adding a surface to the screen."""
         with self.lock:
             self.screen.blit(surface, position)
             self.dirty = True
 
 
 class DecodeStateViewer(object):
-    """Class for displaying the decoding coefficients"""
+
+    """Class for displaying the decoding coefficients."""
+
     def __init__(self, size, canvas, canvas_position=(0, 0)):
+        """Create DecodeStateViewer."""
         super(DecodeStateViewer, self).__init__()
         self.size = size
         self.canvas = canvas
         self.canvas_position = canvas_position
 
     def trace_callback(self, zone, message):
-        """Callback to be used with the decoder trace API"""
+        """Callback to be used with the decoder trace API."""
         # We are only interested in the decoder state.
         if zone != "decoder_state":
             return
@@ -187,12 +199,12 @@ class DecodeStateViewer(object):
 
 
 class ImageViewer(object):
-    """
-    A class containing the logic for displaying an image during decoding
-    """
+
+    """A class containing the logic for displaying an image during decoding."""
+
     def __init__(self, width, height, canvas, canvas_position=(0, 0)):
         """
-        Construct ImageViewer object
+        Construct ImageViewer object.
 
         :param width: the width of the picture to be displayed
         :param height: the height of the picture to be displayed
@@ -205,7 +217,7 @@ class ImageViewer(object):
 
     def set_image(self, image_string):
         """
-        Displays the provided string as an image.
+        Display the provided string as an image.
 
         The string should be a string representation of a numpy 3d array,
         and it should be equal to or larger than width * height * 3.
