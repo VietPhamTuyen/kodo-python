@@ -61,7 +61,7 @@ guide you in the right direction.
 First, acquire the required packages from your package management system::
 
   sudo apt-get update
-  sudo apt-get install python build-essential libpython-dev
+  sudo apt-get install python build-essential libpython-dev python-dev
 
 If you are using Python 3, you'll need to install ``libpython3-dev`` instead.
 
