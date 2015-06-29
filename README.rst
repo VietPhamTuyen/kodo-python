@@ -202,11 +202,11 @@ Before you start, make sure you have the following at your ready:
 Start by booting up the Raspberry Pi and open up a terminal - if you have a
 headless install this should be fairly trivial.
 
-Now first update your package manager:
+Now first update your package manager::
 
     aptitude update
 
-You are now ready to install the required packages:
+You are now ready to install the required packages::
 
     build-essential python-dev g++-4.8
 
@@ -215,7 +215,7 @@ but on my Raspberry Pi 2 it was called `libpython-dev`. This will depend on your
 distribution.
 
 Now we need to make sure that the Raspberry Pi is using the correct compiler,
-to do so, execute the following commands:
+to do so, execute the following commands::
 
     sudo update-alternatives --remove-all gcc
     sudo update-alternatives --remove-all g++
@@ -225,12 +225,12 @@ to do so, execute the following commands:
 Because the compilation of kodo-python is rather memory intensive, the installed
 memory and swap is not sufficient.
 We therefore need use an external USB drive as extra swap. To set this up plug
-in the USB drive and execute the following command to find the drive id:
+in the USB drive and execute the following command to find the drive id::
 
     sudo fdisk -l
 
 When you found the drive id, execute the following commands, replacing `sdx1`
-with your drive id. The drive id I got was `sda1`:
+with your drive id. The drive id I got was `sda1`::
 
     sudo umount /dev/sdx1
     sudo mkswap /dev/sdx1
@@ -240,32 +240,34 @@ To check whether the swap was installed correctly execute the following command:
 
     cat /proc/swaps
 
-The command should output something along the lines of this:
+The command should output something along the lines of this::
 
     Filename      Type          Size  Used  Priority
     /var/swap     file        102396     0        -1
     /dev/sdx1     partition  4029096     0     32767
 
 You have not setup the Raspberry Pi so that it's ready for compiling kodo.
-Clone the repository:
+Clone the repository::
 
     git clone https://github.com/steinwurf/kodo-python
 
-Change directory to the repository:
+Change directory to the repository::
 
     cd kodo-python
 
 Configure the build script - note in this process you will be queried for your
-Github user name and password multiple times.
+Github user name and password multiple times::
 
     ./waf configure
 
-When the configuration has finished successfully you can run the build command:
+When the configuration has finished successfully you can run the build command::
 
     ./waf build
 
 This step will take a rather long time..
 
-![Compiling](https://imgs.xkcd.com/comics/compiling.png)
+.. image:: https://imgs.xkcd.com/comics/compiling.png
+    :target: https://xkcd.com/303/
+    :alt: Compiling
 
 Finally enjoy your freshly made kodo-python for Raspberry Pi.
