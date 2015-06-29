@@ -9,16 +9,33 @@
 import kodo
 import kodo_helpers
 
+import sys
+
 try:
     import Image
 except ImportError:
     from PIL import Image
 
+while True:
+    try:
+        import Image
+        break
+    except:
+        pass
+
+    try:
+        from PIL import Image
+        break
+    except:
+        pass
+
+    print("Unable to import Image module.")
+    sys.exit()
+
 import math
 import os
 import random
 import time
-import sys
 
 
 def main():
