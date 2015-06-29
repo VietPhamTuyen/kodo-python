@@ -187,50 +187,50 @@ Install the package with this command::
 
   pip install kodo
 
-Compile on Raspberry Pi (both 1 and 2)
---------------------------------------
+Compiling on Raspberry Pi (both 1 and 2)
+----------------------------------------
 
 Before you start, make sure you have the following at your ready:
 
 * A valid license to the Kodo library.
 * Fully functioning Raspberry Pi with Raspbian or something similar installed.
-* A USB stick with minimum 4GB.
-* Some way to interact with your Raspberry Pi (keyboard or ssh access)
+* An **empty** USB stick with minimum of 4GB space.
+* Some way to interact with your Raspberry Pi (keyboard or SSH access).
 * An Internet Connection for your Raspberry Pi.
-* ~1 hour worth of coffee or similar beverage (~3 hours for raspberry pi 1).
+* ~1 hour worth of coffee or similar beverage (~3 hours for Raspberry Pi 1).
 
 Start by booting up the Raspberry Pi and open up a terminal - if you have a
 headless install this should be fairly trivial.
 
-Now first update your package manager::
+First update your package manager::
 
-    aptitude update
+    sudo apt-get update
 
 You are now ready to install the required packages::
 
-    build-essential python-dev g++-4.8
+    sudo apt-get install git-core build-essential python-dev g++-4.8
 
 Also install `libpython`. On my Raspberry Pi 1 this was called `libpython2.7`,
 but on my Raspberry Pi 2 it was called `libpython-dev`. This will depend on your
 distribution.
 
-Now we need to make sure that the Raspberry Pi is using the correct compiler,
-to do so, execute the following commands::
+We need to make sure that the default compiler is g++ 4.8 on the Raspberry Pi.
+To do so, execute the following commands::
 
     sudo update-alternatives --remove-all gcc
     sudo update-alternatives --remove-all g++
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 \
     --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
 
-Because the compilation of kodo-python is rather memory intensive, the installed
-memory and swap is not sufficient.
-We therefore need use an external USB drive as extra swap. To set this up plug
-in the USB drive and execute the following command to find the drive id::
+Because the compilation of kodo-python is rather memory-intensive, the installed
+memory and swap are not sufficient (the Pi runs out of memory).
+Therefore we need to use an external USB drive as extra swap. To set this up, plug
+in the USB drive and execute the following command to find the drive ID::
 
     sudo fdisk -l
 
-When you found the drive id, execute the following commands, replacing `sdx1`
-with your drive id. The drive id I got was `sda1`::
+When you found the drive ID, execute the following commands, replacing `sdx1`
+with your drive ID. The drive ID I got was `sda1`::
 
     sudo umount /dev/sdx1
     sudo mkswap /dev/sdx1
@@ -240,13 +240,13 @@ To check whether the swap was installed correctly execute the following command:
 
     cat /proc/swaps
 
-The command should output something along the lines of this::
+The command should output something like this::
 
     Filename      Type          Size  Used  Priority
     /var/swap     file        102396     0        -1
     /dev/sdx1     partition  4029096     0     32767
 
-You have not setup the Raspberry Pi so that it's ready for compiling kodo.
+You have configured the Raspberry Pi so that it's ready for compiling kodo-python.
 Clone the repository::
 
     git clone https://github.com/steinwurf/kodo-python
@@ -255,14 +255,14 @@ Change directory to the repository::
 
     cd kodo-python
 
-Configure the build script - note in this process you will be queried for your
-Github user name and password multiple times::
+Configure the build script - in this process you will be queried for your
+Github username and password multiple times::
 
-    ./waf configure
+    python waf configure
 
-When the configuration has finished successfully you can run the build command::
+When the configuration has finished successfully, you can run the build command::
 
-    ./waf build
+    python waf build
 
 This step will take a rather long time..
 
@@ -270,4 +270,4 @@ This step will take a rather long time..
     :target: https://xkcd.com/303/
     :alt: Compiling
 
-Finally enjoy your freshly made kodo-python for Raspberry Pi.
+Finally enjoy your freshly made kodo-python for the Raspberry Pi!!!
