@@ -197,7 +197,7 @@ Before you start, make sure you have the following at your ready:
 * A USB stick with minimum 4GB.
 * Some way to interact with your Raspberry Pi (keyboard or ssh access)
 * An Internet Connection for your Raspberry Pi.
-* 1 hour worth of coffee or similar beverage (2 for raspberry pi 2).
+* ~1 hour worth of coffee or similar beverage (~3 hours for raspberry pi 1).
 
 Start by booting up the Raspberry Pi and open up a terminal - if you have a
 headless install this should be fairly trivial.
