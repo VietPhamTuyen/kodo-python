@@ -11,22 +11,17 @@ import kodo_helpers
 
 import sys
 
-try:
-    import Image
-except ImportError:
-    from PIL import Image
-
 while True:
     try:
         import Image
         break
-    except:
+    except ImportError:
         pass
 
     try:
         from PIL import Image
         break
-    except:
+    except ImportError:
         pass
 
     print("Unable to import Image module.")
