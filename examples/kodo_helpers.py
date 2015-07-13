@@ -79,7 +79,7 @@ class CanvasFileEngine(object):
     If you want to create a video you can use the following command (tested on
     ubuntu):
 
-      avconv -r 60 -b 65536k -qscale 5 -i %07d.png out.mp4
+      avconv -r 60 -i %07d.png -b 65536k -qscale 5 out.mp4
 
     """
 
