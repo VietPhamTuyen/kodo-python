@@ -9,16 +9,26 @@
 import kodo
 import kodo_helpers
 
-try:
-    import Image
-except ImportError:
-    from PIL import Image
-
 import math
 import os
 import random
-import time
 import sys
+
+while True:
+    try:
+        import Image
+        break
+    except ImportError:
+        pass
+
+    try:
+        from PIL import Image
+        break
+    except ImportError:
+        pass
+
+    print("Unable to import Image/PIL.Image module.")
+    sys.exit()
 
 
 def main():
@@ -81,8 +91,9 @@ def main():
 
     decoder.trace(callback)
 
-    # Create a byte array from the image to use in the encoding
-    data_in = image.tobytes()
+    # Create a byte array from the image to use in the encoding (only pick the
+    # data we have room for).
+    data_in = image.tobytes()[-encoder.block_size():]
 
     # Set the converted image data
     encoder.set_symbols(data_in)
@@ -101,13 +112,14 @@ def main():
 
             image_viewer.set_image(decoder.copy_symbols())
 
+        # The decoder is complete, now copy the symbols from the decoder
+        data_out = decoder.copy_symbols()
+
         # Let the user see the photo before closing the application
-        time.sleep(1)
+        for i in range(100):
+            image_viewer.set_image(data_out)
     finally:
         canvas.stop()
-
-    # The decoder is complete, now copy the symbols from the decoder
-    data_out = decoder.copy_symbols()
 
     # Check we properly decoded the data
     if data_out[:len(data_in)] == data_in:

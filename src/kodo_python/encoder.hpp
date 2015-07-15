@@ -13,36 +13,13 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_trace.hpp>
 #include <kodo/has_set_systematic_off.hpp>
-#include <kodo/is_systematic_on.hpp>
-#include <kodo/set_systematic_off.hpp>
-#include <kodo/set_systematic_on.hpp>
-#include <kodo/write_feedback.hpp>
 
 #include "coder.hpp"
 #include "resolve_field_name.hpp"
 
 namespace kodo_python
 {
-    template<class Encoder>
-    bool is_systematic_on(const Encoder& encoder)
-    {
-        return kodo::is_systematic_on(encoder);
-    }
-
-    template<class Encoder>
-    void set_systematic_on(Encoder& encoder)
-    {
-        kodo::set_systematic_on(encoder);
-    }
-
-    template<class Encoder>
-    void set_systematic_off(Encoder& encoder)
-    {
-        kodo::set_systematic_off(encoder);
-    }
-
     template<class Encoder>
     void set_symbols(Encoder& encoder, const std::string& data)
     {
@@ -99,14 +76,18 @@ namespace kodo_python
         systematic_encoder_methods(EncoderClass& encoder_class)
         {
             encoder_class
-            .def("is_systematic_on", &is_systematic_on<Type>,
-                "Check if the encoder is in systematic mode.\n\n"
+            .def("is_systematic_on", &Type::is_systematic_on,
+                "Check if the encoder systematic mode.\n\n"
                 "\t:returns: True if the encoder is in systematic mode.\n"
             )
-            .def("set_systematic_on", &set_systematic_on<Type>,
+            .def("in_systematic_phase", &Type::in_systematic_phase,
+                "Check if the encoder has systematic packets available.\n\n"
+                "\t:returns: True if the encoder is in systematic phase.\n"
+            )
+            .def("set_systematic_on", &Type::set_systematic_on,
                 "Set the encoder in systematic mode.\n"
             )
-            .def("set_systematic_off", &set_systematic_off<Type>,
+            .def("set_systematic_off", &Type::set_systematic_off,
                 "Turn off systematic mode.\n");
         }
     };

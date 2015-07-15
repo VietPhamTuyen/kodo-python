@@ -29,8 +29,11 @@ us at our developer mailing list (hosted at Google Groups):
 
 * http://groups.google.com/group/steinwurf-dev
 
+.. contents:: Table of Contents:
+   :local:
+
 License
-=======
+-------
 
 A valid license is required if you wish to use and install this library. Please
 request a license by **filling out the license request** form_.
@@ -43,7 +46,7 @@ see the details in the `LICENSE.rst file
 
 
 Requirements
-============
+------------
 
 First of all, follow `this Getting Started guide
 <http://kodo-docs.steinwurf.com/en/latest/getting_started.html>`_ to install
@@ -87,7 +90,7 @@ so that Python distutils can detect your new compiler.
 
 
 Building From Source
-====================
+--------------------
 
 It is recommended to build the Python bindings from source (the other option
 is installing with pip as described below).
@@ -117,8 +120,8 @@ Then you can import the module in your Python script::
 
   >>> import kodo
 
-Compilation Issues
-..................
+Compilation Issues on Linux
+...........................
 
 The compilation process might take a long time on certain Linux systems if
 less than 4 GB RAM is available. The g++ optimizer might consume a lot of RAM
@@ -148,9 +151,16 @@ Or use this one on 64-bit Linux::
 
     python waf configure --options=cxx_mkspec=cxx_clang35_x64
 
+Compiling on the Raspberry Pi
+.............................
+
+The detailed instructions for compiling the project on the Raspberry Pi
+are found in our `Raspberry guide
+<https://github.com/steinwurf/kodo-python/blob/master/RASPBERRY_GUIDE.rst>`_.
+
 
 Pip Package
-===========
+-----------
 
 We also provide a pip package for the installation of kodo-python with a
 single command.

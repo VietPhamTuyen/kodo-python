@@ -6,6 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
+* Minor: Added ``in_systematic_phase`` member function to systematic encoders.
 * Minor: Added a simple benchmark example in ``examples\benchmark.py`` to
   measure the encoding and decoding throughput with the Python API.
 * Major: Removed the codec types where the tracing functionality was disabled.
