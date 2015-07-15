@@ -16,8 +16,6 @@
 
 #include <kodo/has_partial_decoding_tracker.hpp>
 #include <kodo/has_write_payload.hpp>
-#include <kodo/is_partial_complete.hpp>
-#include <kodo/write_feedback.hpp>
 
 #include <sak/storage.hpp>
 
@@ -64,16 +62,10 @@ namespace kodo_python
     }
 
     template<class Decoder>
-    bool is_partial_complete(Decoder& decoder)
-    {
-        return kodo::is_partial_complete(decoder);
-    }
-
-    template<class Decoder>
     PyObject* write_feedback(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.feedback_size());
-        uint32_t length = kodo::write_feedback(decoder, payload.data());
+        uint32_t length = decoder.write_feedback(payload.data());
         #if PY_MAJOR_VERSION >= 3
         return PyBytes_FromStringAndSize((char*)payload.data(), length);
         #else
@@ -98,7 +90,7 @@ namespace kodo_python
         is_partial_complete_method(DecoderClass& decoder_class)
         {
             decoder_class
-            .def("is_partial_complete", &is_partial_complete<Type>,
+            .def("is_partial_complete", &Type::is_partial_complete,
                 "Check whether the decoding matrix is partially decoded.\n\n"
                 "\t:returns: True if the decoding matrix is partially "
                 "decoded.\n");

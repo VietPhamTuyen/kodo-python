@@ -10,7 +10,6 @@ import pykodo as kodo
 
 def run_coding_test(algorithm, field, symbols, symbol_size):
     """Run a timed encoding and decoding benchmark."""
-
     # First, we measure the combined setup time for the encoder and decoder
     start = time.clock()
     encoder_factory = kodo.encoder_factory(

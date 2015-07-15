@@ -23,7 +23,6 @@ def main():
 
     An example where data is received, decoded, and finally written to a file.
     """
-
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument(
         '--output-file',
