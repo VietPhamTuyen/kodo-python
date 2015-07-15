@@ -14,38 +14,26 @@ import kodo
 
 
 def main():
-    """An example of how to use the trace functionality."""
-    # Set the number of symbols (i.e. the generation size in RLNC
-    # terminology) and the size of a symbol in bytes
-    symbols = 8
-    symbol_size = 16
+    max_symbols = 4
+    max_symbol_size = 32
 
-    # In the following we will make an encoder/decoder factory.
-    # The factories are used to build actual encoders/decoders
-    encoder_factory = kodo.FullVectorEncoderFactoryBinary8(
-        max_symbols=symbols,
-        max_symbol_size=symbol_size)
+    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
+        max_symbols=max_symbols,
+        max_symbol_size=max_symbol_size)
+
+
     encoder = encoder_factory.build()
 
-    decoder_factory = kodo.FullVectorDecoderFactoryBinary8(
-        max_symbols=symbols,
-        max_symbol_size=symbol_size)
+    data_in = (
+        "The size of this data is exactly 128 bytes "
+        "which means it will fit perfectly in a single generation. "
+        "That is very lucky, indeed!"
+    )
 
+    encoder.set_symbols(data_in)
+    decoder_factory = kodo.FullVectorDecoderFactoryBinary(
+        max_symbols, max_symbol_size)
     decoder = decoder_factory.build()
-
-    # Create some data to encode. In this case we make a buffer
-    # with the same size as the encoder's block size (the max.
-    # amount a single encoder can encode)
-    # Just for fun - fill the input data with random data
-    data_in = os.urandom(encoder.block_size())
-
-    # Setup tracing
-
-    # Enable the default trace function of the encoder (writes to stdout)
-    encoder.trace()
-
-    # Define a custom trace function for the decoder which filters the
-    # trace message based on their zones
     def callback_function(zone, message):
         if zone in ["decoder_state", "input_symbol_coefficients"]:
             print("{}:".format(zone))
@@ -53,36 +41,30 @@ def main():
 
     decoder.trace(callback_function)
 
-    # Assign the data buffer to the encoder so that we may start
-    # to produce encoded symbols from it
-    encoder.set_symbols(data_in)
-    while not decoder.is_complete():
-
-        # Encode a packet into the payload buffer
-        packet = encoder.write_payload()
-
-        # Here we "simulate" a packet loss of approximately 50%
-        # by dropping half of the encoded packets.
-        # When running this example you will notice that the initial
-        # symbols are received systematically (i.e. uncoded). After
-        # sending all symbols once uncoded, the encoder will switch
-        # to full coding, in which case you will see the full encoding
-        # vectors being sent and received.
-        if random.choice([True, False]):
-            continue
-
-        # Pass that packet to the decoder
-        decoder.read_payload(packet)
-
-    # The decoder is complete, now copy the symbols from the decoder
-    data_out = decoder.copy_symbols()
-
-    # Check we properly decoded the data
-    if data_out == data_in:
-        print("Data decoded correctly")
-    else:
-        print("Unexpected failure to decode please file a bug report :)")
-        sys.exit(1)
+    packet = encoder.write_payload()
+    encoder.write_payload()
+    encoder.write_payload()
+    encoder.write_payload()
+    packet2 = encoder.write_payload()
+    decoder.read_payload(packet)
+    print(decoder.copy_symbols().replace('\x00', '_'))
+    print(
+        "rank: {}\n"
+        "symbols_uncoded: {}".format(
+            decoder.rank(),
+            decoder.symbols_uncoded()
+        )
+    )
+    decoder.read_payload(packet2)
+    print("")
+    print(decoder.copy_symbols().replace('\x00', '_'))
+    print(
+        "rank: {}\n"
+        "symbols_uncoded: {}".format(
+            decoder.rank(),
+            decoder.symbols_uncoded()
+        )
+    )
 
 if __name__ == "__main__":
     main()
