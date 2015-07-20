@@ -13,8 +13,7 @@
 
 #include <kodo/has_rank.hpp>
 
-#include "has_is_symbol_pivot.hpp"
-
+#include <kodo/has_is_symbol_pivot.hpp>
 #include <kodo/has_set_zone_prefix.hpp>
 #include <kodo/has_set_trace_stdout.hpp>
 #include <kodo/has_set_trace_callback.hpp>
@@ -191,7 +190,7 @@ namespace kodo_python
         );
 
         (is_symbol_pivot_method<
-            has_is_symbol_pivot<coder_type>::value>(coder_class));
+            kodo::has_is_symbol_pivot<coder_type>::value>(coder_class));
 
         (rank_method<kodo::has_rank<coder_type>::value>(coder_class));
 

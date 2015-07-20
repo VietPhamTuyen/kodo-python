@@ -61,19 +61,7 @@ namespace kodo_python
         decoder.read_payload(payload.data());
     }
 
-    template<class Decoder>
-    PyObject* write_feedback(Decoder& decoder)
-    {
-        std::vector<uint8_t> payload(decoder.feedback_size());
-        uint32_t length = decoder.write_feedback(payload.data());
-        #if PY_MAJOR_VERSION >= 3
-        return PyBytes_FromStringAndSize((char*)payload.data(), length);
-        #else
-        return PyString_FromStringAndSize((char*)payload.data(), length);
-        #endif
-    }
-
-    template<bool HAS_PARTIAL_DECODING_TRACKER, class Type>
+    template<bool HasPartialDecodingTracker>
     struct is_partial_complete_method
     {
         template<class DecoderClass>
@@ -83,21 +71,22 @@ namespace kodo_python
         }
     };
 
-    template<class Type>
-    struct is_partial_complete_method<true, Type>
+    template<>
+    struct is_partial_complete_method<true>
     {
         template<class DecoderClass>
         is_partial_complete_method(DecoderClass& decoder_class)
         {
             decoder_class
-            .def("is_partial_complete", &Type::is_partial_complete,
+            .def("is_partial_complete",
+                &DecoderClass::wrapped_type::is_partial_complete,
                 "Check whether the decoding matrix is partially decoded.\n\n"
                 "\t:returns: True if the decoding matrix is partially "
                 "decoded.\n");
         }
     };
 
-    template<bool HAS_WRITE_PAYLOAD, class Type>
+    template<bool HasWritePayload>
     struct write_payload_method
     {
         template<class DecoderClass>
@@ -107,21 +96,22 @@ namespace kodo_python
         }
     };
 
-    template<class Type>
-    struct write_payload_method<true, Type>
+    template<>
+    struct write_payload_method<true>
     {
         template<class DecoderClass>
         write_payload_method(DecoderClass& decoder_class)
         {
             decoder_class
-            .def("write_payload", &decoder_write_payload<Type>,
+            .def("write_payload",
+                &decoder_write_payload<typename DecoderClass::wrapped_type>,
                 "Recode symbol.\n\n"
                 "\t:returns: The recoded symbol.\n"
             );
         }
     };
 
-    template<template<class, class> class Coder, class Type>
+    template<template<class, class> class Coder>
     struct extra_decoder_methods
     {
         template<class DecoderClass>
@@ -160,13 +150,12 @@ namespace kodo_python
         );
 
         (write_payload_method<
-            kodo::has_write_payload<decoder_type>::value, decoder_type>
-            (decoder_class));
+            kodo::has_write_payload<decoder_type>::value>(decoder_class));
 
         (is_partial_complete_method<
-            kodo::has_partial_decoding_tracker<decoder_type>::value,
-            decoder_type> (decoder_class));
+            kodo::has_partial_decoding_tracker<decoder_type>::value>(
+                decoder_class));
 
-        (extra_decoder_methods<Coder, decoder_type>(decoder_class));
+        (extra_decoder_methods<Coder>(decoder_class));
     }
 }
