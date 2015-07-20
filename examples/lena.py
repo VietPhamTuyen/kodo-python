@@ -89,7 +89,7 @@ def main():
     def callback(zone, msg):
         state_viewer.trace_callback(zone, msg)
 
-    decoder.trace(callback)
+    decoder.set_trace_callback(callback)
 
     # Create a byte array from the image to use in the encoding (only pick the
     # data we have room for).

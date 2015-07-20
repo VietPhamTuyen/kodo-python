@@ -10,9 +10,7 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_trace.hpp>
-
-#include "has_is_complete.hpp"
+#include <kodo/has_is_complete.hpp>
 #include "resolve_field_name.hpp"
 
 namespace kodo_python
@@ -29,7 +27,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string coder =
-            has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
+            kodo::has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
         std::string kind = coder + std::string("Factory");
         std::string name = stack + kind + field;
 
@@ -77,7 +75,7 @@ namespace kodo_python
         );
 
         std::string max_block_size_desc;
-        if (has_is_complete<stack_type>::value)
+        if (kodo::has_is_complete<stack_type>::value)
         {
             max_block_size_desc =
             "Return the maximum amount of data decoded in bytes.\n\n"

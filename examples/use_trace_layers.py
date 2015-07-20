@@ -41,8 +41,8 @@ def main():
 
     # Setup tracing
 
-    # Enable the default trace function of the encoder (writes to stdout)
-    encoder.trace()
+    # Enable the stdout trace function of the encoder
+    encoder.set_trace_stdout()
 
     # Define a custom trace function for the decoder which filters the
     # trace message based on their zones
@@ -51,7 +51,7 @@ def main():
             print("{}:".format(zone))
             print(message)
 
-    decoder.trace(callback_function)
+    decoder.set_trace_callback(callback_function)
 
     # Assign the data buffer to the encoder so that we may start
     # to produce encoded symbols from it

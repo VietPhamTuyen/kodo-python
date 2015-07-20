@@ -10,35 +10,60 @@
 
 namespace kodo_python
 {
-    template<class Type>
-    struct extra_encoder_methods<kodo::rlnc::sliding_window_encoder, Type>
+
+    template<class Encoder>
+    void read_feedback(Encoder& encoder, const std::string& feedback)
+    {
+        std::vector<uint8_t> _feedback(feedback.length());
+        std::copy(
+            feedback.c_str(),
+            feedback.c_str() + feedback.length(),
+            _feedback.data());
+        encoder.read_feedback(_feedback.data());
+    }
+
+    template<>
+    struct extra_encoder_methods<kodo::rlnc::sliding_window_encoder>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
         {
             encoder_class
-            .def("feedback_size", &Type::feedback_size,
+            .def("feedback_size", &EncoderClass::wrapped_type::feedback_size,
                 "Return the required feedback buffer size in bytes.\n\n"
                 "\t:returns: The required feedback buffer size in bytes.\n"
                 )
-            .def("read_feedback", &read_feedback<Type>,
+            .def("read_feedback", &read_feedback<typename EncoderClass::wrapped_type>,
                 "Return the feedback information.\n\n"
                 "\t:returns: The feedback information.\n");
         }
     };
 
-    template<class Type>
-    struct extra_decoder_methods<kodo::rlnc::sliding_window_decoder, Type>
+    template<class Decoder>
+    PyObject* write_feedback(Decoder& decoder)
+    {
+        std::vector<uint8_t> payload(decoder.feedback_size());
+        uint32_t length = decoder.write_feedback(payload.data());
+        #if PY_MAJOR_VERSION >= 3
+        return PyBytes_FromStringAndSize((char*)payload.data(), length);
+        #else
+        return PyString_FromStringAndSize((char*)payload.data(), length);
+        #endif
+    }
+
+    template<>
+    struct extra_decoder_methods<kodo::rlnc::sliding_window_decoder>
     {
         template<class DecoderClass>
         extra_decoder_methods(DecoderClass& decoder_class)
         {
             decoder_class
-            .def("feedback_size", &Type::feedback_size,
+            .def("feedback_size", &DecoderClass::wrapped_type::feedback_size,
                 "Return the required feedback buffer size in bytes.\n\n"
                 "\t:returns: The required feedback buffer size in bytes.\n"
                 )
-            .def("write_feedback", &write_feedback<Type>,
+            .def("write_feedback",
+                &write_feedback<typename DecoderClass::wrapped_type>,
                 "Return a buffer containing the feedback.\n\n"
                 "\t:returns: A buffer containing the feedback.\n");
         }

@@ -39,7 +39,7 @@ def options(opt):
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='kodo',
         git_repository='github.com/steinwurf/kodo.git',
-        major_version=26))
+        major_version=28))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='platform',
@@ -49,6 +49,11 @@ def options(opt):
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
         name='recycle',
         git_repository='github.com/steinwurf/recycle.git',
+        major_version=1))
+
+    bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
+        name='meta',
+        git_repository='github.com/steinwurf/meta.git',
         major_version=1))
 
     bundle.add_dependency(opt, resolve.ResolveGitMajorVersion(
@@ -85,6 +90,7 @@ def configure(conf):
         recurse_helper(conf, 'kodo')
         recurse_helper(conf, 'platform')
         recurse_helper(conf, 'recycle')
+        recurse_helper(conf, 'meta')
         recurse_helper(conf, 'sak')
 
     # Ensure that Python is configured properly
@@ -118,6 +124,7 @@ def build(bld):
         recurse_helper(bld, 'kodo')
         recurse_helper(bld, 'platform')
         recurse_helper(bld, 'recycle')
+        recurse_helper(bld, 'meta')
         recurse_helper(bld, 'sak')
 
     bld.recurse('src/kodo_python')

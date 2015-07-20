@@ -9,24 +9,27 @@
 
 namespace kodo_python
 {
-    template<class Type>
-    struct extra_encoder_methods<kodo::rlnc::sparse_full_vector_encoder, Type>
+    template<>
+    struct extra_encoder_methods<kodo::rlnc::sparse_full_vector_encoder>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
         {
             using boost::python::arg;
             encoder_class
-            .def("set_density", &Type::set_density, arg("density"),
+            .def("set_density",
+                &EncoderClass::wrapped_type::set_density, arg("density"),
                 "Set the density of the coefficients generated.\n\n"
                 "\t:param density: The coefficients density.\n"
             )
-            .def("density", &Type::density,
+            .def("density",
+                &EncoderClass::wrapped_type::density,
                 "Get the density of the coefficients generated.\n\n"
                 "\t:returns: The density of the generator.\n"
             )
             .def("set_average_nonzero_symbols",
-                &Type::set_average_nonzero_symbols, arg("symbols"),
+                &EncoderClass::wrapped_type::set_average_nonzero_symbols,
+                arg("symbols"),
                 "Set the average number of nonzero symbols.\n\n"
                 "\t:param symbols: The average number of nonzero symbols.\n"
             );

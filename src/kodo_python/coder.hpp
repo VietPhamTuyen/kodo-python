@@ -11,15 +11,16 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/trace.hpp>
-#include <kodo/has_trace.hpp>
 #include <kodo/has_rank.hpp>
 
-#include "has_is_symbol_pivot.hpp"
+#include <kodo/has_is_symbol_pivot.hpp>
+#include <kodo/has_set_zone_prefix.hpp>
+#include <kodo/has_set_trace_stdout.hpp>
+#include <kodo/has_set_trace_callback.hpp>
 
 namespace kodo_python
 {
-    template<bool HAS_IS_SYMBOL_PIVOT, class Type>
+    template<bool HasIsSymbolPivot>
     struct is_symbol_pivot_method
     {
         template<class CoderClass>
@@ -29,14 +30,14 @@ namespace kodo_python
         }
     };
 
-    template<class Type>
-    struct is_symbol_pivot_method<true, Type>
+    template<>
+    struct is_symbol_pivot_method<true>
     {
         template<class CoderClass>
         is_symbol_pivot_method(CoderClass& coder_class)
         {
             coder_class
-            .def("is_symbol_pivot", &Type::is_symbol_pivot,
+            .def("is_symbol_pivot", &CoderClass::wrapped_type::is_symbol_pivot,
                 boost::python::arg("symbol_index"),
                 "Check if a certain symbol is a pivot.\n\n"
                 "A symbol is pivot if it is available to either the encoder or "
@@ -48,7 +49,7 @@ namespace kodo_python
         }
     };
 
-    template<bool HAS_RANK, class Type>
+    template<bool HasRank>
     struct rank_method
     {
         template<class CoderClass>
@@ -58,14 +59,14 @@ namespace kodo_python
         }
     };
 
-    template<class Type>
-    struct rank_method<true, Type>
+    template<>
+    struct rank_method<true>
     {
         template<class CoderClass>
         rank_method(CoderClass& coder_class)
         {
             coder_class
-            .def("rank", &Type::rank,
+            .def("rank", &CoderClass::wrapped_type::rank,
                 "Return the rank.\n\n"
                 "The rank of a decoder states how many symbols have been "
                 "decoded or partially decoded. The rank of an encoder states "
@@ -76,13 +77,7 @@ namespace kodo_python
     };
 
     template<class Coder>
-    void trace(Coder& coder)
-    {
-        kodo::trace(coder);
-    }
-
-    template<class Coder>
-    void trace_with_callback(Coder& coder, PyObject* function)
+    void set_trace_callback(Coder& coder, PyObject* function)
     {
         auto callback = [function](
             const std::string& zone, const std::string& message)
@@ -90,34 +85,80 @@ namespace kodo_python
             boost::python::call<void>(function, zone, message);
         };
 
-        kodo::trace(coder, callback);
+        coder.set_trace_callback(callback);
     }
 
-    template<class TraceTag, bool has_trace, class Type>
-    struct trace_methods
+    template<bool HasSetTraceCallback>
+    struct set_trace_callback_method
     {
         template<class CoderClass>
-        trace_methods(CoderClass& coder_class)
+        set_trace_callback_method(CoderClass& coder_class)
         {
             (void) coder_class;
         }
     };
 
-    template<class Type>
-    struct trace_methods<kodo::enable_trace, true, Type>
+    template<>
+    struct set_trace_callback_method<true>
     {
         template<class CoderClass>
-        trace_methods(CoderClass& coder_class)
+        set_trace_callback_method(CoderClass& coder_class)
         {
             coder_class
-            .def("trace", &trace<Type>,
-                "Use a default callback to trace debug info to stdout.\n"
-            )
-            .def("trace", &trace_with_callback<Type>,
+            .def("set_trace_callback", 
+                &set_trace_callback<typename CoderClass::wrapped_type>,
                 boost::python::arg("callback"),
                 "Write the trace information to a callback.\n\n"
                 "\t:param callback: The callback which is called with the zone "
                 "and message.");
+        }
+    };
+
+    template<bool HasSetTraceStdout>
+    struct set_trace_stdout_method
+    {
+        template<class CoderClass>
+        set_trace_stdout_method(CoderClass& coder_class)
+        {
+            (void) coder_class;
+        }
+    };
+
+    template<>
+    struct set_trace_stdout_method<true>
+    {
+        template<class CoderClass>
+        set_trace_stdout_method(CoderClass& coder_class)
+        {
+            coder_class
+            .def("set_trace_stdout",
+                &CoderClass::wrapped_type::set_trace_stdout,
+                "Trace debug info to stdout.\n");
+        }
+    };
+
+    template<bool HasSetZonePrefix>
+    struct set_zone_prefix_method
+    {
+        template<class CoderClass>
+        set_zone_prefix_method(CoderClass& coder_class)
+        {
+            (void) coder_class;
+        }
+    };
+
+    template<>
+    struct set_zone_prefix_method<true>
+    {
+        template<class CoderClass>
+        set_zone_prefix_method(CoderClass& coder_class)
+        {
+            coder_class
+            .def("set_zone_prefix", &CoderClass::wrapped_type::set_zone_prefix,
+                boost::python::arg("zone_prefix"),
+                "Sets a zone prefix for the tracing output.\n\n"
+                "\t:param zone_prefix: The zone prefix to append to all "
+                "tracing zones.");
         }
     };
 
@@ -149,14 +190,18 @@ namespace kodo_python
         );
 
         (is_symbol_pivot_method<
-            has_is_symbol_pivot<coder_type>::value, coder_type> (coder_class));
+            kodo::has_is_symbol_pivot<coder_type>::value>(coder_class));
 
-        (rank_method<
-            kodo::has_rank<coder_type>::value, coder_type> (coder_class));
+        (rank_method<kodo::has_rank<coder_type>::value>(coder_class));
 
-        (trace_methods<TraceTag,
-            kodo::has_trace<coder_type>::value, coder_type> (coder_class));
-
+        // Trace related
+        (set_zone_prefix_method<
+            kodo::has_set_zone_prefix<coder_type>::value>(coder_class));
+        (set_trace_stdout_method<
+            kodo::has_set_trace_stdout<coder_type>::value>(coder_class));
+        (set_trace_callback_method<
+            kodo::has_set_trace_callback<coder_type>::value>(coder_class));
+        
         return coder_class;
     }
 }
