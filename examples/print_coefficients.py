@@ -21,17 +21,23 @@ import time
 def main():
 
     # Setup canvas and viewer
-    size = 1024
-    canvas = kodo_helpers.CanvasScreenEngine(size, size)
-    viewer = kodo_helpers.DecodeStateViewer(
+    size = 512
+    canvas = kodo_helpers.CanvasScreenEngine(size * 2, size)
+
+    encoder_viewer = kodo_helpers.EncodeStateViewer(
         size=size,
         canvas=canvas)
+
+    decoder_viewer = kodo_helpers.DecodeStateViewer(
+        size=size,
+        canvas=canvas,
+        canvas_position=(size, 0))
 
     canvas.start()
     try:
         # Set the number of symbols (i.e. the generation size in RLNC
         # terminology) and the size of a symbol in bytes
-        symbols = 256
+        symbols = 128
         symbol_size = 16
 
         # In the following we will make an encoder/decoder factory.
@@ -52,10 +58,13 @@ def main():
         # Just for fun - fill the input data with random data
         data_in = os.urandom(encoder.block_size())
 
-        def callback(zone, msg):
-            viewer.trace_callback(zone, msg)
+        def decoder_callback(zone, msg):
+            decoder_viewer.trace_callback(zone, msg)
+        decoder.set_trace_callback(decoder_callback)
 
-        decoder.set_trace_callback(callback)
+        def encoder_callback(zone, msg):
+            encoder_viewer.trace_callback(zone, msg)
+        encoder.set_trace_callback(encoder_callback)
 
         # Assign the data buffer to the encoder so that we may start
         # to produce encoded symbols from it
