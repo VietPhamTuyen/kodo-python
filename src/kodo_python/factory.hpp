@@ -10,8 +10,6 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_trace.hpp>
-
 #include "has_is_complete.hpp"
 #include "resolve_field_name.hpp"
 

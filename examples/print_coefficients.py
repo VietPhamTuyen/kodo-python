@@ -57,7 +57,7 @@ def main():
             def callback(zone, msg):
                 viewer.trace_callback(zone, msg)
 
-            decoder.trace(callback)
+            decoder.set_trace_callback(callback)
 
         # Assign the data buffer to the encoder so that we may start
         # to produce encoded symbols from it
