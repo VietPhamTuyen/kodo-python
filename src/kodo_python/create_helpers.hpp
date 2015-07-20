@@ -25,18 +25,18 @@ namespace kodo_python
     void create_factory_and_encoder(const std::string& stack)
     {
         // First create the factory type
-        factory<Coder, Field, kodo::enable_trace>(stack);
+        factory<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
         // Then create the corresponding encoder type
-        encoder<Coder, Field, kodo::enable_trace>(stack);
+        encoder<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
     }
 
     template<template<class, class> class Coder, class Field>
     void create_factory_and_decoder(const std::string& stack)
     {
         // First create the factory type
-        factory<Coder, Field, kodo::enable_trace>(stack);
+        factory<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
         // Then create the corresponding decoder type
-        decoder<Coder, Field, kodo::enable_trace>(stack);
+        decoder<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
     }
 
     template<template<class, class> class Coder>

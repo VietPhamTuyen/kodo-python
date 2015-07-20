@@ -52,12 +52,10 @@ def main():
         # Just for fun - fill the input data with random data
         data_in = os.urandom(encoder.block_size())
 
-        # Set up tracing callback
-        if 'trace' in dir(decoder):
-            def callback(zone, msg):
-                viewer.trace_callback(zone, msg)
+        def callback(zone, msg):
+            viewer.trace_callback(zone, msg)
 
-            decoder.set_trace_callback(callback)
+        decoder.set_trace_callback(callback)
 
         # Assign the data buffer to the encoder so that we may start
         # to produce encoded symbols from it
