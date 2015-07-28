@@ -141,7 +141,14 @@ namespace kodo_python
             "\t:returns: True if the decoding is complete.\n"
         )
         .def("symbols_uncoded", &decoder_type::symbols_uncoded,
-            "Return the number of uncoded symbols.\n\n"
+            "Returns the number of uncoded symbols currently known.\n\n"
+            "Depending on the algorithm used the true number of uncoded\n"
+            "symbols may be higher.\n"
+            "The reason for this uncertainty is the some algorithms, for\n"
+            "performance reasons, choose to not keep track of the exact\n"
+            "status of the decoding matrix.\n"
+            "It is however guaranteed that at least this amount of uncoded\n"
+            "symbols exist.\n"
             "\t:returns: The number of symbols which have been uncoded.\n"
         )
         .def("copy_symbols", &copy_symbols<decoder_type>,
