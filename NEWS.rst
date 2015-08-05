@@ -6,6 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
+* Minor: Added fulcrum stack.
 * Minor: Added visualization of the encoding state.
 * Major: Update kodo to version 30.
 * Major: renamed ``copy_symbols`` to ``copy_from_symbols``.
