@@ -15,6 +15,17 @@
 
 namespace kodo_python
 {
+
+    template<template<class, class> class Coder>
+    struct extra_factory_methods
+    {
+        template<class FactoryClass>
+        extra_factory_methods(FactoryClass& factory_class)
+        {
+            (void) factory_class;
+        }
+    };
+
     template<template<class, class> class Coder, class Field, class TraceTag>
     void factory(const std::string& stack)
     {
@@ -31,7 +42,7 @@ namespace kodo_python
         std::string kind = coder + std::string("Factory");
         std::string name = stack + kind + field;
 
-        auto factory = class_<factory_type, boost::noncopyable>(
+        auto factory_class = class_<factory_type, boost::noncopyable>(
             name.c_str(),
             "Factory for creating encoders/decoders.",
             init<uint32_t, uint32_t>(
@@ -92,9 +103,12 @@ namespace kodo_python
             "\t:returns: The maximum amount of data encoded in bytes\n";
         }
 
-        factory.def("max_block_size", &factory_type::max_block_size,
+        factory_class.def("max_block_size", &factory_type::max_block_size,
             max_block_size_desc.c_str()
         );
+
+        (extra_factory_methods<Coder>(factory_class));
+
         // Enable boost to map from the c++ pointer type to the python coder
         // type. E.g., from std::shared_ptr<Codec> to python [Codec]Encoder.
         boost::python::register_ptr_to_python<typename factory_type::pointer>();

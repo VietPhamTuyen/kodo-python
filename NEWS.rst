@@ -6,6 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
+* Major: Update kodo to version 30.
 * Major: renamed ``copy_symbols`` to ``copy_from_symbols``.
 * Major: Update kodo to version 29.
 * Major: Added dependency for meta.

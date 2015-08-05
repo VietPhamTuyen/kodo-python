@@ -26,8 +26,7 @@ def main():
 
     encoder_viewer = kodo_helpers.EncodeStateViewer(
         size=size,
-        canvas=canvas,
-        wrap_around=True)
+        canvas=canvas)
 
     decoder_viewer = kodo_helpers.DecodeStateViewer(
         size=size,

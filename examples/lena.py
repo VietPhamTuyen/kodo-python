@@ -108,7 +108,7 @@ def main():
 
     # Set the converted image data
     encoder.set_symbols(data_in)
-    encoder.set_systematic_off()
+
     # Create an image viwer and run the following code in a try catch;
     # this prevents the program from locking up, as the finally clause will
     # close down the image viewer.
