@@ -46,24 +46,30 @@ def main():
 
     # The canvas should be able to contain both the image and the decoding
     # state. Note the decoding state is the same width as the image height.
-    canvas_width = image_width + image_height
+    canvas_width = image_height + image_width + image_height
 
     # Create the canvas
     canvas = kodo_helpers.CanvasScreenEngine(
         width=canvas_width,
         height=image_height)
 
+    # Create the decoding coefficient viewer
+    encoding_state_viewer = kodo_helpers.EncodeStateViewer(
+        size=image_height,
+        canvas=canvas)
+
     # Create the image viewer
     image_viewer = kodo_helpers.ImageViewer(
         width=image_width,
         height=image_height,
-        canvas=canvas)
-
-    # Create the decoding coefficient viewer
-    state_viewer = kodo_helpers.DecodeStateViewer(
-        size=image_height,
         canvas=canvas,
         canvas_position=(image_width, 0))
+
+    # Create the decoding coefficient viewer
+    decoding_state_viewer = kodo_helpers.DecodeStateViewer(
+        size=image_height,
+        canvas=canvas,
+        canvas_position=(image_width * 2, 0))
 
     # Pick a symbol size (image_width * 3 will create a packet for each
     # horizontal line of the image, that is three bytes per pixel (RGB))
@@ -86,10 +92,15 @@ def main():
     decoder = decoder_factory.build()
 
     # Connect the tracing callback to the decode state viewer
-    def callback(zone, msg):
-        state_viewer.trace_callback(zone, msg)
+    def encoding_callback(zone, msg):
+        encoding_state_viewer.trace_callback(zone, msg)
 
-    decoder.set_trace_callback(callback)
+    encoder.set_trace_callback(encoding_callback)
+
+    def decoding_callback(zone, msg):
+        decoding_state_viewer.trace_callback(zone, msg)
+
+    decoder.set_trace_callback(decoding_callback)
 
     # Create a byte array from the image to use in the encoding (only pick the
     # data we have room for).
@@ -110,10 +121,10 @@ def main():
             if random.choice([True, False]):
                 decoder.read_payload(packet)
 
-            image_viewer.set_image(decoder.copy_symbols())
+            image_viewer.set_image(decoder.copy_from_symbols())
 
         # The decoder is complete, now copy the symbols from the decoder
-        data_out = decoder.copy_symbols()
+        data_out = decoder.copy_from_symbols()
 
         # Let the user see the photo before closing the application
         for i in range(100):

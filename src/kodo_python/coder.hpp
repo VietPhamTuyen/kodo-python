@@ -105,7 +105,7 @@ namespace kodo_python
         set_trace_callback_method(CoderClass& coder_class)
         {
             coder_class
-            .def("set_trace_callback", 
+            .def("set_trace_callback",
                 &set_trace_callback<typename CoderClass::wrapped_type>,
                 boost::python::arg("callback"),
                 "Write the trace information to a callback.\n\n"
@@ -201,7 +201,7 @@ namespace kodo_python
             kodo::has_set_trace_stdout<coder_type>::value>(coder_class));
         (set_trace_callback_method<
             kodo::has_set_trace_callback<coder_type>::value>(coder_class));
-        
+
         return coder_class;
     }
 }

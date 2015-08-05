@@ -75,7 +75,7 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
         decoder.read_payload(payloads[i])
 
     # Copy the symbols from the decoder
-    data_out = decoder.copy_symbols()
+    data_out = decoder.copy_from_symbols()
 
     # Stop the decoding timer
     stop = time.clock()

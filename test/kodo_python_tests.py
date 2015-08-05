@@ -103,7 +103,7 @@ class TestEncodeDecode(unittest.TestCase):
             decoder.read_payload(packet)
 
         # The decoder is complete, now copy the symbols from the decoder
-        data_out = decoder.copy_symbols()
+        data_out = decoder.copy_from_symbols()
 
         # Check if we properly decoded the data
         self.assertEqual(data_out, data_in)

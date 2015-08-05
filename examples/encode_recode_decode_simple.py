@@ -86,8 +86,8 @@ def main():
     # Both decoder1 and decoder2 should now be complete,
     # copy the symbols from the decoders
 
-    data_out1 = decoder1.copy_symbols()
-    data_out2 = decoder2.copy_symbols()
+    data_out1 = decoder1.copy_from_symbols()
+    data_out2 = decoder2.copy_from_symbols()
 
     # Check we properly decoded the data
     if data_out1 == data_in and data_out2 == data_in:

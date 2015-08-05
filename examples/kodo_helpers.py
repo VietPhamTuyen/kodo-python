@@ -137,45 +137,28 @@ class CanvasFileEngine(object):
             self.dirty = True
 
 
-class DecodeStateViewer(object):
+class StateViewer(object):
 
-    """Class for displaying the decoding coefficients."""
+    """Class for displaying the coding coefficients."""
 
-    def __init__(self, size, canvas, canvas_position=(0, 0)):
-        """Create DecodeStateViewer."""
-        super(DecodeStateViewer, self).__init__()
+    def __init__(self, size, canvas, canvas_position):
+        """Create StateViewer."""
+        super(StateViewer, self).__init__()
         self.size = size
         self.canvas = canvas
         self.canvas_position = canvas_position
 
-    def trace_callback(self, zone, message):
-        """Callback to be used with the decoder trace API."""
-        # We are only interested in the decoder state.
-        if zone != "decoder_state":
-            return
-
-        decode_state = []
-        for line in message.split('\n'):
-            if not line:
-                continue
-            line = line.split()
-
-            # Add the decoding state
-            decode_state.append([int(i) for i in line[2:]])
-
-        self.show_decode_state(decode_state)
-
-    def show_decode_state(self, decode_state):
+    def show_decode_state(self, code_state):
         """
-        Use the decoding state to print a graphical representation.
+        Use the coding state to print a graphical representation.
 
-        :param decode_state: A list of lists containing the symbol coefficients
+        :param code_state: A list of lists containing the symbol coefficients
         """
         surface = pygame.Surface((self.size + 1, self.size + 1))
         surface.fill((0,)*3)
-        diameter = self.size / len(decode_state)
+        diameter = self.size / len(code_state)
         y = diameter / 2
-        for symbol in decode_state:
+        for symbol in code_state:
             x = diameter / 2
             for data in symbol:
                 x += diameter
@@ -196,6 +179,82 @@ class DecodeStateViewer(object):
         self.canvas.add_surface(
             surface,
             self.canvas_position)
+
+
+class DecodeStateViewer(StateViewer):
+
+    """Class for displaying the decoding coefficients."""
+
+    def __init__(self, size, canvas, canvas_position=(0, 0)):
+        """Create DecodeStateViewer."""
+        super(DecodeStateViewer, self).__init__(
+            size, canvas, canvas_position)
+
+    def trace_callback(self, zone, message):
+        """Callback to be used with the decoder trace API."""
+        # We are only interested in the decoder state.
+        if zone != "decoder_state":
+            return
+
+        decode_state = []
+        for line in message.split('\n'):
+            if not line:
+                continue
+            line = line.split()
+
+            # Add the decoding state
+            decode_state.append([int(i) for i in line[2:]])
+
+        self.show_decode_state(decode_state)
+
+
+class EncodeStateViewer(StateViewer):
+
+    """Class for displaying the encoding coefficients."""
+
+    def __init__(self, size, canvas, canvas_position=(0, 0),
+                 wrap_around=False):
+        """Create EncodeStateViewer."""
+        super(EncodeStateViewer, self).__init__(
+            size, canvas, canvas_position)
+        # if true, wrap_around, else push up.
+        self.wrap_around = wrap_around
+
+    def trace_callback(self, zone, message):
+        """Callback to be used with the encoder trace API."""
+        if zone == "set_symbols":
+            for line in reversed(message.split('\n')):
+                elements = line.split()
+                if len(elements) > 1 and elements[1] == 'I:':
+                    self.symbols = int(elements[0]) + 1
+                    break
+
+            self.state = [[] for i in range(self.symbols)]
+            self.index = 0
+            return
+
+        if zone == "symbol_index_after_write_uncoded_symbol":
+            index = int(message.split(' ')[-1])
+            symbol = [0 for i in range(self.symbols)]
+            symbol[index] = 1
+
+        elif zone == "symbol_coefficients_after_write_symbol":
+            symbol = message[3:].split(' ')[:-1]
+            symbol = map(int, symbol)
+        else:
+            return
+
+        if self.index < self.symbols:
+            self.state[self.index] = symbol
+        else:
+            self.state = self.state[1:] + [symbol]
+        self.index += 1
+
+        if self.wrap_around:
+            self.index = self.index % self.symbols
+            self.state[self.index-1] = symbol
+
+        self.show_decode_state(self.state)
 
 
 class ImageViewer(object):
