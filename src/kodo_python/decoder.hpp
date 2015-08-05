@@ -25,12 +25,12 @@
 namespace kodo_python
 {
     template<class Decoder>
-    PyObject* copy_symbols(Decoder& decoder)
+    PyObject* copy_from_symbols(Decoder& decoder)
     {
         std::vector<uint8_t> payload(decoder.block_size());
         auto storage = sak::mutable_storage(
             payload.data(), decoder.block_size());
-        decoder.copy_symbols(storage);
+        decoder.copy_from_symbols(storage);
         #if PY_MAJOR_VERSION >= 3
         return PyBytes_FromStringAndSize(
             (char*)payload.data(), decoder.block_size());
@@ -151,7 +151,7 @@ namespace kodo_python
             "symbols exist.\n"
             "\t:returns: The number of symbols which have been uncoded.\n"
         )
-        .def("copy_symbols", &copy_symbols<decoder_type>,
+        .def("copy_from_symbols", &copy_from_symbols<decoder_type>,
             "Return the decoded symbols.\n\n"
             "\t:returns: The decoded symbols.\n"
         );

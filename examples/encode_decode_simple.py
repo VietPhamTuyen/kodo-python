@@ -53,7 +53,7 @@ def main():
     print("Processing finished")
 
     # The decoder is complete, now copy the symbols from the decoder
-    data_out = decoder.copy_symbols()
+    data_out = decoder.copy_from_symbols()
 
     # Check if we properly decoded the data
     print("Checking results")

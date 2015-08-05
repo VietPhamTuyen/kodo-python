@@ -88,7 +88,7 @@ def main():
 
     # Write the decoded data to the output file
     f = open(args.output_file, 'wb')
-    f.write(decoder.copy_symbols())
+    f.write(decoder.copy_from_symbols())
     f.close()
 
     print("Processing finished.")

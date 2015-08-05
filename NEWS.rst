@@ -6,6 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
+* Major: renamed ``copy_symbols`` to ``copy_from_symbols``.
+* Major: Update kodo to version 29.
 * Major: Added dependency for meta.
 * Major: Update kodo to version 28.
 * Minor: Added ``in_systematic_phase`` member function to systematic encoders.

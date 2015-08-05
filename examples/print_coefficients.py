@@ -26,7 +26,8 @@ def main():
 
     encoder_viewer = kodo_helpers.EncodeStateViewer(
         size=size,
-        canvas=canvas)
+        canvas=canvas,
+        wrap_around=True)
 
     decoder_viewer = kodo_helpers.DecodeStateViewer(
         size=size,
@@ -37,7 +38,7 @@ def main():
     try:
         # Set the number of symbols (i.e. the generation size in RLNC
         # terminology) and the size of a symbol in bytes
-        symbols = 128
+        symbols = 64
         symbol_size = 16
 
         # In the following we will make an encoder/decoder factory.
@@ -92,7 +93,7 @@ def main():
         canvas.stop()
 
     # The decoder is complete, now copy the symbols from the decoder
-    data_out = decoder.copy_symbols()
+    data_out = decoder.copy_from_symbols()
     # Check we properly decoded the data
     if data_out == data_in:
         print("Data decoded correctly")

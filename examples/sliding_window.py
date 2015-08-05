@@ -96,7 +96,7 @@ def main():
         print("Received feedback from decoder")
 
     # The decoder is complete, now copy the symbols from the decoder
-    data_out = decoder.copy_symbols()
+    data_out = decoder.copy_from_symbols()
 
     # Check we properly decoded the data
     if data_out == data_in:
