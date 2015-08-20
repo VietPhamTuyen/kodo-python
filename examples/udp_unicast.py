@@ -38,6 +38,16 @@ symbols = (int) number of symbols in each generation/block
 symbol_size = (int) size of each symbol, in bytes
 max_redundancy = (float percent) maximum amount of redundancy to be sent
 timeout = (float seconds) timeout used for retransmitting various control messages
+
+Both server and client return the 'settings' dictionary with added entries 
+describing the process:
+
+    client_ip   = (string) ip of the connected client (server only)
+    status      = (string) describing if the process succeeded or failed
+    packets     = (int) amount of packets transferred or received (depending on direction)
+    bitrate     = (float kbit/s) effective bitrate. For the receiver it is 
+                  bitrate of decoded data, while for the sender it is for total
+                  of the sent packets.
 """
 
 def server(args):
@@ -55,7 +65,7 @@ def server(args):
     try:
         settings = json.loads(data) # may throw exception
         settings['client_ip'] = address[0]
-        settings['role'] = 'server'
+        # settings['role'] = 'server'
         if settings['direction'] == 'server_to_client':
             send_data(settings, 'server')
         elif settings['direction'] == 'client_to_server':
