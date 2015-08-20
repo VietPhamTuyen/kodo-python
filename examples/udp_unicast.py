@@ -37,6 +37,7 @@ def main():
 
     subparsers = parser.add_subparsers(
         dest='role', help='help for subcommand')
+
     subparsers.add_parser(
         'server',
         description="UDP server for sending and receiving files.",
@@ -122,7 +123,8 @@ def server(args):
     settings_socket.bind(('', args.settings_port))
 
     # Wait for settings connections
-    print("Server running, press ctrl+c to stop.")
+    print("Server running, listening for connection settings on port " +
+          str(args.settings_port) + ", press ctrl+c to stop.")
     while True:
         data, address = receive(settings_socket, 1024)
         try:
