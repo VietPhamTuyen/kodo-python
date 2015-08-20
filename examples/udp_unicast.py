@@ -67,7 +67,7 @@ def server(args):
         print("Settings message invalid.")
         settings['status'] = 'Settings message invalid'
     finally:
-        return settings;
+        return settings
 
 def client(args):
 
@@ -86,6 +86,7 @@ def client(args):
     if 'client_to_server' in direction:
         settings['direction'] = 'client_to_server'
         send_data(settings, 'client')
+    return settings
 
 
 def send_data(settings, role):
