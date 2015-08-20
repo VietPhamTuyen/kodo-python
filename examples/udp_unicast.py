@@ -164,8 +164,6 @@ def send_data(settings, role):
 
     size = encoder.block_size() * (float(sent) / settings['symbols'])
     seconds = end - start
-    print("Sent {0} packets, {1} kB, in {2}s, at {3:.2f} kb/s.".format(
-        sent, size / 1000, seconds, size * 8 / 1000 / seconds))
     
     # save results in settings
     settings['packets_total'] = sent # packets
@@ -232,23 +230,15 @@ def receive_data(settings, role):
     data_socket.close()
 
     if not decoder.is_complete():
-        print("Decoding failed")
         settings['status'] = "Decoding failed"
     else:
         settings['status'] = "success"
 
     size = decoder.block_size() * (float(received) / settings['symbols'])
     seconds = end-start
-    print("Received {0} packets, {1}kB, in {2}s, at {3:.2f} kb/s.".format(
-        received,
-        size / 1000,
-        seconds,
-        decoder.block_size() * 8 / 1000 / seconds
-    ))
 
     settings['packets_total'] = received; # packets
     settings['packets_decode'] = received_decode
-    settings['status'] = "success"
     settings['time_start'] = start
     settings['time_decode'] = dec
     settings['time_stop'] = end

@@ -116,7 +116,16 @@ def main():
             results = udp_unicast.client(args)
         else:
             results = udp_unicast.server(args)
-        # do not use results here.
+
+        if(results['status'] != "success"):
+            print("{0} failed: {1}".format(args.role, results['status']))
+        else:
+            print("Summary for {} udp unicast:".format(args.role))
+            for key, value in results:
+                print("\t{0}: {1}".format(key, value))
+
+        if args.role == 'client':
+            break # only run once for client
 
 if __name__ == "__main__":
     main()
