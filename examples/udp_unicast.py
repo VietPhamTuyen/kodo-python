@@ -24,6 +24,20 @@ can be specified on the client side.
 
 The sender side will send symols until it receives a stop signal on its control
 port or it has sent all redundant symbols as specified.
+
+All settings are contained in the 'settings' dictionary which should define the
+following keys-values:
+
+settings_port = (int) settings port on the server
+server_ip = (string) ip of the server
+client_control_port = (int) control port on the client side, used for signaling
+server_control_port = (int) control port on the server side, used for signaling
+data_port = (int) port used for data transmission
+direction = (string) direction of data transmission
+symbols = (int) number of symbols in each generation/block
+symbol_size = (int) size of each symbol, in bytes
+max_redundancy = (float percent) maximum amount of redundancy to be sent
+timeout = (float seconds) timeout used for retransmitting various control messages
 """
 
 def server(args):
