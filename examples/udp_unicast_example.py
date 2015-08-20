@@ -110,10 +110,13 @@ def main():
 
     args = parser.parse_args()
 
-    if args.role == 'client':
-        udp_unicast.client(args)
-    else:
-        udp_unicast.server(args)
+    while True: # Loop until cancelled, e.g. by "ctrl+c"
+        results = None
+        if args.role == 'client':
+            results = udp_unicast.client(args)
+        else:
+            results = udp_unicast.server(args)
+        # do not use results here.
 
 if __name__ == "__main__":
     main()
