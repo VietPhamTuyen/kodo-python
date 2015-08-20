@@ -42,12 +42,17 @@ timeout = (float seconds) timeout used for retransmitting various control messag
 Both server and client return the 'settings' dictionary with added entries 
 describing the process:
 
-    client_ip   = (string) ip of the connected client (server only)
-    status      = (string) describing if the process succeeded or failed
-    packets     = (int) amount of packets transferred or received (depending on direction)
-    bitrate     = (float kbit/s) effective bitrate. For the receiver it is 
-                  bitrate of decoded data, while for the sender it is for total
-                  of the sent packets.
+    client_ip       = (string) ip of the connected client (server only)
+    status          = (string) describing if process succeeded or why it failed
+    packets_total   = (int) total amount of packets transferred or received 
+                      (depending on direction)
+    packets_decode  = (int) amount of packets sent / received at decode time.
+                      sender may have sent more packets before receiving the ack
+    time_start      = (float) timestamp for when the first packet is sent 
+    time_decode     = (float) timestamp for when the decode happens (or when 
+                      ack is received for sender)
+    time_stop       = (float) timestamp for when the last packet is sent or received
+
 """
 
 def server(args):
@@ -132,7 +137,9 @@ def send_data(settings, role):
 
     sent = 0
     start = time.time()
+    ack = None
     end = None
+    sent_decode = 0
     while sent < settings['symbols'] * settings['max_redundancy'] / 100:
         packet = encoder.write_payload()
         send(send_socket, packet, address)
@@ -140,8 +147,9 @@ def send_data(settings, role):
 
         try:
             control_socket.recv(1024)
-            if end is None:
-                end = time.time()
+            if ack is None:
+                ack = time.time()
+                sent_decode = sent
             break
         except socket.timeout:
             continue
@@ -149,6 +157,8 @@ def send_data(settings, role):
     # if no ack was received we sent all packets
     if end is None:
         end = time.time()
+    if ack is None:
+        ack = end;
 
     control_socket.close()
 
@@ -156,9 +166,14 @@ def send_data(settings, role):
     seconds = end - start
     print("Sent {0} packets, {1} kB, in {2}s, at {3:.2f} kb/s.".format(
         sent, size / 1000, seconds, size * 8 / 1000 / seconds))
-    settings['packets'] = sent # packets
-    settings['bitrate'] = float(size) * 8 / 1000 / seconds # kbits / second
+    
+    # save results in settings
+    settings['packets_total'] = sent # packets
+    settings['packets_decode'] = sent_decode
     settings['status'] = "success"
+    settings['time_start'] = start
+    settings['time_decode'] = ack
+    settings['time_stop'] = end
 
 
 def receive_data(settings, role):
@@ -187,7 +202,9 @@ def receive_data(settings, role):
 
     # Decode coded packets
     received = 0
+    received_decode = 0
     start = time.time()
+    dec = None
     end = None
     while 1:
         try:
@@ -198,8 +215,9 @@ def receive_data(settings, role):
                 received += 1
 
             if decoder.is_complete():
-                if end is None:
-                    end = time.time()  # stopping time once
+                if dec is None:
+                    dec = time.time()  # stopping time once
+                    received_decode = received
                 send(send_socket, "Stop sending", address)
 
         except socket.timeout:
@@ -208,6 +226,8 @@ def receive_data(settings, role):
     # in case we did not complete
     if end is None:
         end = time.time()
+    if dec is None:
+        dec = end
 
     data_socket.close()
 
@@ -226,9 +246,12 @@ def receive_data(settings, role):
         decoder.block_size() * 8 / 1000 / seconds
     ))
 
-    settings['packets'] = received; # packets
-    # efficient bitrate (kb/s), after decoding 
-    settings['bitrate'] = decoder.block_size() * 8 / 1000 / seconds
+    settings['packets_total'] = received; # packets
+    settings['packets_decode'] = received_decode
+    settings['status'] = "success"
+    settings['time_start'] = start
+    settings['time_decode'] = dec
+    settings['time_stop'] = end
 
 
 def send_settings(settings):
