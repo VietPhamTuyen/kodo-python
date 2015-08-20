@@ -27,31 +27,33 @@ port or it has sent all redundant symbols as specified.
 """
 
 def server(args):
+    settings = {}
+
     settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     settings_socket.bind(('', args.settings_port))
 
     # Wait for settings connections
     print("Server running, listening for connection settings on port " +
           str(args.settings_port) + ", press ctrl+c to stop.")
-    while True:
-        data, address = receive(settings_socket, 1024)
-        try:
-            settings = json.loads(data)
-        except Exception:
-            print("Settings message invalid.")
-            continue
-
-        settings['role'] = 'server'
+    
+    data, address = receive(settings_socket, 1024)
+    
+    try:
+        settings = json.loads(data) # may throw exception
         settings['client_ip'] = address[0]
-
+        settings['role'] = 'server'
         if settings['direction'] == 'server_to_client':
             send_data(settings, 'server')
         elif settings['direction'] == 'client_to_server':
             receive_data(settings, 'server')
         else:
             print("Invalid direction.")
-            continue
-
+            settings['status'] = "Invalid direction "
+    except Exception:
+        print("Settings message invalid.")
+        settings['status'] = 'Settings message invalid'
+    finally:
+        return settings;
 
 def client(args):
 
@@ -129,6 +131,9 @@ def send_data(settings, role):
     seconds = end - start
     print("Sent {0} packets, {1} kB, in {2}s, at {3:.2f} kb/s.".format(
         sent, size / 1000, seconds, size * 8 / 1000 / seconds))
+    settings['packets'] = sent # packets
+    settings['bitrate'] = float(size) * 8 / 1000 / seconds # kbits / second
+    settings['status'] = "success"
 
 
 def receive_data(settings, role):
@@ -183,6 +188,9 @@ def receive_data(settings, role):
 
     if not decoder.is_complete():
         print("Decoding failed")
+        settings['status'] = "Decoding failed"
+    else:
+        settings['status'] = "success"
 
     size = decoder.block_size() * (float(received) / settings['symbols'])
     seconds = end-start
@@ -192,6 +200,10 @@ def receive_data(settings, role):
         seconds,
         decoder.block_size() * 8 / 1000 / seconds
     ))
+
+    settings['packets'] = received; # packets
+    # efficient bitrate (kb/s), after decoding 
+    settings['bitrate'] = decoder.block_size() * 8 / 1000 / seconds
 
 
 def send_settings(settings):
