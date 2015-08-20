@@ -10,113 +10,21 @@ import os
 import socket
 import time
 import sys
-
-import argparse
 import json
 
 import kodo
 
+"""
+Functionality for communicating over udp using kodo to ensure reliability.
 
-def main():
-    """
-    UDP Server/Client for sending and receiving files.
-    """
+Both the server and the client can send and receive data
 
-    parser = argparse.ArgumentParser(description=main.__doc__)
+The client can send settings to the server, such that relevant test parameters
+can be specified on the client side.
 
-    parser.add_argument(
-        '--settings-port',
-        type=int,
-        help='settings port on the server.',
-        default=41001)
-
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Run without network use, for testing purposes')
-
-    subparsers = parser.add_subparsers(
-        dest='role', help='help for subcommand')
-
-    subparsers.add_parser(
-        'server',
-        description="UDP server for sending and receiving files.",
-        help='Start a server')
-
-    client_parser = subparsers.add_parser(
-        'client',
-        description="UDP client for sending and receiving files.",
-        help='Start a client')
-
-    client_parser.add_argument(
-        '--server-ip',
-        type=str,
-        help='ip of the server.',
-        default='127.0.0.1')
-
-    client_parser.add_argument(
-        '--client-control-port',
-        type=int,
-        help='control port on the client side, used for signaling.',
-        default=41003)
-
-    client_parser.add_argument(
-        '--server-control-port',
-        type=int,
-        help='control port on the server side, used for signaling.',
-        default=41005)
-
-    client_parser.add_argument(
-        '--data-port',
-        type=int,
-        help='port used for data transmission.',
-        default=41011)
-
-    client_parser.add_argument(
-        '--direction',
-        help='direction of data transmission',
-        choices=[
-            'client_to_server',
-            'server_to_client',
-            'client_to_server_to_client'],
-        default='client_to_server_to_client')
-
-    client_parser.add_argument(
-        '--symbols',
-        type=int,
-        help='number of symbols in each generation/block.',
-        default=64)
-
-    client_parser.add_argument(
-        '--symbol-size',
-        type=int,
-        help='size of each symbol, in bytes.',
-        default=1400)
-
-    client_parser.add_argument(
-        '--max-redundancy',
-        type=float,
-        help='maximum amount of redundancy to be sent, in percent.',
-        default=200)
-
-    client_parser.add_argument(
-        '--timeout',
-        type=float,
-        help='timeout used for various sockets, in seconds.',
-        default=.2)
-
-    # We have to use syg.argv for the dry-run parameter, otherwise a subcommand
-    # is required.
-    if '--dry-run' in sys.argv:
-        return
-
-    args = parser.parse_args()
-
-    if args.role == 'client':
-        client(args)
-    else:
-        server(args)
-
+The sender side will send symols until it receives a stop signal on its control
+port or it has sent all redundant symbols as specified.
+"""
 
 def server(args):
     settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -347,6 +255,3 @@ def receive(socket, number_of_bytes):
     else:
         if isinstance(data, bytes):
             return str(data, 'utf-8'), address
-
-if __name__ == "__main__":
-    main()
