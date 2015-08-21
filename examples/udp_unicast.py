@@ -262,14 +262,16 @@ def send_settings(settings):
     message = json.dumps(settings)
     ack = None
     address = ''
+    attempts = 0
     while ack is None:
         # Send settings
         send(send_socket, message, send_address)
+        attempts += 1
         # Waiting for respons
         try:
             ack, address = receive(control_socket, 1024)  # Server ack
         except socket.timeout:
-            print("Timeout - server not responding to settings.")
+            print("Timeout - server not responding to settings ({})".format(attempts))
 
     control_socket.close()
 

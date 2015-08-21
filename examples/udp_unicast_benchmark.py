@@ -56,6 +56,13 @@ def main():
         action='store_true',
         help='Run without network use, for testing purposes')
 
+    parser.add_argument('--log-format',
+                        dest='log_format',
+                        type=str, 
+                        help="one of the following: "
+                        "'json', 'yaml', 'csv', 'xml'. ", 
+                        default='json')
+
     subparsers = parser.add_subparsers(
         dest='role', help='help for subcommand')
 
@@ -113,11 +120,12 @@ def main():
             else:
                 results = udp_unicast.client(s)
                 logname = "client_benchmark_log"
-                log(results, logname)
+                log(results, logname, args.log_format)
                 # sleep for a bit to ensure that sockets have time to close
                 time.sleep(1)
     else: #server
         settings = vars(args)
+        log_format = settings.pop('log_format')
 
         print("Starting server on port " + str(settings['settings_port']) +
                 ", press ctrl+c to stop.")
@@ -126,18 +134,24 @@ def main():
             try:
                 results = udp_unicast.server(settings)
                 logname = "server_benchmark_log"
-                log(results, logname)
+                log(results, logname, log_format)
                 
             except KeyboardInterrupt:
                 break
 
-def log(results, logname):
+def log(results, logname, logtype):
     #add date and time to results
     results['date'] = str(datetime.datetime.now())
-    # udp_unicast_logging.save_as_xml(results, logname)
-    # udp_unicast_logging.save_as_csv(results, logname)
-    # udp_unicast_logging.save_as_yaml(results, logname)
-    udp_unicast_logging.save_as_json(results, logname)
+    if logtype == 'xml':
+        udp_unicast_logging.save_as_xml(results, logname)
+    elif logtype == 'csv':
+        udp_unicast_logging.save_as_csv(results, logname)
+    elif logtype == 'yaml':
+        udp_unicast_logging.save_as_yaml(results, logname)
+    elif logtype == 'json':
+        udp_unicast_logging.save_as_json(results, logname)
+    else:
+        print("Unknown log format: " + logtype)
 
 if __name__ == "__main__":
     main()
