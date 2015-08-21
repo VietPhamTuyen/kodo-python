@@ -11,6 +11,7 @@ import socket
 import time
 import sys
 import json
+import uuid
 
 import kodo
 
@@ -42,6 +43,7 @@ timeout = (float seconds) timeout used for retransmitting various control messag
 Both server and client return the 'settings' dictionary with added entries 
 describing the process:
 
+    test_id         = (int) 128bit unique test identifier
     client_ip       = (string) ip of the connected client (server only)
     status          = (string) describing if process succeeded or why it failed
     packets_total   = (int) total amount of packets transferred or received 
@@ -92,6 +94,8 @@ def client(args):
 
     settings = vars(args)
     direction = settings.pop('direction')
+
+    settings['test_id'] = uuid.uuid4().int
 
     # Note: "server>client>server" matches both cases.
     if 'server_to_client' in direction:
