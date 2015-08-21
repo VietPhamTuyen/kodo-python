@@ -40,13 +40,13 @@ max_redundancy = (float percent) maximum amount of redundancy to be sent
 timeout = (float seconds) timeout used for retransmitting various control messages
 """
 
-def server(args):
+def server(settings):
     settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    settings_socket.bind(('', args.settings_port))
+    settings_socket.bind(('', settings['settings_port']))
 
     # Wait for settings connections
     print("Server running, listening for connection settings on port " +
-          str(args.settings_port) + ", press ctrl+c to stop.")
+          str(settings['settings_port']) + ", press ctrl+c to stop.")
     while True:
         data, address = receive(settings_socket, 1024)
         try:
@@ -67,13 +67,11 @@ def server(args):
             continue
 
 
-def client(args):
-
-    if args.symbol_size > 65000:
+def client(settings):
+    if settings['symbol_size'] > 65000:
         print("Resulting packets too big, reduce symbol size")
         return
 
-    settings = vars(args)
     direction = settings.pop('direction')
 
     # Note: "server>client>server" matches both cases.

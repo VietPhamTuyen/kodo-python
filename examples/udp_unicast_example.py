@@ -10,8 +10,6 @@ import sys
 import argparse
 import json
 
-import kodo
-
 import udp_unicast
 
 
@@ -109,11 +107,12 @@ def main():
         return
 
     args = parser.parse_args()
+    settings = settings = vars(args)
 
     if args.role == 'client':
-        udp_unicast.client(args)
+        udp_unicast.client(settings)
     else:
-        udp_unicast.server(args)
+        udp_unicast.server(settings)
 
 if __name__ == "__main__":
     main()
