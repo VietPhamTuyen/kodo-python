@@ -10,13 +10,16 @@ import sys
 import argparse
 import json
 import itertools
+import time
 
 import udp_unicast
 
-def get_settings(parameter_space):
+def get_settings(parameter_space, repeat = 1):
     """
     Returns a iterator that yelds all possible combinations in a dictionary of
     parameter, where each parameter is given a list of possible values.
+
+    the parameter space is repeated "repeat" times
 
     Example:
     {"p1": [1,2], "p2": [3,4], "p3": [5]}
@@ -32,7 +35,11 @@ def get_settings(parameter_space):
     for key,value in parameter_space.iteritems():
         l.append( list( itertools.product([key],value)))
 
-    settings = itertools.product(*l)
+    settings = iter("")
+
+    for r in range(repeat):
+        settings = itertools.chain(settings, itertools.product(*l))
+
     return settings
 
 def main():
@@ -78,6 +85,12 @@ def main():
         help='number of times to run through the parameter space',
         default=1)
 
+    client_parser.add_argument(
+        '--print-parameters-used',
+        type=bool,
+        help='Print the parameters to be used instead of testing',
+        default=False)
+
     # We have to use syg.argv for the dry-run parameter, otherwise a subcommand
     # is required.
     if '--dry-run' in sys.argv:
@@ -89,15 +102,19 @@ def main():
 
         parameter_space = json.load(open(args.parameters_file))
 
-        for run in range(args.runs):
-            settings = get_settings(parameter_space)
-            for setting in settings:
-                    s = dict(setting)
-                    udp_unicast.client(s)
-    else:
+        # for run in range(args.runs):
+        settings = get_settings(parameter_space, args.runs)
+        for setting in settings:
+            s = dict(setting)
+            if args.print_parameters_used:
+                print s
+            else:
+                udp_unicast.client(s)
+                # sleep for a bit to ensure that sockets have time to close
+                time.sleep(1)
+    else: #server
         settings = vars(args)
         udp_unicast.server(settings)
-
 
 if __name__ == "__main__":
     main()
