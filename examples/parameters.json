@@ -1,0 +1,13 @@
+{
+    "role" :                ["client"],
+    "server_ip":            ["127.0.0.1"],
+    "settings_port" :       [41001],
+    "data_port" :           [44444],
+    "server_control_port" : [44005],
+    "client_control_port" : [41003],
+    "timeout":              [1.0],
+    "direction":            ["client_to_server", "server_to_client"],
+    "symbols" :             [16,64],
+    "symbol_size" :         [100,1500],
+    "max_redundancy" :      [200]
+}

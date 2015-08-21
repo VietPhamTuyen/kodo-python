@@ -57,22 +57,24 @@ describing the process:
 
 """
 
+
 def server(args):
     settings = {}
 
     settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    settings_socket.bind(('', args.settings_port))
+    settings_socket.bind(('', args['settings_port']))
 
     # Wait for settings connections
     print("Server running, listening for connection settings on port " +
-          str(args.settings_port) + ", press ctrl+c to stop.")
+          str(args['settings_port']) + ", press ctrl+c to stop.")
     
     data, address = receive(settings_socket, 1024)
     
     try:
         settings = json.loads(data) # may throw exception
+
         settings['client_ip'] = address[0]
-        # settings['role'] = 'server'
+        settings['role'] = 'server'
         if settings['direction'] == 'server_to_client':
             send_data(settings, 'server')
         elif settings['direction'] == 'client_to_server':
@@ -86,13 +88,11 @@ def server(args):
     finally:
         return settings
 
-def client(args):
-
-    if args.symbol_size > 65000:
+def client(settings):
+    if settings['symbol_size'] > 65000:
         print("Resulting packets too big, reduce symbol size")
         return
 
-    settings = vars(args)
     direction = settings.pop('direction')
 
     settings['test_id'] = uuid.uuid4().int

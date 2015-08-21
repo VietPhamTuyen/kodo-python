@@ -10,8 +10,6 @@ import sys
 import argparse
 import json
 
-import kodo
-
 import udp_unicast
 
 
@@ -109,13 +107,14 @@ def main():
         return
 
     args = parser.parse_args()
+    settings = vars(args)
 
     while True: # Loop until cancelled, e.g. by "ctrl+c"
         results = None
         if args.role == 'client':
-            results = udp_unicast.client(args)
+            results = udp_unicast.client(settings)
         else:
-            results = udp_unicast.server(args)
+            results = udp_unicast.server(settings)
 
         if(results['status'] != "success"):
             print("{0} failed: {1}".format(args.role, results['status']))
