@@ -11,8 +11,10 @@ import argparse
 import json
 import itertools
 import time
+import datetime
 
 import udp_unicast
+import udp_unicast_logging
 
 def get_settings(parameter_space, repeat = 1):
     """
@@ -109,12 +111,33 @@ def main():
             if args.print_parameters_used:
                 print s
             else:
-                udp_unicast.client(s)
+                results = udp_unicast.client(s)
+                logname = "client_benchmark_log"
+                log(results, logname)
                 # sleep for a bit to ensure that sockets have time to close
                 time.sleep(1)
     else: #server
         settings = vars(args)
-        udp_unicast.server(settings)
+
+        print("Starting server on port " + str(settings['settings_port']) +
+                ", press ctrl+c to stop.")
+
+        while True:
+            try:
+                results = udp_unicast.server(settings)
+                logname = "server_benchmark_log"
+                log(results, logname)
+                
+            except KeyboardInterrupt:
+                break
+
+def log(results, logname):
+    #add date and time to results
+    results['date'] = str(datetime.datetime.now())
+    # udp_unicast_logging.save_as_xml(results, logname)
+    # udp_unicast_logging.save_as_csv(results, logname)
+    # udp_unicast_logging.save_as_yaml(results, logname)
+    udp_unicast_logging.save_as_json(results, logname)
 
 if __name__ == "__main__":
     main()

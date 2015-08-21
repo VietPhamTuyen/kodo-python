@@ -109,22 +109,22 @@ def main():
     args = parser.parse_args()
     settings = vars(args)
 
-    while True: # Loop until cancelled, e.g. by "ctrl+c"
-        results = None
-        if args.role == 'client':
-            results = udp_unicast.client(settings)
-        else:
+    results = None
+    if args.role == 'client':
+        results = udp_unicast.client(settings)
+        print_results(results)
+    else:
+        while True: # Loop until cancelled, e.g. by "ctrl+c"
             results = udp_unicast.server(settings)
+            print_results(results)
 
-        if(results['status'] != "success"):
+def print_results(results):
+    if(results['status'] != "success"):
             print("{0} failed: {1}".format(args.role, results['status']))
         else:
             print("Summary for {} udp unicast:".format(args.role))
             for key, value in results.items():
                 print("\t{0}: {1}".format(key, value))
-
-        if args.role == 'client':
-            break # only run once for client
 
 if __name__ == "__main__":
     main()

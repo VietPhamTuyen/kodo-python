@@ -20,6 +20,7 @@ def save_as_json(results, log_name):
     """
     with open(log_name+'.json', 'a') as logfile:
         json.dump(results, logfile)
+        logfile.write(os.linesep)
 
 def save_as_yaml(results, log_name):
     """ 
@@ -28,6 +29,7 @@ def save_as_yaml(results, log_name):
     """
     with open(log_name+'.yaml', 'a') as logfile:
         yaml.dump(results, logfile)
+        logfile.write(os.linesep)
 
 def save_as_csv(results, log_name):
     """
@@ -38,6 +40,7 @@ def save_as_csv(results, log_name):
     with open(log_name+'.csv', 'a') as logfile:
         writer = csv.writer(logfile)
         writer.writerows(results.items())
+        logfile.write(os.linesep)
 
 def save_as_xml(results, log_name):
     """

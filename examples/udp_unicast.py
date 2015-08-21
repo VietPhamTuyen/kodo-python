@@ -65,9 +65,6 @@ def server(args):
     settings_socket.bind(('', args['settings_port']))
 
     # Wait for settings connections
-    print("Server running, listening for connection settings on port " +
-          str(args['settings_port']) + ", press ctrl+c to stop.")
-    
     data, address = receive(settings_socket, 1024)
     
     try:
@@ -96,6 +93,7 @@ def client(settings):
     direction = settings.pop('direction')
 
     settings['test_id'] = uuid.uuid4().int
+    settings['role'] = 'client'
 
     # Note: "server>client>server" matches both cases.
     if 'server_to_client' in direction:
