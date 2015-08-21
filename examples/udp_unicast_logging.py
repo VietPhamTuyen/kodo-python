@@ -10,7 +10,8 @@ import json
 import yaml
 import csv
 from xml.etree import ElementTree
-import os.path
+import os
+import uuid
 
 def save_as_json(results, log_name):
     """
@@ -80,7 +81,7 @@ def dict_to_xml(tag, d):
 def test():
     # Create test dictionary
     testresults = dict(
-        test_id     = 187575533864669201003246697037521678873,
+        test_id     = uuid.uuid4().int,
         client_ip   = "192.168.1.80",
         status      = "success",
         packets_total = 100,
@@ -95,6 +96,13 @@ def test():
     save_as_csv(testresults, logname)
     save_as_xml(testresults, logname)
 
+def test_cleanup():
+    for extension in ['json', 'yaml', 'csv', 'xml']:
+        filename = 'testlog.' + extension
+        if os.path.isfile(filename):
+            os.remove(filename)
+
 if __name__ == '__main__':
     test()
     test() # run twice to check if files are appended properly
+    test_cleanup()
