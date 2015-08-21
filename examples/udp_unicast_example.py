@@ -121,7 +121,7 @@ def main():
             print("{0} failed: {1}".format(args.role, results['status']))
         else:
             print("Summary for {} udp unicast:".format(args.role))
-            for key, value in results:
+            for key, value in results.items():
                 print("\t{0}: {1}".format(key, value))
 
         if args.role == 'client':
