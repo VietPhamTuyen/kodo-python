@@ -8,6 +8,7 @@
 
 import json
 import yaml
+import csv
 from xml.etree import ElementTree
 import os.path
 
@@ -16,7 +17,7 @@ def save_as_json(results, log_name):
     Saves a dictionary type as a json formatted logfile with 
     name 'log_name'. Function adds correct extension to logfile name
     """
-    with open(log_name+'.json', 'w') as logfile:
+    with open(log_name+'.json', 'a') as logfile:
         json.dump(results, logfile)
 
 def save_as_yaml(results, log_name):
@@ -24,7 +25,7 @@ def save_as_yaml(results, log_name):
     Saves a dictionary type as a yaml formatted logfile with 
     name 'log_name'. Function adds correct extension to logfile name
     """
-    with open(log_name+'.yaml', 'w') as logfile:
+    with open(log_name+'.yaml', 'a') as logfile:
         yaml.dump(results, logfile)
 
 def save_as_csv(results, log_name):
@@ -33,7 +34,7 @@ def save_as_csv(results, log_name):
     name 'log_name'. Function adds correct extension to logfile name.
     Writes keys in first column, values in second. One key-value pair each line
     """
-    with open(log_name+'.csv', 'w') as logfile:
+    with open(log_name+'.csv', 'a') as logfile:
         writer = csv.writer(logfile)
         writer.writerows(results.items())
 
@@ -45,9 +46,11 @@ def save_as_xml(results, log_name):
     logfile = log_name+".xml"
     tree = None
     root = None
+    parser = ElementTree.XMLParser(encoding='utf-8')
     
     if os.path.isfile(logfile):
-        tree = ElementTree.ElementTree(file=logfile)
+        tree = ElementTree.ElementTree()
+        tree.parse(logfile, parser=parser)
         root = tree.getroot()
     else:
         # Create root element with tag log
@@ -55,7 +58,8 @@ def save_as_xml(results, log_name):
         tree = ElementTree.ElementTree(element=root)
 
     id_string = str(results.pop('test_id'))
-    child = dict_to_xml(id_string, results)
+    child = dict_to_xml('test_id', results)
+    child.text = id_string
     root.append(child)
 
     tree.write(logfile)
@@ -68,8 +72,29 @@ def dict_to_xml(tag, d):
     """
     element = ElementTree.Element(str(tag))
     for key, val in d.items():
-        child = Element(str(key))
+        child = ElementTree.Element(str(key))
         child.text = str(val)
-        elememt.append(child)
+        element.append(child)
     return element
 
+def test():
+    # Create test dictionary
+    testresults = dict(
+        test_id     = 187575533864669201003246697037521678873,
+        client_ip   = "192.168.1.80",
+        status      = "success",
+        packets_total = 100,
+        packets_decode = 98,
+        time_start  = 14.231235, 
+        time_decode = 28.123215,
+        time_stop   = 30.456456)
+
+    logname = "testlog"
+    save_as_json(testresults, logname)
+    save_as_yaml(testresults, logname)
+    save_as_csv(testresults, logname)
+    save_as_xml(testresults, logname)
+
+if __name__ == '__main__':
+    test()
+    test() # run twice to check if files are appended properly
