@@ -13,23 +13,43 @@ from xml.etree import ElementTree
 import os
 import uuid
 
+"""
+    Saves a list of dictionaries in logfile with 
+    name 'log_name'. Uses function load_func to load existing data, 
+    and dump_func to save data with correct formatting. 
+    """
+def save_helper(results, log_name, load_func, dump_func):
+    results_list = []
+
+    # read in old results, if any
+    if os.path.isfile(log_name):
+        with open(log_name, 'r') as logfile:
+            old_results = load_func(logfile)
+            if type(old_results) is list:
+                results_list += old_results
+            elif type(old_results) is dict:
+                results_list.append(old_results)
+
+    # add results to list of results
+    results_list.append(results)
+
+    with open(log_name, 'w') as logfile:
+        dump_func(results_list, logfile, indent=4)
+
 def save_as_json(results, log_name):
     """
-    Saves a dictionary type as a json formatted logfile with 
+    Saves a list of dictionaries as a json formatted logfile with 
     name 'log_name'. Function adds correct extension to logfile name
     """
-    with open(log_name+'.json', 'a') as logfile:
-        json.dump(results, logfile)
-        logfile.write(os.linesep)
 
+    save_helper(results, log_name+'.json', json.load, json.dump)
+    
 def save_as_yaml(results, log_name):
     """ 
-    Saves a dictionary type as a yaml formatted logfile with 
+    Saves a list of dictionaries as a yaml formatted logfile with 
     name 'log_name'. Function adds correct extension to logfile name
     """
-    with open(log_name+'.yaml', 'a') as logfile:
-        yaml.dump(results, logfile)
-        logfile.write(os.linesep)
+    save_helper(results, log_name+'.yaml', yaml.load, yaml.dump)
 
 def save_as_csv(results, log_name):
     """
@@ -84,7 +104,7 @@ def dict_to_xml(tag, d):
 def test():
     # Create test dictionary
     testresults = dict(
-        test_id     = uuid.uuid4().int,
+        test_id     = uuid.uuid4().get_hex(),
         client_ip   = "192.168.1.80",
         status      = "success",
         packets_total = 100,

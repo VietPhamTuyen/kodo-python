@@ -72,6 +72,9 @@ def server(args):
 
         settings['client_ip'] = address[0]
         settings['role'] = 'server'
+
+        sys.stdout.write("Client connected from {}: Running scenario '{}'... ".format(settings['client_ip'], settings['direction']))
+
         if settings['direction'] == 'server_to_client':
             send_data(settings, 'server')
         elif settings['direction'] == 'client_to_server':
@@ -83,6 +86,8 @@ def server(args):
         print("Settings message invalid.")
         settings['status'] = 'Settings message invalid'
     finally:
+        sys.stdout.write("{}\n".format(settings['status']))
+        sys.stdout.flush()
         return settings
 
 def client(settings):
@@ -92,7 +97,13 @@ def client(settings):
 
     direction = settings.pop('direction')
 
-    settings['test_id'] = uuid.uuid4().int
+    settings_string = ""
+    for key, value in settings.iteritems():
+        settings_string += "{}: {}, ".format(key, value)
+
+    sys.stdout.write("Running client with settings:\t{}\t".format(settings_string))
+
+    settings['test_id'] = uuid.uuid4().get_hex()
     settings['role'] = 'client'
 
     # Note: "server>client>server" matches both cases.
@@ -103,6 +114,8 @@ def client(settings):
     if 'client_to_server' in direction:
         settings['direction'] = 'client_to_server'
         send_data(settings, 'client')
+
+    sys.stdout.write("{}\n".format(settings['status']))
     return settings
 
 
