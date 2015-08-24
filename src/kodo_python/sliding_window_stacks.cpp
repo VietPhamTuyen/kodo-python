@@ -11,6 +11,18 @@
 namespace kodo_python
 {
 
+    struct sliding_window_coder_methods
+    {
+        template<class CoderClass>
+        sliding_window_coder_methods(CoderClass& coder_class)
+        {
+            coder_class
+            .def("feedback_size", &CoderClass::wrapped_type::feedback_size,
+                "Return the required feedback buffer size in bytes.\n\n"
+                "\t:returns: The required feedback buffer size in bytes.\n");
+        }
+    };
+
     template<class Encoder>
     void read_feedback(Encoder& encoder, const std::string& feedback)
     {
@@ -28,11 +40,8 @@ namespace kodo_python
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
         {
+            (sliding_window_coder_methods(encoder_class));
             encoder_class
-            .def("feedback_size", &EncoderClass::wrapped_type::feedback_size,
-                "Return the required feedback buffer size in bytes.\n\n"
-                "\t:returns: The required feedback buffer size in bytes.\n"
-                )
             .def("read_feedback", &read_feedback<typename EncoderClass::wrapped_type>,
                 "Return the feedback information.\n\n"
                 "\t:returns: The feedback information.\n");
@@ -57,11 +66,8 @@ namespace kodo_python
         template<class DecoderClass>
         extra_decoder_methods(DecoderClass& decoder_class)
         {
+            (sliding_window_coder_methods(decoder_class));
             decoder_class
-            .def("feedback_size", &DecoderClass::wrapped_type::feedback_size,
-                "Return the required feedback buffer size in bytes.\n\n"
-                "\t:returns: The required feedback buffer size in bytes.\n"
-                )
             .def("write_feedback",
                 &write_feedback<typename DecoderClass::wrapped_type>,
                 "Return a buffer containing the feedback.\n\n"
@@ -77,3 +83,5 @@ namespace kodo_python
         create_decoder<sliding_window_decoder>("SlidingWindow");
     }
 }
+
+
