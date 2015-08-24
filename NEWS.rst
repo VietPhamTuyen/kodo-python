@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+8.0.1
+-----
 * Patch: Expose fulcrum stack.
 
 8.0.0
