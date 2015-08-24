@@ -16,6 +16,7 @@ namespace kodo_python
     void create_sliding_window_stacks();
     void create_perpertual_stacks();
     void create_carousel_stacks();
+    void create_fulcrum_stacks();
 
     void create_stacks()
     {
@@ -24,6 +25,7 @@ namespace kodo_python
         create_sliding_window_stacks();
         create_perpertual_stacks();
         create_carousel_stacks();
+        create_fulcrum_stacks();
     }
 
     std::string version()
