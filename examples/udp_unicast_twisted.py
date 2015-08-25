@@ -57,37 +57,148 @@ describing the process:
 
 """
 
-from twisted.internet.protocol import DatagramProtocol, Factory
+from twisted.internet.protocol import DatagramProtocol
 from twisted.internet import reactor
 
-class UnicastNode(DatagramProtocol):
+import sys
 
-    def startProtocol(self):
-        """ Protocol startup phase: join multicast group, set TTL etc """
+# Server: Listens for incoming settings on settings_port - spawns appropriate test instance
+# Client: Sends settings to Server and spawns appropriate test instance
+# test_instance
+# test_instance_data
+# test_instance_data_send
+# test_instance_data_recv
+# test_instance_control
+
+
+class Server(DatagramProtocol):
+    """
+    Listens for test settings on specified port and launches test instances
+    based on received settings.
+    Server may run indefinately, launching multiple test instances
+    """
+
+    def datagramReceived(self, data, (host, port)):
+
+        try:
+            settings = json.loads(data)
+        except Exception:
+            print("Received invalid settings message.")
+            return
+
+        if not settings.has_key('test_id'):
+            print("Incomplete settings received, missing key 'test_id'")
+            return
+
+        settings_ack = settings['test_id']+"_ack"
+        self.transport.write(settings_ack, (host, port))
+
+        settings['client_ip'] = host
+        settings['role'] = 'server'
+
+        if settings['direction'] == 'server_to_client':
+            instance = TestInstanceSend()
+            ## start sending!!
+        elif settings['direction'] == 'client_to_server':
+            instance = TestInstanceRecv()
+            pass
+        else:
+            print("Invalid direction specified in received settings: {}".format(
+                  settings['direction']))
+            return
+
+        reactor.listenUDP(settings['port'], instance)
+
+        # Wait for instance to finish
+        # this should probably not be done here
+        # ready for new test after this
+
+
+class Client(DatagramProtocol):
+    """
+    Sends settings to specified server and launches appropriate test instance
+    after the settings packet has been acknowledged.
+    Client only launches on test instance, then closes.
+    """
+
+    def __init__(self, server_addr, settings):
+        self.server_addr = server_addr
+        self.settings = settings
+        self.settings['test_id'] = uuid.uuid4().get_hex()
+
+        # set more settings variables
+
+        # Maybe this should be done once the protocol running (socket open)
+        settings_string = json.dumps(self.settings)
+        self.transport.write(settings_string, self.server_addr)
+
+    def datagramReceived(self, data, addr):
+        if not addr == self.server_addr:
+            print("Client received datagram not from server ({})".format(addr))
+            return
+        if not data == settings['test_id']+"_ack":
+            print("Client could not process ack: {}".format(data))
+            return
+
+        # ack received successfully
+        if settings['direction'] == 'client_to_server':
+            instance = TestInstanceSend()
+            ## Start sending!
+        elif settings['direction'] == 'server_to_client':
+            instance = TestInstanceRecv()
+        else:
+            print("Could not interpret setting 'direction': {}".format(
+                  settings['direction']))
+            sys.exit()
+
+        reactor.listenUDP(settings['port'], instance)
+
+        # Wait for instance to finish
+        # This should probably not be done here
+        # We should be done here, close connection
+
+class TestInstanceSend(DatagramProtocol):
+
+    def __init__(self):
+        # Setup variables related to test instance
+
+        # begin sending
         pass
 
     def datagramReceived(self, data, (host, port)):
-        print("Received {} bytes from {}:{}".format(len(data), host, port))
-        # recv_datagram_callback(data, (host, port))
+        # Check contents and sender of received datagram
+        # if OK, stop sender
 
-    def send(self, data, (host, port)):
-        self.transport.write(data, (host, port))
+    def sendData(self, (host, port)):
+        # Send data in loop if not finished, otherwise stop and clean up.
+        pass
 
-class UnicastClient(Factory):
+class TestInstanceRecv(DatagramProtocol):
 
-    def __init__(self, settings):
-        self.settings = settings
+    def __init__(self):
+        # Setup variable related to test instance
+        pass
 
-    def buildProtocol(self, addr):
-        print("Building UnicastNode with addr {}".format(addr))
-        return UnicastNode()
+    def datagramReceived(self, data, (host, port)):
+        # Receive data and process (decode)
+        # if complete, send nack packet
+        pass
+
+    def sendNack(self, (host, port)):
+        # Construct and send nack packet
+        pass
+
 
 if __name__ == '__main__':
-    local_port = 44444
+    server_port = 44444
+    host = "127.0.0.1"
+    addr = (host, server_port)
     settings = {}
 
-    client = UnicastClient(settings)
+    client = Client(addr, settings)
+    reactor.listenUDP(0, client) # Any port
 
-    reactor.listenUDP(local_port, client)
-    reactor.listenUDP(local_port+1, client)
+    server = Server()
+    reactor.listenUDP(server_port, server)
+
     reactor.run()
