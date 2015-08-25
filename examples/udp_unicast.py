@@ -74,6 +74,7 @@ def server(args):
         settings['role'] = 'server'
 
         sys.stdout.write("Client connected from {}: Running scenario '{}'... ".format(settings['client_ip'], settings['direction']))
+        sys.stdout.flush()
 
         if settings['direction'] == 'server_to_client':
             send_data(settings, 'server')
@@ -86,7 +87,7 @@ def server(args):
         print("Settings message invalid.")
         settings['status'] = 'Settings message invalid'
     finally:
-        sys.stdout.write("{}\n".format(settings['status']))
+        sys.stdout.write(" {}\n".format(settings['status']))
         sys.stdout.flush()
         return settings
 
@@ -97,25 +98,22 @@ def client(settings):
 
     direction = settings.pop('direction')
 
-    settings_string = ""
-    for key, value in settings.iteritems():
-        settings_string += "{}: {}, ".format(key, value)
-
-    sys.stdout.write("Running client with settings:\t{}\t".format(settings_string))
+    sys.stdout.write("Running '{}' with {} symbols of size {}.".format(
+                     direction, settings['symbols'], settings['symbol_size']))
+    sys.stdout.flush()
 
     settings['test_id'] = uuid.uuid4().get_hex()
     settings['role'] = 'client'
 
-    # Note: "server>client>server" matches both cases.
-    if 'server_to_client' in direction:
+    if 'server_to_client' == direction:
         settings['direction'] = 'server_to_client'
         receive_data(settings, 'client')
 
-    if 'client_to_server' in direction:
+    elif 'client_to_server' == direction:
         settings['direction'] = 'client_to_server'
         send_data(settings, 'client')
 
-    sys.stdout.write("{}\n".format(settings['status']))
+    sys.stdout.write(" {}\n".format(settings['status']))
     return settings
 
 
@@ -136,7 +134,7 @@ def send_data(settings, role):
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    control_socket.settimeout(0.00000000000000000001)
+    control_socket.settimeout(0.0000001)
 
     if role == 'client':
         address = (settings['server_ip'], settings['data_port'])
@@ -144,11 +142,10 @@ def send_data(settings, role):
         control_socket.bind(('', settings['client_control_port']))
     else:  # server
         address = (settings['client_ip'], settings['data_port'])
-        server_address = (
-            settings['server_ip'],
-            settings['client_control_port'])
+        control_address = (
+            settings['client_ip'], settings['client_control_port'])
         control_socket.bind(('', settings['server_control_port']))
-        send(send_socket, "settings OK, sending", server_address)
+        send(send_socket, "settings OK, sending", control_address)
 
     sent = 0
     start = time.time()
@@ -169,21 +166,23 @@ def send_data(settings, role):
         except socket.timeout:
             continue
 
+    settings['status'] = "success"
+
     # if no ack was received we sent all packets
     if end is None:
         end = time.time()
     if ack is None:
         ack = end;
+        settings['status'] = "ack not received"
 
     control_socket.close()
 
     size = encoder.block_size() * (float(sent) / settings['symbols'])
     seconds = end - start
-    
+
     # save results in settings
     settings['packets_total'] = sent # packets
     settings['packets_decode'] = sent_decode
-    settings['status'] = "success"
     settings['time_start'] = start
     settings['time_decode'] = ack
     settings['time_stop'] = end
@@ -284,7 +283,8 @@ def send_settings(settings):
         try:
             ack, address = receive(control_socket, 1024)  # Server ack
         except socket.timeout:
-            print("Timeout - server not responding to settings ({})".format(attempts))
+            sys.stdout.write(".")
+            sys.stdout.flush()
 
     control_socket.close()
 

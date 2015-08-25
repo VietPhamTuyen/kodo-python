@@ -41,8 +41,10 @@ def save_as_json(results, log_name):
     Saves a list of dictionaries as a json formatted logfile with 
     name 'log_name'. Function adds correct extension to logfile name
     """
+    def dump(res, file, indent=4):
+        json.dump(res, file, indent=indent, sort_keys=True)
 
-    save_helper(results, log_name+'.json', json.load, json.dump)
+    save_helper(results, log_name+'.json', json.load, dump)
     
 def save_as_yaml(results, log_name):
     """ 
