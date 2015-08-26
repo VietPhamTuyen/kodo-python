@@ -17,14 +17,7 @@ import uuid
 import time
 import json
 import os
-
-# Server: Listens for incoming settings on settings_port - spawns appropriate test instance
-# Client: Sends settings to Server and spawns appropriate test instance
-# test_instance
-# test_instance_data
-# test_instance_data_send
-# test_instance_data_recv
-# test_instance_control
+import datetime
 
 class Server(DatagramProtocol):
     """
@@ -35,27 +28,18 @@ class Server(DatagramProtocol):
 
     def __init__(self, report_results=print):
         self.report_results = report_results
-        print("Built Server!")
-
 
     def datagramReceived(self, data, (host, port)):
-
-        print("Server receiving {} from {}!".format(data, (host, port)))
-
         try:
             settings = json.loads(data)
         except Exception:
             print("Received invalid settings message.")
             return
 
-        if not settings.has_key('test_id'):
-            print("Incomplete settings received, missing key 'test_id'")
-            return
-
         settings_ack = settings['test_id']+"_ack"
         self.transport.write(settings_ack, (host, port))
 
-        settings['client_ip'] = host
+        settings['ip_client'] = host
         settings['role'] = 'server'
 
         local_port = 0
@@ -71,8 +55,13 @@ class Server(DatagramProtocol):
                   settings['direction']))
             return
 
+        print("Connection from {}: Running '{}'... ".format(
+              host, settings['direction']))
+
         reactor.listenUDP(local_port, instance)
+        # instance.results.addCallback(lambda x: self.report_results())
         instance.results.addCallback(self.report_results)
+
 
         # Wait for instance to finish
         # this should probably not be done here
@@ -89,23 +78,27 @@ class Client(DatagramProtocol):
     def __init__(self, server_addr, settings, report_results=print):
         self.server_addr = server_addr
         self.settings = settings
+        
         self.settings['test_id'] = uuid.uuid4().get_hex()
+        self.settings['role'] = 'client'
+        self.settings['ip_server'], self.settings['port_server'] = server_addr
+        self.settings['date'] = str(datetime.datetime.now())
+
         self.report_results = report_results
-        print("Built Client!")
 
         # set more settings variables
 
-    def startProtocol(self):
+    def doStart(self):
         # Maybe this should be done once the protocol running (socket open)
         settings_string = json.dumps(self.settings)
         self.transport.connect(*self.server_addr)
         self.transport.write(settings_string, self.server_addr)
-        print("Client started protocol!")
+
+    def doStop(self):
+        pass # do something on shutdown?
 
     def datagramReceived(self, data, addr):
-        print("Client received {} from {}".format(data, addr))
-
-        if not data == settings['test_id']+"_ack":
+        if not data == self.settings['test_id']+"_ack":
             print("Client could not process ack: {}".format(data))
             return
 
@@ -123,8 +116,12 @@ class Client(DatagramProtocol):
                   settings['direction']))
             sys.exit()
 
+        print("Running '{}' with {} symbols of size {}.".format(
+              self.settings['direction'], self.settings['symbols'],
+              self.settings['symbol_size']))
+
         reactor.listenUDP(local_port, instance)
-        instance.results.addCallback(lambda x: self.report_results())
+        instance.results.addCallback(self.report_results)
         instance.results.addCallback(lambda x: self.transport.stopListening())
 
 
@@ -141,7 +138,14 @@ class TestInstanceSend(DatagramProtocol):
         # Setup variables related to test instance:
         self.destination_addr = destination_addr
         self.settings = settings
-        self.packets_sent = 0
+
+        self.settings['packets_total'] = 0
+        self.settings['packets_decode'] = 0
+
+        self.settings['time_start'] = None;
+        self.settings['time_end'] = None;
+        self.settings['time_decode'] = None;
+
         self.done = False
 
         self.results = Deferred()
@@ -153,49 +157,56 @@ class TestInstanceSend(DatagramProtocol):
         self.encoder = self.encoder_factory.build()
         data_in = os.urandom(self.encoder.block_size())
         self.encoder.set_symbols(data_in)
-        print("TestInstanceSend built!")
 
-    def startProtocol(self):
+    def doStart(self):
         self.transport.connect(*self.destination_addr)
-        print("TestInstanceSend connected")
-        reactor.callLater(0.5, self.asyncSendData)
+        # Give the other side time to setup a receiver
+        reactor.callLater(0, self.asyncSendData)
 
-
+    def doStop(self):
+        self.results.callback(self.settings)
 
     def datagramReceived(self, data, addr):
         """
         Checks if the correct nack was received from the correct sender
         """
-        print("TestInstanceSend received {} from {}".format(data, addr))
         if not data == self.settings['test_id'] + "_ack_data":
             return
-        # ack received
 
+        # ack received
         self.done = True
 
-    @inlineCallbacks
-    def asyncSendData(self, packet_interval=0.5):
+        # keep track of how many packets were sent until 'done' detected
+        self.settings['packets_decode'] = self.settings['packets_total']
+        self.settings['time_decode'] = time.time()
+
+    def asyncSendData(self, packet_interval=0):
         """
-        Asynchronous transmission of data
+        Asynchronous transmission of data. Queues itself on the reactor event
+        loop if not done sending. Allows async operation with 1 thread
         """
 
-        # there should be a start delay of some sort
-        while not self.done:
+        if self.settings['time_start'] is None:
+            self.settings['time_start'] = time.time()
+        self.settings['time_end'] = time.time()
+
+        if not self.done:
+
             packet = self.encoder.write_payload()
-            yield reactor.callLater(packet_interval, self.transport.write,
-                                    packet)
-            self.packets_sent += 1
-            print("TestInstanceSend sent packet {}".format(self.packets_sent))
-            if self.packets_sent >= (self.settings['symbols'] * 
-                                     self.settings['max_redundancy']) / 100:
+            self.transport.write(packet)
+            self.settings['packets_total'] += 1
+
+            if self.settings['packets_total'] >= (self.settings['symbols'] * 
+                                        self.settings['max_redundancy']) / 100:
                 self.done = True
+            else:
 
-        print("TestInstanceSend done")
+                reactor.callLater(packet_interval, self.asyncSendData, 
+                                  packet_interval)
 
-        ## populate settings
+        else:
 
-        self.results.callback(self.settings)
-        # yield self.transport.stopListening()
+            self.transport.stopListening() # stops the instance
 
 class TestInstanceRecv(DatagramProtocol):
     """
@@ -207,12 +218,12 @@ class TestInstanceRecv(DatagramProtocol):
         self.source_addr = source_addr
         self.settings = settings
         
-        self.packets_received = 0
-        self.packets_decode = 0
+        self.settings['packets_decode'] = 0
+        self.settings['packets_total'] = 0
         
-        self.time_start = None;
-        self.time_stop = None;
-        self.time_decode = None;
+        self.settings['time_start'] = None;
+        self.settings['time_end'] = None;
+        self.settings['time_decode'] = None;
 
         self.results = Deferred()
 
@@ -221,35 +232,33 @@ class TestInstanceRecv(DatagramProtocol):
                                     max_symbols=settings['symbols'], 
                                     max_symbol_size=settings['symbol_size'])
         self.decoder = self.decoder_factory.build()
-        print("TestInstanceRecv built!")
 
-    def startProtocol(self):
+    def doStart(self):
         self.transport.connect(*self.source_addr)
-        print("TestInstanceRecv connected")
+        self.timeout = reactor.callLater(self.settings['timeout'], 
+                                         self.transport.stopListening)
+
+    def doStop(self):
+        self.results.callback(self.settings)
 
     def datagramReceived(self, data, addr):
-        print("TestInstanceRecv received {} bytes from {}".format(len(data), addr))
+        self.timeout.reset(self.settings['timeout']) # postpone timeout
 
-        if self.time_start is None:
-            self.time_start = time.time()
+        if self.settings['time_start'] is None:
+            self.settings['time_start'] = time.time()
+        self.settings['time_end'] = time.time()
 
-        self.packets_received += 1
+        self.settings['packets_total'] += 1
 
         if not self.decoder.is_complete():
             self.decoder.read_payload(data)
 
         if self.decoder.is_complete():
             self.sendNack()
-            if self.time_decode is None:
-                self.time_decode = time.time()
-                self.packets_decode = self.packets_received
-            
+            if self.settings['time_decode'] is None:
+                self.settings['time_decode'] = time.time()
+                self.settings['packets_decode'] = self.settings['packets_total']
 
-                results = {'empty':'results'}
-                # populate results dict
-                # close test instance
-                self.results.callback(results)
-                # self.transport.stopListening()    
 
     def sendNack(self):
         nack = self.settings['test_id'] + "_ack_data"
@@ -261,28 +270,20 @@ if __name__ == '__main__':
 
     server_addr = (host, server_port)
     
-# test_id, source_addr, symbols, symbol_size
-
-    settings = {
-    'port_tx'   : 10000,
-    'port_rx'   : 10001,
-    'symbols'   : 16,
-    'symbol_size' : 1500,
-    'direction' : 'client_to_server',
-    'max_redundancy' : 200,
-    }
+    settings = dict(
+    port_tx   = 10000,
+    port_rx   = 10001,
+    symbols   = 16,
+    symbol_size = 1500,
+    direction = 'client_to_server',
+    max_redundancy = 200,
+    timeout   = 0.2
+    )
 
     server = Server()
     reactor.listenUDP(server_port, server)
 
     client = Client(server_addr, settings)
     reactor.listenUDP(0, client) # Any port
-
-    # send = TestInstanceSend("test", addr, 16, 1500, 200)
-    # reactor.listenUDP(server_port + 1, send)
-
-    # recv = TestInstanceRecv("test", (host, port+1), 16, 1500)
-    # reactor.listenUDP(server_port, recv)
-
 
     reactor.run()
