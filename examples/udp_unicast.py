@@ -19,11 +19,60 @@ import json
 import os
 import datetime
 
+"""
+    General workflow and Hierarchi of the classes in this file 
+
+    Server listens for test settings from Client on globally known port.
+    On received settings, a client-specific port is opened.
+
+    If the settings specify a test-scenario direction from:
+    -   SERVER TO CLIENT: The server launches a SendInstance and transmits data 
+        (from the new port) to the (host, port) pair used to send the settings.
+        In case settings with the same test-id are received again,
+        this is ignored and discarded while the SendInstance is active.
+        The client is expected to send an ACK on the private port when finished
+        receiving data. The ack should be re-sent for each additional
+        packet the client receives.
+
+    -   CLIENT TO SERVER: The server starts a ReceiveInstance on the new port,
+        which begins its life begin transmitting an ACK to the client and 
+        listens for incoming data. The server associates the RecvInstace with
+        the specified test ID.
+        In case the ACK was lost, the client will (after a timeout) re-send the 
+        settings. An ACK for each received settings of this direction 
+        must be sent. When the Server re-receives these settings, the test-id
+        is recognised, and the RecvInstance is ordered to re-transmit the ACK.
+        The cycle may run indefinately (but certainly should not), and is broken
+        when the client receives the ACK before the timeout. The timeout should
+        be big enough to allow this.
+        When data is decoded fully, an ACK(data) is sent to the client.
+        Additional ACKs are transmitted for each additional data packet received
+        after all data is received.
+
+    The Client thus only uses one port for each test scenario (and may re-use
+    this for several runs), while the Server uses one for receiving settings,
+    a "service" port, and then creates "private" ports for each
+    connecting Client.
+    This should also enable communication if only Server has a global address.
+    """
+
 class Server(DatagramProtocol):
     """
-    Listens for test settings on specified port and launches test instances
-    based on received settings.
-    Server may run indefinately, launching multiple test instances
+
+    Listens for settings from Clients on server port.
+    On received settings:
+    
+    -   If settings direction is server to client, the server launches a 
+        SendInstance on a new port.
+        In case settings test-id is already known (an Instance is already 
+        associated with the test-id), the settings are discarded
+    -   If settings direction is client to server, the server launches a
+        RecvInstance on a new port.
+        In case settings test-id is already known (an Instance is already 
+        associated with the test-id), the associated RecvInstance is ordered to
+        retransmit the start-up ACK.
+    
+    Server may run indefinetely, launching multiple test instances
     """
 
     def __init__(self, report_results=print):
@@ -36,10 +85,11 @@ class Server(DatagramProtocol):
             print("Received invalid settings message.")
             return
 
-        settings_ack = settings['test_id']+"_ack"
-        self.transport.write(settings_ack, (host, port))
+        # settings_ack = settings['test_id']+"_ack"
+        # self.transport.write(settings_ack, (host, port))
 
         settings['ip_client'] = host
+        settings['port_client'] = port
         settings['role'] = 'server'
 
         local_port = 0
