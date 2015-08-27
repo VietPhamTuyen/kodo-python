@@ -12,8 +12,9 @@ import json
 import itertools
 import time
 import datetime
+from twisted.internet.defer import inlineCallbacks
 
-import udp_unicast
+import udp_unicast_twisted
 import udp_unicast_logging
 
 def get_settings(parameter_space, repeat = 1):
@@ -44,6 +45,44 @@ def get_settings(parameter_space, repeat = 1):
 
     return settings
 
+
+def log(results, logname, logtype):
+    #add date and time to results
+    results['date'] = str(datetime.datetime.now())
+    if logtype == 'xml':
+        udp_unicast_logging.save_as_xml(results, logname)
+    elif logtype == 'csv':
+        udp_unicast_logging.save_as_csv(results, logname)
+    elif logtype == 'yaml':
+        udp_unicast_logging.save_as_yaml(results, logname)
+    elif logtype == 'json':
+        udp_unicast_logging.save_as_json(results, logname)
+    else:
+        print("Unknown log format: " + logtype)
+
+@inlineCallbacks
+def queue_clients(parameters_list, logname, log_format):
+    """
+    Async function that ensures clients are run sequentially. Thread control
+    is handed over after each yield, until client.on_finish as completed
+    """
+    for parameters in parameters_list:
+        p = dict(parameters)
+        logname = "client_benchmark_log"
+        addr = (p['ip_server'], p['port_server'])
+        
+        client = udp_unicast_twisted.Client(addr, p, 
+            report_results=lambda x: log(x, logname, log_format))
+        udp_unicast_twisted.reactor.listenUDP(0, client)
+        completed_test = yield client.on_finish
+        # completed_test contains the ID of the completed test case
+        
+        # sleep for a bit to ensure that sockets have time to close
+        time.sleep(1)
+
+    # stop the reactor here
+    udp_unicast_twisted.reactor.stop()
+
 def main():
     """
     UDP Server/Client benchmarking of a defined parameter space
@@ -72,7 +111,7 @@ def main():
         help='Start a server')
 
     server_parser.add_argument(
-        '--settings-port',
+        '--port_server',
         type=int,
         help='settings port on the server.',
         default=41001)
@@ -112,46 +151,30 @@ def main():
         parameter_space = json.load(open(args.parameters_file))
 
         # for run in range(args.runs):
+        logname = "client_benchmark_log"
         settings = get_settings(parameter_space, args.runs)
-        for setting in settings:
-            s = dict(setting)
-            if args.print_parameters_used:
-                print s
-            else:
-                results = udp_unicast.client(s)
-                logname = "client_benchmark_log"
-                log(results, logname, args.log_format)
-                # sleep for a bit to ensure that sockets have time to close
-                time.sleep(1)
+
+        if args.print_parameters_used:
+            for setting in settings:
+                print(dict(setting))  
+        else:
+            udp_unicast_twisted.reactor.callLater(0, queue_clients, 
+                                                  settings, logname, 
+                                                  args.log_format)
     else: #server
         settings = vars(args)
         log_format = settings.pop('log_format')
+        logname = 'server_benchmark_log'
 
-        print("Starting server on port " + str(settings['settings_port']) +
+        print("Starting server on port " + str(settings['port_server']) +
                 ", press ctrl+c to stop.")
 
-        while True:
-            try:
-                results = udp_unicast.server(settings)
-                logname = "server_benchmark_log"
-                log(results, logname, log_format)
-                
-            except KeyboardInterrupt:
-                break
+        server = udp_unicast_twisted.Server(
+                    report_results=lambda x: log(x, logname, log_format))
+        udp_unicast_twisted.reactor.listenUDP(settings['port_server'], server)
 
-def log(results, logname, logtype):
-    #add date and time to results
-    results['date'] = str(datetime.datetime.now())
-    if logtype == 'xml':
-        udp_unicast_logging.save_as_xml(results, logname)
-    elif logtype == 'csv':
-        udp_unicast_logging.save_as_csv(results, logname)
-    elif logtype == 'yaml':
-        udp_unicast_logging.save_as_yaml(results, logname)
-    elif logtype == 'json':
-        udp_unicast_logging.save_as_json(results, logname)
-    else:
-        print("Unknown log format: " + logtype)
+    udp_unicast_twisted.reactor.run()
+
 
 if __name__ == "__main__":
     main()

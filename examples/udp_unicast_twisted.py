@@ -59,14 +59,7 @@ class Server(DatagramProtocol):
               host, settings['direction']))
 
         reactor.listenUDP(local_port, instance)
-        # instance.results.addCallback(lambda x: self.report_results())
         instance.results.addCallback(self.report_results)
-
-
-        # Wait for instance to finish
-        # this should probably not be done here
-        # ready for new test after this
-
 
 class Client(DatagramProtocol):
     """
@@ -85,6 +78,7 @@ class Client(DatagramProtocol):
         self.settings['date'] = str(datetime.datetime.now())
 
         self.report_results = report_results
+        self.on_finish = Deferred()
 
         # set more settings variables
 
@@ -95,7 +89,8 @@ class Client(DatagramProtocol):
         self.transport.write(settings_string, self.server_addr)
 
     def doStop(self):
-        pass # do something on shutdown?
+        # Return test id to the on_finish callback
+        reactor.callLater(0, self.on_finish.callback, self.settings['test_id'])
 
     def datagramReceived(self, data, (host, port)):
         if not data == self.settings['test_id']+"_ack":
@@ -123,11 +118,6 @@ class Client(DatagramProtocol):
         reactor.listenUDP(local_port, instance)
         instance.results.addCallback(self.report_results)
         instance.results.addCallback(lambda x: self.transport.stopListening())
-
-
-        # Wait for instance to finish
-        # This should probably not be done here
-        # We should be done here, close connection
 
 class TestInstanceSend(DatagramProtocol):
     """
