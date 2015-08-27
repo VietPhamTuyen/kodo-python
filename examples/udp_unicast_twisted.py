@@ -97,23 +97,23 @@ class Client(DatagramProtocol):
     def doStop(self):
         pass # do something on shutdown?
 
-    def datagramReceived(self, data, addr):
+    def datagramReceived(self, data, (host, port)):
         if not data == self.settings['test_id']+"_ack":
             print("Client could not process ack: {}".format(data))
             return
 
         # ack received successfully
         local_port = 0
-        if settings['direction'] == 'client_to_server':
-            local_port = settings['port_tx']
-            instance = TestInstanceSend((host, settings['port_rx']), settings)
+        if self.settings['direction'] == 'client_to_server':
+            local_port = self.settings['port_tx']
+            instance = TestInstanceSend((host, self.settings['port_rx']), self.settings)
             ## Start sending!
-        elif settings['direction'] == 'server_to_client':
-            local_port = settings['port_rx']
-            instance = TestInstanceRecv((host, settings['port_tx']), settings)
+        elif self.settings['direction'] == 'server_to_client':
+            local_port = self.settings['port_rx']
+            instance = TestInstanceRecv((host, self.settings['port_tx']), self.settings)
         else:
             print("Could not interpret setting 'direction': {}".format(
-                  settings['direction']))
+                  self.settings['direction']))
             sys.exit()
 
         print("Running '{}' with {} symbols of size {}.".format(

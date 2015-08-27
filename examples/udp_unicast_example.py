@@ -10,7 +10,7 @@ import sys
 import argparse
 import json
 
-import udp_unicast
+import udp_unicast_twisted
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description=main.__doc__)
 
     parser.add_argument(
-        '--settings-port',
+        '--port-server',
         type=int,
         help='settings port on the server.',
         default=41001)
@@ -45,43 +45,36 @@ def main():
         help='Start a client')
 
     client_parser.add_argument(
-        '--server-ip',
+        '--ip-server',
         type=str,
         help='ip of the server.',
         default='127.0.0.1')
 
     client_parser.add_argument(
-        '--client-control-port',
-        type=int,
-        help='control port on the client side, used for signaling.',
-        default=41003)
-
-    client_parser.add_argument(
-        '--server-control-port',
-        type=int,
-        help='control port on the server side, used for signaling.',
-        default=41005)
-
-    client_parser.add_argument(
-        '--data-port',
+        '--port_tx',
         type=int,
         help='port used for data transmission.',
         default=41011)
+
+    client_parser.add_argument(
+        '--port_rx',
+        type=int,
+        help='port used for data reception.',
+        default=41012)
 
     client_parser.add_argument(
         '--direction',
         help='direction of data transmission',
         choices=[
             'client_to_server',
-            'server_to_client',
-            'client_to_server_to_client'],
-        default='client_to_server_to_client')
+            'server_to_client'],
+        default='client_to_server')
 
     client_parser.add_argument(
         '--symbols',
         type=int,
         help='number of symbols in each generation/block.',
-        default=64)
+        default=16)
 
     client_parser.add_argument(
         '--symbol-size',
@@ -111,20 +104,22 @@ def main():
 
     results = None
     if args.role == 'client':
-        results = udp_unicast.client(settings)
-        print_results(results)
+        addr = (settings['ip_server'], settings['port_server'])
+        client = udp_unicast_twisted.Client(addr, settings, 
+                                            report_results=print_results)
+        udp_unicast_twisted.reactor.listenUDP(0, client)
     else:
-        while True: # Loop until cancelled, e.g. by "ctrl+c"
-            results = udp_unicast.server(settings)
-            print_results(results)
+        server = udp_unicast_twisted.Server(report_results=print_results)
+        udp_unicast_twisted.reactor.listenUDP(settings['port_server'], server)
+
+    udp_unicast_twisted.reactor.run()
 
 def print_results(results):
-    if(results['status'] != "success"):
-            print("{0} failed: {1}".format(args.role, results['status']))
-        else:
-            print("Summary for {} udp unicast:".format(args.role))
-            for key, value in results.items():
-                print("\t{0}: {1}".format(key, value))
+    print("Summary for {} udp unicast: ".format(results['role']))
+    for key, value in results.items():
+        print("\t{0}: {1}".format(key, value))
 
 if __name__ == "__main__":
     main()
+
+
