@@ -77,39 +77,59 @@ class Server(DatagramProtocol):
 
     def __init__(self, report_results=print):
         self.report_results = report_results
+        self.active_instances = {} # identified by "'test-id'"
+
+    def detach_instance(results):
+        self.report_results(results)
+        instance = self.active_instances.pop(results['test_id'])
+        return results
+        # Any last operations for instance?
 
     def datagramReceived(self, data, (host, port)):
         try:
             settings = json.loads(data)
         except Exception:
-            print("Received invalid settings message.")
+            print("Discarding invalid settings message.")
             return
 
-        # settings_ack = settings['test_id']+"_ack"
-        # self.transport.write(settings_ack, (host, port))
+        # Verify that all needed entries are in settings, otherwise discard
 
         settings['ip_client'] = host
         settings['port_client'] = port
         settings['role'] = 'server'
 
-        local_port = 0
+        test_id = settings['test_id']
+
         if settings['direction'] == 'server_to_client':
-            local_port = settings['port_tx']
-            instance = TestInstanceSend((host, settings['port_rx']), settings)
-            ## start sending!!
+
+            if not self.active_instances.has_key(test_id):
+                instance = TestInstanceSend(host, port, settings)
+                instance.results.addCallback(self.detach_instance)
+                self.active_instances[test_id] = instance
+                reactor.listenUDP(0, instance) # any port
+            else:
+                # just ignore
+                return
+
         elif settings['direction'] == 'client_to_server':
-            local_port = settings['port_rx']
-            instance = TestInstanceRecv((host, settings['port_tx']), settings)
+
+            if not self.active_instances.has_key(test_id):
+                instance = TestInstanceRecv(host, port, settings)
+                instance.results.addCallback(self.detach_instance)
+                self.active_instances[test_id] = instance
+                reactor.listenUDP(0, instance) # any port
+            else:
+                assert(type(self.active_instances[test_id]) is TestInstanceRecv)
+                self.active_instances[test_id].send_ack()
+    
         else:
+
             print("Invalid direction specified in received settings: {}".format(
                   settings['direction']))
             return
 
-        print("Connection from {}: Running '{}'... ".format(
-              host, settings['direction']))
-
-        reactor.listenUDP(local_port, instance)
-        instance.results.addCallback(self.report_results)
+        print("{}:{} Connected: Running '{}' with ID {}".format(
+              host, port, settings['direction'], settings['test_id']))
 
 class Client(DatagramProtocol):
     """
@@ -119,12 +139,12 @@ class Client(DatagramProtocol):
     """
 
     def __init__(self, server_addr, settings, report_results=print):
-        self.server_addr = server_addr
+        self.server_ip, self.server_port = server_addr
         self.settings = settings
         
         self.settings['test_id'] = uuid.uuid4().get_hex()
         self.settings['role'] = 'client'
-        self.settings['ip_server'], self.settings['port_server'] = server_addr
+        self.settings['ip_server'] = server_ip
         self.settings['date'] = str(datetime.datetime.now())
 
         self.report_results = report_results
@@ -133,9 +153,8 @@ class Client(DatagramProtocol):
         # set more settings variables
 
     def doStart(self):
-        # Maybe this should be done once the protocol running (socket open)
         settings_string = json.dumps(self.settings)
-        self.transport.connect(*self.server_addr)
+        self.transport.connect(self.server_ip, self.server_port)
         self.transport.write(settings_string, self.server_addr)
 
     def doStop(self):
@@ -143,6 +162,8 @@ class Client(DatagramProtocol):
         reactor.callLater(0, self.on_finish.callback, self.settings['test_id'])
 
     def datagramReceived(self, data, (host, port)):
+        
+        
         if not data == self.settings['test_id']+"_ack":
             print("Client could not process ack: {}".format(data))
             return
