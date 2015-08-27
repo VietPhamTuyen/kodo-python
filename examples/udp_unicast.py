@@ -6,319 +6,280 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-import os
-import socket
-import time
+from __future__ import print_function
+from twisted.internet.protocol import DatagramProtocol
+from twisted.internet.defer import Deferred, inlineCallbacks
+from twisted.internet import reactor
+
 import sys
-import json
-import uuid
-
 import kodo
+import uuid
+import time
+import json
+import os
+import datetime
 
-"""
-Functionality for communicating over udp using kodo to ensure reliability.
+class Server(DatagramProtocol):
+    """
+    Listens for test settings on specified port and launches test instances
+    based on received settings.
+    Server may run indefinately, launching multiple test instances
+    """
 
-Both the server and the client can send and receive data
+    def __init__(self, report_results=print):
+        self.report_results = report_results
 
-The client can send settings to the server, such that relevant test parameters
-can be specified on the client side.
+    def datagramReceived(self, data, (host, port)):
+        try:
+            settings = json.loads(data)
+        except Exception:
+            print("Received invalid settings message.")
+            return
 
-The sender side will send symols until it receives a stop signal on its control
-port or it has sent all redundant symbols as specified.
+        settings_ack = settings['test_id']+"_ack"
+        self.transport.write(settings_ack, (host, port))
 
-All settings are contained in the 'settings' dictionary which should define the
-following keys-values:
-
-settings_port = (int) settings port on the server
-server_ip = (string) ip of the server
-client_control_port = (int) control port on the client side, used for signaling
-server_control_port = (int) control port on the server side, used for signaling
-data_port = (int) port used for data transmission
-direction = (string) direction of data transmission
-symbols = (int) number of symbols in each generation/block
-symbol_size = (int) size of each symbol, in bytes
-max_redundancy = (float percent) maximum amount of redundancy to be sent
-timeout = (float seconds) timeout used for retransmitting various control messages
-
-Both server and client return the 'settings' dictionary with added entries 
-describing the process:
-
-    test_id         = (int) 128bit unique test identifier
-    client_ip       = (string) ip of the connected client (server only)
-    status          = (string) describing if process succeeded or why it failed
-    packets_total   = (int) total amount of packets transferred or received 
-                      (depending on direction)
-    packets_decode  = (int) amount of packets sent / received at decode time.
-                      sender may have sent more packets before receiving the ack
-    time_start      = (float) timestamp for when the first packet is sent 
-    time_decode     = (float) timestamp for when the decode happens (or when 
-                      ack is received for sender)
-    time_stop       = (float) timestamp for when the last packet is sent or received
-
-"""
-
-
-def server(args):
-    settings = {}
-
-    settings_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    settings_socket.bind(('', args['settings_port']))
-
-    # Wait for settings connections
-    data, address = receive(settings_socket, 1024)
-    
-    try:
-        settings = json.loads(data) # may throw exception
-
-        settings['client_ip'] = address[0]
+        settings['ip_client'] = host
         settings['role'] = 'server'
 
-        sys.stdout.write("Client connected from {}: Running scenario '{}'... ".format(settings['client_ip'], settings['direction']))
-        sys.stdout.flush()
-
+        local_port = 0
         if settings['direction'] == 'server_to_client':
-            send_data(settings, 'server')
+            local_port = settings['port_tx']
+            instance = TestInstanceSend((host, settings['port_rx']), settings)
+            ## start sending!!
         elif settings['direction'] == 'client_to_server':
-            receive_data(settings, 'server')
+            local_port = settings['port_rx']
+            instance = TestInstanceRecv((host, settings['port_tx']), settings)
         else:
-            print("Invalid direction.")
-            settings['status'] = "Invalid direction "
-    except Exception:
-        print("Settings message invalid.")
-        settings['status'] = 'Settings message invalid'
-    finally:
-        sys.stdout.write(" {}\n".format(settings['status']))
-        sys.stdout.flush()
-        return settings
+            print("Invalid direction specified in received settings: {}".format(
+                  settings['direction']))
+            return
 
-def client(settings):
-    if settings['symbol_size'] > 65000:
-        print("Resulting packets too big, reduce symbol size")
-        return
+        print("Connection from {}: Running '{}'... ".format(
+              host, settings['direction']))
 
-    direction = settings.pop('direction')
+        reactor.listenUDP(local_port, instance)
+        instance.results.addCallback(self.report_results)
 
-    sys.stdout.write("Running '{}' with {} symbols of size {}.".format(
-                     direction, settings['symbols'], settings['symbol_size']))
-    sys.stdout.flush()
-
-    settings['test_id'] = uuid.uuid4().get_hex()
-    settings['role'] = 'client'
-
-    if 'server_to_client' == direction:
-        settings['direction'] = 'server_to_client'
-        receive_data(settings, 'client')
-
-    elif 'client_to_server' == direction:
-        settings['direction'] = 'client_to_server'
-        send_data(settings, 'client')
-
-    sys.stdout.write(" {}\n".format(settings['status']))
-    return settings
-
-
-def send_data(settings, role):
+class Client(DatagramProtocol):
     """
-    Send data to the other node
+    Sends settings to specified server and launches appropriate test instance
+    after the settings packet has been acknowledged.
+    Client only launches on test instance, then closes.
     """
 
-    # Setup kodo encoder_factory and encoder
-    encoder_factory = kodo.FullVectorEncoderFactoryBinary(
-        max_symbols=settings['symbols'],
-        max_symbol_size=settings['symbol_size'])
+    def __init__(self, server_addr, settings, report_results=print):
+        self.server_addr = server_addr
+        self.settings = settings
+        
+        self.settings['test_id'] = uuid.uuid4().get_hex()
+        self.settings['role'] = 'client'
+        self.settings['ip_server'], self.settings['port_server'] = server_addr
+        self.settings['date'] = str(datetime.datetime.now())
 
-    encoder = encoder_factory.build()
-    data_in = os.urandom(encoder.block_size())
-    encoder.set_symbols(data_in)
+        self.report_results = report_results
+        self.on_finish = Deferred()
 
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # set more settings variables
 
-    control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    control_socket.settimeout(0.0000001)
+    def doStart(self):
+        # Maybe this should be done once the protocol running (socket open)
+        settings_string = json.dumps(self.settings)
+        self.transport.connect(*self.server_addr)
+        self.transport.write(settings_string, self.server_addr)
 
-    if role == 'client':
-        address = (settings['server_ip'], settings['data_port'])
-        send_settings(settings)
-        control_socket.bind(('', settings['client_control_port']))
-    else:  # server
-        address = (settings['client_ip'], settings['data_port'])
-        control_address = (
-            settings['client_ip'], settings['client_control_port'])
-        control_socket.bind(('', settings['server_control_port']))
-        send(send_socket, "settings OK, sending", control_address)
+    def doStop(self):
+        # Return test id to the on_finish callback
+        reactor.callLater(0, self.on_finish.callback, self.settings['test_id'])
 
-    sent = 0
-    start = time.time()
-    ack = None
-    end = None
-    sent_decode = 0
-    while sent < settings['symbols'] * settings['max_redundancy'] / 100:
-        packet = encoder.write_payload()
-        send(send_socket, packet, address)
-        sent += 1
+    def datagramReceived(self, data, (host, port)):
+        if not data == self.settings['test_id']+"_ack":
+            print("Client could not process ack: {}".format(data))
+            return
 
-        try:
-            control_socket.recv(1024)
-            if ack is None:
-                ack = time.time()
-                sent_decode = sent
-            break
-        except socket.timeout:
-            continue
+        # ack received successfully
+        local_port = 0
+        if self.settings['direction'] == 'client_to_server':
+            local_port = self.settings['port_tx']
+            instance = TestInstanceSend((host, self.settings['port_rx']), self.settings)
+            ## Start sending!
+        elif self.settings['direction'] == 'server_to_client':
+            local_port = self.settings['port_rx']
+            instance = TestInstanceRecv((host, self.settings['port_tx']), self.settings)
+        else:
+            print("Could not interpret setting 'direction': {}".format(
+                  self.settings['direction']))
+            sys.exit()
 
-    settings['status'] = "success"
+        print("Running '{}' with {} symbols of size {}.".format(
+              self.settings['direction'], self.settings['symbols'],
+              self.settings['symbol_size']))
 
-    # if no ack was received we sent all packets
-    if end is None:
-        end = time.time()
-    if ack is None:
-        ack = end;
-        settings['status'] = "ack not received"
+        reactor.listenUDP(local_port, instance)
+        instance.results.addCallback(self.report_results)
+        instance.results.addCallback(lambda x: self.transport.stopListening())
 
-    control_socket.close()
-
-    size = encoder.block_size() * (float(sent) / settings['symbols'])
-    seconds = end - start
-
-    # save results in settings
-    settings['packets_total'] = sent # packets
-    settings['packets_decode'] = sent_decode
-    settings['time_start'] = start
-    settings['time_decode'] = ack
-    settings['time_stop'] = end
-
-
-def receive_data(settings, role):
-    """Receive data from the other node"""
-
-    # Setup kodo encoder_factory and decoder
-    decoder_factory = kodo.FullVectorDecoderFactoryBinary(
-        max_symbols=settings['symbols'],
-        max_symbol_size=settings['symbol_size'])
-
-    decoder = decoder_factory.build()
-
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    # Set receiving sockets
-    data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    data_socket.settimeout(settings['timeout'])
-    data_socket.bind(('', settings['data_port']))
-
-    if role == 'client':
-        address = (settings['server_ip'], settings['server_control_port'])
-        send_settings(settings)
-    else:  # server
-        address = (settings['client_ip'], settings['client_control_port'])
-        send(send_socket, "settings OK, receiving", address)
-
-    # Decode coded packets
-    received = 0
-    received_decode = 0
-    start = time.time()
-    dec = None
-    end = None
-    while 1:
-        try:
-            packet = data_socket.recv(settings['symbol_size'] + 100)
-
-            if not decoder.is_complete():
-                decoder.read_payload(packet)
-                received += 1
-
-            if decoder.is_complete():
-                if dec is None:
-                    dec = time.time()  # stopping time once
-                    received_decode = received
-                send(send_socket, "Stop sending", address)
-
-        except socket.timeout:
-            break  # no more data arriving
-
-    # in case we did not complete
-    if end is None:
-        end = time.time()
-    if dec is None:
-        dec = end
-
-    data_socket.close()
-
-    if not decoder.is_complete():
-        settings['status'] = "Decoding failed"
-    else:
-        settings['status'] = "success"
-
-    size = decoder.block_size() * (float(received) / settings['symbols'])
-    seconds = end-start
-
-    settings['packets_total'] = received; # packets
-    settings['packets_decode'] = received_decode
-    settings['time_start'] = start
-    settings['time_decode'] = dec
-    settings['time_stop'] = end
-
-
-def send_settings(settings):
+class TestInstanceSend(DatagramProtocol):
     """
-    Send settings to server, block until confirmation received that settings
-    was correctly received
+    Sends coded data to a TestInstanceRecv until an ack is received or
+    an upper limit of redundancy is reached.
     """
+    def __init__(self, destination_addr, settings):
+        # Setup variables related to test instance:
+        self.destination_addr = destination_addr
+        self.settings = settings
 
-    control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    control_socket.settimeout(settings['timeout'])
-    control_socket.bind(('', settings['client_control_port']))
+        self.settings['packets_total'] = 0
+        self.settings['packets_decode'] = 0
 
-    send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    send_address = (settings['server_ip'], settings['settings_port'])
+        self.settings['time_start'] = None;
+        self.settings['time_end'] = None;
+        self.settings['time_decode'] = None;
 
-    message = json.dumps(settings)
-    ack = None
-    address = ''
-    attempts = 0
-    while ack is None:
-        # Send settings
-        send(send_socket, message, send_address)
-        attempts += 1
-        # Waiting for respons
-        try:
-            ack, address = receive(control_socket, 1024)  # Server ack
-        except socket.timeout:
-            sys.stdout.write(".")
-            sys.stdout.flush()
+        self.done = False
 
-    control_socket.close()
+        self.results = Deferred()
 
+        # Build encoder
+        self.encoder_factory = kodo.FullVectorEncoderFactoryBinary(
+                                    max_symbols=settings['symbols'], 
+                                    max_symbol_size=settings['symbol_size'])
+        self.encoder = self.encoder_factory.build()
+        data_in = os.urandom(self.encoder.block_size())
+        self.encoder.set_symbols(data_in)
 
-def send(socket, message, address):
+    def doStart(self):
+        self.transport.connect(*self.destination_addr)
+        # Give the other side time to setup a receiver
+        reactor.callLater(0, self.asyncSendData)
+
+    def doStop(self):
+        self.results.callback(self.settings)
+
+    def datagramReceived(self, data, addr):
+        """
+        Checks if the correct nack was received from the correct sender
+        """
+        if not data == self.settings['test_id'] + "_ack_data":
+            return
+
+        # ack received
+        self.done = True
+
+        # keep track of how many packets were sent until 'done' detected
+        self.settings['packets_decode'] = self.settings['packets_total']
+        self.settings['time_decode'] = time.time()
+
+    def asyncSendData(self, packet_interval=0):
+        """
+        Asynchronous transmission of data. Queues itself on the reactor event
+        loop if not done sending. Allows async operation with 1 thread
+        """
+
+        if self.settings['time_start'] is None:
+            self.settings['time_start'] = time.time()
+        self.settings['time_end'] = time.time()
+
+        if not self.done:
+
+            packet = self.encoder.write_payload()
+            self.transport.write(packet)
+            self.settings['packets_total'] += 1
+
+            if self.settings['packets_total'] >= (self.settings['symbols'] * 
+                                        self.settings['max_redundancy']) / 100:
+                self.done = True
+            else:
+
+                reactor.callLater(packet_interval, self.asyncSendData, 
+                                  packet_interval)
+
+        else:
+
+            self.transport.stopListening() # stops the instance
+
+class TestInstanceRecv(DatagramProtocol):
     """
-    Send message to address using the provide socket.
-
-    Works for both python2 and python3
-
-    :param socket: The socket to use.
-    :param message: The message to send.
-    :param address: The address to send to.
+    Receives coded data from a TestInstanceSend. Sends an ack when data can be
+    decoded, an for each packet received after that.
     """
-    if sys.version_info[0] == 2:
-        message = message
-    else:
-        if isinstance(message, str):
-            message = bytes(message, 'utf-8')
-    socket.sendto(message, address)
+    def __init__(self, source_addr, settings):
+        # Setup variable related to test instance
+        self.source_addr = source_addr
+        self.settings = settings
+        
+        self.settings['packets_decode'] = 0
+        self.settings['packets_total'] = 0
+        
+        self.settings['time_start'] = None;
+        self.settings['time_end'] = None;
+        self.settings['time_decode'] = None;
+
+        self.results = Deferred()
+
+        # Build decoder
+        self.decoder_factory = kodo.FullVectorDecoderFactoryBinary(
+                                    max_symbols=settings['symbols'], 
+                                    max_symbol_size=settings['symbol_size'])
+        self.decoder = self.decoder_factory.build()
+
+    def doStart(self):
+        self.transport.connect(*self.source_addr)
+        self.timeout = reactor.callLater(self.settings['timeout'], 
+                                         self.transport.stopListening)
+
+    def doStop(self):
+        self.results.callback(self.settings)
+
+    def datagramReceived(self, data, addr):
+        self.timeout.reset(self.settings['timeout']) # postpone timeout
+
+        if self.settings['time_start'] is None:
+            self.settings['time_start'] = time.time()
+        self.settings['time_end'] = time.time()
+
+        self.settings['packets_total'] += 1
+
+        if not self.decoder.is_complete():
+            self.decoder.read_payload(data)
+
+        if self.decoder.is_complete():
+            self.sendNack()
+            if self.settings['time_decode'] is None:
+                self.settings['time_decode'] = time.time()
+                self.settings['packets_decode'] = self.settings['packets_total']
 
 
-def receive(socket, number_of_bytes):
-    """
-    Receive an amount of bytes.
+    def sendNack(self):
+        nack = self.settings['test_id'] + "_ack_data"
+        self.transport.write(nack, self.source_addr)
 
-    Works for both python2 and python3
+def run():
+    reactor.run()
 
-    :param socket: The socket to use.
-    :param number_of_bytes: The number of bytes to receive.
-    """
-    data, address = socket.recvfrom(number_of_bytes)
-    if sys.version_info[0] == 2:
-        return data, address
-    else:
-        if isinstance(data, bytes):
-            return str(data, 'utf-8'), address
+def stop():
+    reactor.stop()
+
+if __name__ == '__main__':
+    server_port = 44444
+    host = "127.0.0.1"
+
+    server_addr = (host, server_port)
+    
+    settings = dict(
+    port_tx   = 10000,
+    port_rx   = 10001,
+    symbols   = 16,
+    symbol_size = 1500,
+    direction = 'client_to_server',
+    max_redundancy = 200,
+    timeout   = 0.2
+    )
+
+    server = Server()
+    reactor.listenUDP(server_port, server)
+
+    client = Client(server_addr, settings)
+    reactor.listenUDP(0, client) # Any port
+
+    run()

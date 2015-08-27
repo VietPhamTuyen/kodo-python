@@ -14,7 +14,7 @@ import time
 import datetime
 from twisted.internet.defer import inlineCallbacks
 
-import udp_unicast_twisted
+import udp_unicast
 import udp_unicast_logging
 
 def get_settings(parameter_space, repeat = 1):
@@ -71,17 +71,17 @@ def queue_clients(parameters_list, logname, log_format):
         logname = "client_benchmark_log"
         addr = (p['ip_server'], p['port_server'])
         
-        client = udp_unicast_twisted.Client(addr, p, 
+        client = udp_unicast.Client(addr, p, 
             report_results=lambda x: log(x, logname, log_format))
-        udp_unicast_twisted.reactor.listenUDP(0, client)
+        udp_unicast.reactor.listenUDP(0, client)
         completed_test = yield client.on_finish
         # completed_test contains the ID of the completed test case
         
         # sleep for a bit to ensure that sockets have time to close
         time.sleep(1)
 
-    # stop the reactor here
-    udp_unicast_twisted.reactor.stop()
+    # stop the event loop here
+    udp_unicast.stop()
 
 def main():
     """
@@ -158,7 +158,7 @@ def main():
             for setting in settings:
                 print(dict(setting))  
         else:
-            udp_unicast_twisted.reactor.callLater(0, queue_clients, 
+            udp_unicast.reactor.callLater(0, queue_clients, 
                                                   settings, logname, 
                                                   args.log_format)
     else: #server
@@ -169,11 +169,11 @@ def main():
         print("Starting server on port " + str(settings['port_server']) +
                 ", press ctrl+c to stop.")
 
-        server = udp_unicast_twisted.Server(
+        server = udp_unicast.Server(
                     report_results=lambda x: log(x, logname, log_format))
-        udp_unicast_twisted.reactor.listenUDP(settings['port_server'], server)
+        udp_unicast.reactor.listenUDP(settings['port_server'], server)
 
-    udp_unicast_twisted.reactor.run()
+    udp_unicast.run()
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ import sys
 import argparse
 import json
 
-import udp_unicast_twisted
+import udp_unicast
 
 
 def main():
@@ -105,14 +105,14 @@ def main():
     results = None
     if args.role == 'client':
         addr = (settings['ip_server'], settings['port_server'])
-        client = udp_unicast_twisted.Client(addr, settings, 
+        client = udp_unicast.Client(addr, settings, 
                                             report_results=print_results)
-        udp_unicast_twisted.reactor.listenUDP(0, client)
+        udp_unicast.reactor.listenUDP(0, client)
     else:
-        server = udp_unicast_twisted.Server(report_results=print_results)
-        udp_unicast_twisted.reactor.listenUDP(settings['port_server'], server)
+        server = udp_unicast.Server(report_results=print_results)
+        udp_unicast.reactor.listenUDP(settings['port_server'], server)
 
-    udp_unicast_twisted.reactor.run()
+    udp_unicast.run()
 
 def print_results(results):
     print("Summary for {} udp unicast: ".format(results['role']))
