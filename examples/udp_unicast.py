@@ -234,7 +234,7 @@ class TestInstanceSend(TestInstance):
     coded data is transmitted.
     """
     def __init__(self, *args, **kwargs):
-        TestInstance.__init__(args, kwargs)
+        TestInstance.__init__(self, args, kwargs)
 
         self.settings['packets_total'] = 0
         self.settings['packets_decode'] = 0
@@ -321,7 +321,7 @@ class TestInstanceRecv(TestInstance):
     after that event.
     """
     def __init__(self, *args, **kwargs):
-        TestInstance.__init__(args, kwargs)
+        TestInstance.__init__(self, args, kwargs)
 
         self.settings['packets_decode'] = 0
         self.settings['packets_total'] = 0
