@@ -58,7 +58,6 @@ import datetime
 
 class Server(DatagramProtocol):
     """
-
     Listens for settings from Clients on server port.
     On received settings:
     
@@ -133,6 +132,11 @@ class Server(DatagramProtocol):
 
 class Client(DatagramProtocol):
     """
+    Client sends settings to specified server (addr, port) pair, depending on
+    the test-direction specified in the settings, two procedures will be
+    launched:
+
+
     Sends settings to specified server and launches appropriate test instance
     after the settings packet has been acknowledged.
     Client only launches on test instance, then closes.
@@ -162,8 +166,8 @@ class Client(DatagramProtocol):
         reactor.callLater(0, self.on_finish.callback, self.settings['test_id'])
 
     def datagramReceived(self, data, (host, port)):
-        
-        
+
+
         if not data == self.settings['test_id']+"_ack":
             print("Client could not process ack: {}".format(data))
             return
@@ -193,7 +197,7 @@ class Client(DatagramProtocol):
 class TestInstanceSend(DatagramProtocol):
     """
     Sends coded data to a TestInstanceRecv until an ack is received or
-    an upper limit of redundancy is reached.
+    an upper limit of redundancy is reached. 
     """
     def __init__(self, destination_addr, settings):
         # Setup variables related to test instance:
