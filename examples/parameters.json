@@ -6,7 +6,7 @@
     "port_tx" :             [44005],
     "timeout":              [1.0],
     "direction":            ["client_to_server", "server_to_client"],
-    "symbols" :             [16,64],
-    "symbol_size" :         [100,1500],
+    "symbols" :             [16,64,128,256,512],
+    "symbol_size" :         [100,500,1500],
     "max_redundancy" :      [200]
 }
