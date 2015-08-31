@@ -412,27 +412,25 @@ def stop():
     reactor.stop()
 
 if __name__ == '__main__':
-    host = "127.0.0.1"
 
     settings = dict(
     port_server = 10000,
     ip_server = "127.0.0.1",
-    erasures = 0.5,
     rate_limit_kBps = 50,
     symbols   = 16,
     symbol_size = 1500,
     direction = 'client_to_server',
-    # max_redundancy = 200,
-    timeout   = 0.5
+    max_redundancy = 200,
+    timeout   = 0.5,
+    erasures = 0.5,
     )
 
     server = Server()
     reactor.listenUDP(settings['port_server'], server)
 
     client = Client()
-    # d = Deferred()
-    # d.addCallback(client.run_test)
-    # d.addCallback(reactor.stop())
-    reactor.callLater(0, client.run_test, settings)
+
+    d = client.run_test(settings)
+    d.addCallback(lambda ignore: stop())
 
     run()

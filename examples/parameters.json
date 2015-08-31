@@ -8,5 +8,7 @@
     "direction":            ["client_to_server", "server_to_client"],
     "symbols" :             [16,64,128,256,512],
     "symbol_size" :         [100,500,1500],
-    "max_redundancy" :      [200]
+    "max_redundancy" :      [200],
+    "rate_limit_kBps" :     [1000, 10000],
+    "erasures" :            [0.1, 0.2, 0.3]
 }
