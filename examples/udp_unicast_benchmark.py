@@ -66,15 +66,14 @@ def queue_clients(parameters_list, logname, log_format):
     Async function that ensures clients are run sequentially. Thread control
     is handed over after each yield, until client.on_finish as completed
     """
+    logname = "client_benchmark_log"
+    client = udp_unicast.Client(report_results=lambda x: log(x, logname, 
+                                                             log_format))
     for parameters in parameters_list:
         p = dict(parameters)
-        logname = "client_benchmark_log"
         addr = (p['ip_server'], p['port_server'])
         
-        client = udp_unicast.Client(addr, p, 
-            report_results=lambda x: log(x, logname, log_format))
-        udp_unicast.reactor.listenUDP(0, client)
-        completed_test = yield client.on_finish
+        completed_test = yield client.run_test(p)
         # completed_test contains the ID of the completed test case
         
         # sleep for a bit to ensure that sockets have time to close

@@ -105,9 +105,10 @@ def main():
     results = None
     if args.role == 'client':
         addr = (settings['ip_server'], settings['port_server'])
-        client = udp_unicast.Client(addr, settings, 
-                                            report_results=print_results)
-        udp_unicast.reactor.listenUDP(0, client)
+        client = udp_unicast.Client(report_results=print_results)
+        d = client.run_test(settings)
+        d.addCallback(lambda x: udp_unicast.stop())
+
     else:
         server = udp_unicast.Server(report_results=print_results)
         udp_unicast.reactor.listenUDP(settings['port_server'], server)

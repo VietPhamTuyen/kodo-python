@@ -165,10 +165,10 @@ class Client(object):
 
         # Create the appropriate instance:
         instance = None
-        if settings['direction'] is 'client_to_server':
+        if settings['direction'] == 'client_to_server':
             instance = TestInstanceSend((server_ip, server_port), 
                                         settings, True)
-        elif settings['direction'] is 'server_to_client':
+        elif settings['direction'] == 'server_to_client':
             instance = TestInstanceRecv((server_ip, server_port), 
                                         settings, True)
         else:
@@ -220,12 +220,12 @@ class TestInstance(DatagramProtocol):
     def doHandshake(self):
         assert(self.client_mode) # should only be called in client mode
         settings_string = json.dumps(self.settings)
-        server_addr = (settings['ip_server'], settings['port_server'])
+        server_addr = (self.settings['ip_server'], self.settings['port_server'])
         while not self.handshake_finished:
-            self.transport.write(settings_string, server_addr)
             timeout = Deferred()
-            self.handshake_timeout = reactor.callLater(settings['timeout'], 
+            self.handshake_timeout = reactor.callLater(self.settings['timeout'], 
                                                        timeout.callback, None)
+            self.transport.write(settings_string, server_addr)
             yield timeout
 
     def finishHandshake(self, addr):
