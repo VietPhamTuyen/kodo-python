@@ -20,6 +20,8 @@ import json
 import os
 import datetime
 import random
+import socket
+import errno
 
 random.seed()
 
@@ -300,16 +302,30 @@ class TestInstanceSend(TestInstance):
         if not self.done:
             # print("sending packet {}".format(settings['packets_total']))
             packet = self.encoder.write_payload()
-            self.transport.write(packet)
+
+            while True:
+                try:
+                    self.transport.write(packet)
+                    break
+                except socket.error, e:
+                    err = e.args[0]
+                    if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                        # Socket send buffer is full. Give it a little time
+                        # and the try again
+                        print("Rate limit too high (Send buffer full). "
+                              "Waiting 250ms before sending another packet")
+                        time.sleep(0.25)
+                        continue
+                    else:
+                        print(e)
+                        break
+
             self.settings['packets_total'] += 1
 
             if self.settings.has_key('max_redundancy') and (
                 self.settings['packets_total'] >= (self.settings['symbols'] * 
                                         self.settings['max_redundancy']) / 100):
                 self.done = True
-                print("Sending done sending (reached max redundancy)")
-                
-
             
             reactor.callLater(packet_interval, self.asyncSendData, 
                               packet_interval)
@@ -375,14 +391,14 @@ class TestInstanceRecv(TestInstance):
             self.decoder.read_payload(data)
 
         if self.decoder.is_complete():
-            self.sendDataAck()
+            self.sendDataAck((host, port))
             if not self.settings.has_key('time_decode'):
                 self.settings['time_decode'] = time.time()
                 self.settings['packets_decode'] = self.settings['packets_total']
 
-    def sendDataAck(self):
+    def sendDataAck(self, addr):
         ack = self.settings['test_id'] + "_ack_data"
-        self.transport.write(ack)
+        self.transport.write(ack, addr)
 
     def sendSettingsAck(self, addr):
         ack = self.settings['test_id'] + "_ack_settings"
