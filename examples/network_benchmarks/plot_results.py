@@ -12,7 +12,8 @@ for log in logs:
 
 pl.rcParams.update({
         'figure.autolayout': True,
-        'lines.marker': "x",
+        # 'lines.marker': "o",
+        'lines.linewidth': 0,
         "legend.fontsize": "xx-small",
         })
 
@@ -27,14 +28,13 @@ df["overhead"] = (df["packets_total"] - df["packets_decode"]) / df["packets_deco
 g = df.groupby(by=test_parameters)
 gg = g.mean().reset_index()
 
-gg.pivot_table(values='goodput', index="decode_delay", columns=["direction"]).plot(logy=True)
-pl.ylabel("goodput")
-pl.savefig("test.eps")
+pl.close("all")
 
-gg.pivot_table(values='overhead', index="decode_delay", columns=["direction"]).plot()
-pl.ylabel("overhead")
-pl.savefig("test2.eps")
+gg.pivot_table(index="decode_delay", columns=["direction"], values=["goodput"]).plot(logy=True)
+pl.savefig("delay_vs_goodput.eps")
 
-gg.pivot_table(values='overhead', index="goodput", columns=["direction"]).plot(logx=True)
-pl.ylabel("overhead")
-pl.savefig("test3.eps")
+gg.pivot_table(index="decode_delay", columns=["direction"], values=["overhead"]).plot()
+pl.savefig("delay_vs_overhead.eps")
+
+gg.pivot_table(index="goodput", columns=["direction"], values=["overhead"]).plot(logx=True)
+pl.savefig("goodput_vs_overhead.eps")
