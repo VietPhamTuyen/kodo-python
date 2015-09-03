@@ -106,7 +106,7 @@ def dict_to_xml(tag, d):
 def test():
     # Create test dictionary
     testresults = dict(
-        test_id     = uuid.uuid4().get_hex(),
+        test_id     = uuid.uuid4().hex,
         client_ip   = "192.168.1.80",
         status      = "success",
         packets_total = 100,

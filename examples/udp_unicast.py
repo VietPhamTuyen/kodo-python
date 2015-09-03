@@ -62,6 +62,20 @@ random.seed()
     This should also enable communication if only Server has a global address.
     """
 
+def to_string(message):
+    if sys.version_info[0] == 2:
+        return message
+    else:
+        if isinstance(message, bytes):
+            return str(message, 'utf-8')
+
+def to_buffer(message):
+    if sys.version_info[0] != 2:
+        if isinstance(message, str):
+            message = bytes(message, 'utf-8')
+    return message
+
+
 class Server(DatagramProtocol):
     """
     Listens for settings from Clients on server port.
@@ -91,7 +105,8 @@ class Server(DatagramProtocol):
         instance = self.active_instances.pop(results['test_id'])
         return results
 
-    def datagramReceived(self, data, (host, port)):
+    def datagramReceived(self, data, addr):
+        data = to_string(data)
         try:
             settings = json.loads(data)
         except Exception:
@@ -99,17 +114,15 @@ class Server(DatagramProtocol):
             return
 
         # Verify that all needed entries are in settings, otherwise discard
-
-        settings['ip_client'] = host
-        settings['port_client'] = port
+        settings['ip_client'], settings['port_client'] = addr
         settings['role'] = 'server'
 
         test_id = settings['test_id']
 
         if settings['direction'] == 'server_to_client':
 
-            if not self.active_instances.has_key(test_id):
-                instance = TestInstanceSend((host, port), settings, False)
+            if not test_id in self.active_instances:
+                instance = TestInstanceSend(addr, settings, False)
                 instance.results.addCallback(self.detach_instance)
                 self.active_instances[test_id] = instance
                 reactor.listenUDP(0, instance) # any port
@@ -119,13 +132,13 @@ class Server(DatagramProtocol):
 
         elif settings['direction'] == 'client_to_server':
 
-            if not self.active_instances.has_key(test_id):
-                instance = TestInstanceRecv((host, port), settings, False)
+            if not test_id in self.active_instances:
+                instance = TestInstanceRecv(addr, settings, False)
                 instance.results.addCallback(self.detach_instance)
                 self.active_instances[test_id] = instance
                 reactor.listenUDP(0, instance) # any port
             else:
-                self.active_instances[test_id].sendSettingsAck((host, port))
+                self.active_instances[test_id].sendSettingsAck(addr)
                 return
     
         else:
@@ -134,8 +147,8 @@ class Server(DatagramProtocol):
                   settings['direction']))
             return
 
-        print("{}:{} Connected: Running '{}' with ID {}".format(
-              host, port, settings['direction'], settings['test_id']))
+        print("{} Connected: Running '{}' with ID {}".format(
+              addr, settings['direction'], settings['test_id']))
 
 class Client(object):
     """
@@ -159,7 +172,7 @@ class Client(object):
     def run_test(self, settings):
         server_ip = settings['ip_server']
         server_port = settings['port_server']
-        settings['test_id'] = uuid.uuid4().get_hex()
+        settings['test_id'] = uuid.uuid4().hex
         settings['role'] = 'client'
         settings['date'] = str(datetime.datetime.now())
 
@@ -186,7 +199,7 @@ class Client(object):
               settings['direction'], settings['symbols'], 
               settings['symbol_size']))
 
-        results = yield on_finish
+        yield on_finish
         # yield doesnt return until its callback has emitted. Meanwhile the
         # reactor event loop is free to process whatever task it may have.
         print("Client Finished")
@@ -210,7 +223,7 @@ class TestInstance(DatagramProtocol):
         self.settings['time_first'] = None
         self.settings['time_last'] = None
 
-        if not self.settings.has_key('erasures'):
+        if not 'erasures' in self.settings:
             self.settings['erasures'] = 0
 
         self.results = Deferred()
@@ -227,7 +240,7 @@ class TestInstance(DatagramProtocol):
             timeout = Deferred()
             self.handshake_timeout = reactor.callLater(self.settings['timeout'], 
                                                        timeout.callback, None)
-            self.transport.write(settings_string, server_addr)
+            self.transport.write(to_buffer(settings_string), server_addr)
             yield timeout
 
     def finishHandshake(self, addr):
@@ -270,17 +283,18 @@ class TestInstanceSend(TestInstance):
         # start sending
         packet_interval = 0
 
-        if self.settings.has_key('rate_limit_kBps'):
+        if 'rate_limit_kBps' in self.settings:
             rate_limit = self.settings['rate_limit_kBps']
             symbol_size = self.settings['symbol_size']
             packet_interval = symbol_size / float(1000 * rate_limit)
 
         reactor.callLater(0, self.asyncSendData, packet_interval)
 
-    def datagramReceived(self, data, (host, port)):
+    def datagramReceived(self, data, addr):
         """
         Checks if the correct ack was received from the remote
         """
+        data = to_string(data)
         # Introduce erasures
         if random.random() < self.settings['erasures']:
             return
@@ -288,7 +302,7 @@ class TestInstanceSend(TestInstance):
         if data == self.settings['test_id'] + "_ack_data":
             self.done = True
         elif data == self.settings['test_id'] + "_ack_settings":
-            self.finishHandshake((host, port))
+            self.finishHandshake(addr)
 
     def asyncSendData(self, packet_interval=0):
         """
@@ -305,9 +319,9 @@ class TestInstanceSend(TestInstance):
 
             while True:
                 try:
-                    self.transport.write(packet)
+                    self.transport.write(to_buffer(packet))
                     break
-                except socket.error, e:
+                except socket.error as e:
                     err = e.args[0]
                     if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                         # Socket send buffer is full. Give it a little time
@@ -322,7 +336,7 @@ class TestInstanceSend(TestInstance):
 
             self.settings['packets_total'] += 1
 
-            if self.settings.has_key('max_redundancy') and (
+            if 'max_redundancy' in self.settings and (
                 self.settings['packets_total'] >= (self.settings['symbols'] * 
                                         self.settings['max_redundancy']) / 100):
                 self.done = True
@@ -366,13 +380,13 @@ class TestInstanceRecv(TestInstance):
         self.transport.connect(*self.remote_addr)
         # reset timeout to make up for time lost for handshake
 
-    def datagramReceived(self, data, (host, port)):
+    def datagramReceived(self, data, addr):
         # Introduce erasures
         if random.random() < self.settings['erasures']:
             return
 
         if self.client_mode and not self.handshake_finished:
-            self.finishHandshake((host, port))
+            self.finishHandshake(addr)
 
         # set data timeout if not already set, otherwise reset 
         if self.timeout: 
@@ -391,18 +405,18 @@ class TestInstanceRecv(TestInstance):
             self.decoder.read_payload(data)
 
         if self.decoder.is_complete():
-            self.sendDataAck((host, port))
-            if not self.settings.has_key('time_decode'):
+            self.sendDataAck(addr)
+            if not 'time_decode' in self.settings:
                 self.settings['time_decode'] = time.time()
                 self.settings['packets_decode'] = self.settings['packets_total']
 
     def sendDataAck(self, addr):
         ack = self.settings['test_id'] + "_ack_data"
-        self.transport.write(ack, addr)
+        self.transport.write(to_buffer(ack), addr)
 
     def sendSettingsAck(self, addr):
         ack = self.settings['test_id'] + "_ack_settings"
-        self.transport.write(ack, addr)
+        self.transport.write(to_buffer(ack), addr)
 
 
 def run():
@@ -427,10 +441,10 @@ if __name__ == '__main__':
 
     server = Server()
     reactor.listenUDP(settings['port_server'], server)
-
+    
     client = Client()
-
     d = client.run_test(settings)
     d.addCallback(lambda ignore: stop())
-
+    
     run()
+    
