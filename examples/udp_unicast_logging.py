@@ -16,8 +16,7 @@ try:
     import os
     import uuid
 except ImportError as err:
-    print("Error: Could not import module '{0}'. Please install '{0}'.".format(
-          err.name))
+    print("Error: A module was not found ({})".format(err))
     sys.exit()
 
 
@@ -31,7 +30,7 @@ def save_helper(results, log_name, load_func, dump_func):
 
     # read in old results, if any
     if os.path.isfile(log_name):
-        with open(log_name, 'r') as logfile:
+        with open(log_name, 'rt') as logfile:
             old_results = load_func(logfile)
             if type(old_results) is list:
                 results_list += old_results

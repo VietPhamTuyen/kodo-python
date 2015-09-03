@@ -19,8 +19,7 @@ try:
     import udp_unicast
     import udp_unicast_logging
 except ImportError as err:
-    print("Error: Could not import module '{0}'. Please install '{0}'.".format(
-          err.name))
+    print("Error: A module was not found ({})".format(err))
     sys.exit()
 
 
@@ -168,7 +167,7 @@ def main():
             udp_unicast.reactor.callLater(0, queue_clients,
                                           settings, logname,
                                           args.log_format)
-    else:  # server
+    elif args.role == 'server':
         settings = vars(args)
         log_format = settings.pop('log_format')
         logname = 'server_benchmark_log'
@@ -179,6 +178,10 @@ def main():
         server = udp_unicast.Server(
                     report_results=lambda x: log(x, logname, log_format))
         udp_unicast.reactor.listenUDP(settings['port_server'], server)
+
+    else:
+        print("Error: Please specify role")
+        return
 
     udp_unicast.run()
 

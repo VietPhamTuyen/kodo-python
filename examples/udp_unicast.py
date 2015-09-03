@@ -24,8 +24,7 @@ try:
     import socket
     import errno
 except ImportError as err:
-    print("Error: Could not import module '{0}'. Please install '{0}'.".format(
-          err.name))
+    print("Error: A module was not found ({})".format(err))
     sys.exit()
 
 random.seed()
