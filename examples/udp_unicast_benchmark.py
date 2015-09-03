@@ -23,7 +23,8 @@ except ImportError as err:
           err.name))
     sys.exit()
 
-def get_settings(parameter_space, repeat = 1):
+
+def get_settings(parameter_space, repeat=1):
     """
     Returns a iterator that yelds all possible combinations in a dictionary of
     parameter, where each parameter is given a list of possible values.
@@ -41,8 +42,9 @@ def get_settings(parameter_space, repeat = 1):
     """
 
     l = list()
-    for key,value in parameter_space.iteritems():
-        l.append( list( itertools.product([key],value)))
+
+    for key, value in parameter_space.iteritems():
+        l.append(list(itertools.product([key], value)))
 
     settings = iter("")
 
@@ -53,7 +55,7 @@ def get_settings(parameter_space, repeat = 1):
 
 
 def log(results, logname, logtype):
-    #add date and time to results
+    # add date and time to results
     results['date'] = str(datetime.datetime.now())
     if logtype == 'xml':
         udp_unicast_logging.save_as_xml(results, logname)
@@ -66,6 +68,7 @@ def log(results, logname, logtype):
     else:
         print("Unknown log format: " + logtype)
 
+
 @inlineCallbacks
 def queue_clients(parameters_list, logname, log_format):
     """
@@ -73,20 +76,19 @@ def queue_clients(parameters_list, logname, log_format):
     is handed over after each yield, until client.on_finish as completed
     """
     logname = "client_benchmark_log"
-    client = udp_unicast.Client(report_results=lambda x: log(x, logname, 
+    client = udp_unicast.Client(report_results=lambda x: log(x, logname,
                                                              log_format))
     for parameters in parameters_list:
         p = dict(parameters)
-        addr = (p['ip_server'], p['port_server'])
-        
-        completed_test = yield client.run_test(p)
+        yield client.run_test(p)
         # completed_test contains the ID of the completed test case
-        
+
         # sleep for a bit to ensure that sockets have time to close
         time.sleep(1)
 
     # stop the event loop here
     udp_unicast.stop()
+
 
 def main():
     """
@@ -102,9 +104,9 @@ def main():
 
     parser.add_argument('--log-format',
                         dest='log_format',
-                        type=str, 
+                        type=str,
                         help="one of the following: "
-                        "'json', 'yaml', 'csv', 'xml'. ", 
+                        "'json', 'yaml', 'csv', 'xml'. ",
                         default='json')
 
     subparsers = parser.add_subparsers(
@@ -161,18 +163,18 @@ def main():
 
         if args.print_parameters_used:
             for setting in settings:
-                print(dict(setting))  
+                print(dict(setting))
         else:
-            udp_unicast.reactor.callLater(0, queue_clients, 
-                                                  settings, logname, 
-                                                  args.log_format)
-    else: #server
+            udp_unicast.reactor.callLater(0, queue_clients,
+                                          settings, logname,
+                                          args.log_format)
+    else:  # server
         settings = vars(args)
         log_format = settings.pop('log_format')
         logname = 'server_benchmark_log'
 
         print("Starting server on port " + str(settings['port_server']) +
-                ", press ctrl+c to stop.")
+              ", press ctrl+c to stop.")
 
         server = udp_unicast.Server(
                     report_results=lambda x: log(x, logname, log_format))

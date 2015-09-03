@@ -6,6 +6,8 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
+import sys
+
 try:
     import json
     import yaml
@@ -19,12 +21,12 @@ except ImportError as err:
     sys.exit()
 
 
-"""
-    Saves a list of dictionaries in logfile with 
-    name 'log_name'. Uses function load_func to load existing data, 
-    and dump_func to save data with correct formatting. 
-    """
 def save_helper(results, log_name, load_func, dump_func):
+    """
+    Saves a list of dictionaries in logfile with
+    name 'log_name'. Uses function load_func to load existing data,
+    and dump_func to save data with correct formatting.
+    """
     results_list = []
 
     # read in old results, if any
@@ -42,26 +44,29 @@ def save_helper(results, log_name, load_func, dump_func):
     with open(log_name, 'w') as logfile:
         dump_func(results_list, logfile, indent=4)
 
+
 def save_as_json(results, log_name):
     """
-    Saves a list of dictionaries as a json formatted logfile with 
+    Saves a list of dictionaries as a json formatted logfile with
     name 'log_name'. Function adds correct extension to logfile name
     """
     def dump(res, file, indent=4):
         json.dump(res, file, indent=indent, sort_keys=True)
 
     save_helper(results, log_name+'.json', json.load, dump)
-    
+
+
 def save_as_yaml(results, log_name):
-    """ 
-    Saves a list of dictionaries as a yaml formatted logfile with 
+    """
+    Saves a list of dictionaries as a yaml formatted logfile with
     name 'log_name'. Function adds correct extension to logfile name
     """
     save_helper(results, log_name+'.yaml', yaml.load, yaml.dump)
 
+
 def save_as_csv(results, log_name):
     """
-    Saves a dictionary type as a csv formatted logfile with 
+    Saves a dictionary type as a csv formatted logfile with
     name 'log_name'. Function adds correct extension to logfile name.
     Writes keys in first column, values in second. One key-value pair each line
     """
@@ -69,6 +74,7 @@ def save_as_csv(results, log_name):
         writer = csv.writer(logfile)
         writer.writerows(results.items())
         logfile.write(os.linesep)
+
 
 def save_as_xml(results, log_name):
     """
@@ -79,7 +85,7 @@ def save_as_xml(results, log_name):
     tree = None
     root = None
     parser = ElementTree.XMLParser(encoding='utf-8')
-    
+
     if os.path.isfile(logfile):
         tree = ElementTree.ElementTree()
         tree.parse(logfile, parser=parser)
@@ -96,8 +102,9 @@ def save_as_xml(results, log_name):
 
     tree.write(logfile)
 
+
 def dict_to_xml(tag, d):
-    """ 
+    """
     Turn a simple dictionary d of key, value pairs into xml.
     'tag' is the "root" xml entry
     returns an ElementTree.Element
@@ -109,23 +116,25 @@ def dict_to_xml(tag, d):
         element.append(child)
     return element
 
+
 def test():
     # Create test dictionary
     testresults = dict(
-        test_id     = uuid.uuid4().hex,
-        client_ip   = "192.168.1.80",
-        status      = "success",
-        packets_total = 100,
-        packets_decode = 98,
-        time_start  = 14.231235, 
-        time_decode = 28.123215,
-        time_stop   = 30.456456)
+        test_id=uuid.uuid4().hex,
+        client_ip="192.168.1.80",
+        status="success",
+        packets_total=100,
+        packets_decode=98,
+        time_start=14.231235,
+        time_decode=28.123215,
+        time_stop=30.456456)
 
     logname = "testlog"
     save_as_json(testresults, logname)
     save_as_yaml(testresults, logname)
     save_as_csv(testresults, logname)
     save_as_xml(testresults, logname)
+
 
 def test_cleanup():
     for extension in ['json', 'yaml', 'csv', 'xml']:
@@ -135,5 +144,5 @@ def test_cleanup():
 
 if __name__ == '__main__':
     test()
-    test() # run twice to check if files are appended properly
+    test()  # run twice to check if files are appended properly
     test_cleanup()
