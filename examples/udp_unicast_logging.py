@@ -6,12 +6,18 @@
 # See accompanying file LICENSE.rst or
 # http://www.steinwurf.com/licensing
 
-import json
-import yaml
-import csv
-from xml.etree import ElementTree
-import os
-import uuid
+try:
+    import json
+    import yaml
+    import csv
+    from xml.etree import ElementTree
+    import os
+    import uuid
+except ImportError as err:
+    print("Error: Could not import module '{0}'. Please install '{0}'.".format(
+          err.name))
+    sys.exit()
+
 
 """
     Saves a list of dictionaries in logfile with 

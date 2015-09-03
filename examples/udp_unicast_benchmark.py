@@ -7,15 +7,21 @@
 # http://www.steinwurf.com/licensing
 
 import sys
-import argparse
-import json
-import itertools
-import time
-import datetime
-from twisted.internet.defer import inlineCallbacks
 
-import udp_unicast
-import udp_unicast_logging
+try:
+    import argparse
+    import json
+    import itertools
+    import time
+    import datetime
+    from twisted.internet.defer import inlineCallbacks
+
+    import udp_unicast
+    import udp_unicast_logging
+except ImportError as err:
+    print("Error: Could not import module '{0}'. Please install '{0}'.".format(
+          err.name))
+    sys.exit()
 
 def get_settings(parameter_space, repeat = 1):
     """

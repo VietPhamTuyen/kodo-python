@@ -7,21 +7,27 @@
 # http://www.steinwurf.com/licensing
 
 from __future__ import print_function
-from twisted.internet.protocol import DatagramProtocol
-from twisted.internet.defer import Deferred, inlineCallbacks
-from twisted.internet.base import DelayedCall
-from twisted.internet import reactor
-
 import sys
-import kodo
-import uuid
-import time
-import json
-import os
-import datetime
-import random
-import socket
-import errno
+
+try:
+    from twisted.internet.protocol import DatagramProtocol
+    from twisted.internet.defer import Deferred, inlineCallbacks
+    from twisted.internet.base import DelayedCall
+    from twisted.internet import reactor
+
+    import kodo
+    import uuid
+    import time
+    import json
+    import os
+    import datetime
+    import random
+    import socket
+    import errno
+except ImportError as err:
+    print("Error: Could not import module '{0}'. Please install '{0}'.".format(
+          err.name))
+    sys.exit()
 
 random.seed()
 
@@ -447,4 +453,3 @@ if __name__ == '__main__':
     d.addCallback(lambda ignore: stop())
     
     run()
-    
