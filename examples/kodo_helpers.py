@@ -155,25 +155,17 @@ class StateViewer(object):
         :param code_state: A list of lists containing the symbol coefficients
         """
         surface = pygame.Surface((self.size + 1, self.size + 1))
-        surface.fill((0,)*3)
+        surface.fill((0,) * 3)
         diameter = self.size / len(code_state)
-        y = diameter / 2
+        radius = diameter / 2
+        y = radius
         for symbol in code_state:
-            x = diameter / 2
+            x = radius
             for data in symbol:
+                if data != 0:
+                    color = (255 - (data % 255),) * 3
+                    pygame.gfxdraw.circle(surface, x, y, radius, color)
                 x += diameter
-                if data == 0:
-                    continue
-                color = (255,)*3
-                if data != 1:
-                    color = (data % 255,) * 3
-
-                pygame.gfxdraw.circle(
-                    surface,
-                    int(x - diameter),
-                    int(y),
-                    int(diameter / 2),
-                    color)
             y += diameter
 
         self.canvas.add_surface(
