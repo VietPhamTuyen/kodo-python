@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* Updated udp unicast example and added udp unicast benchmark
+* Minor: Updated udp unicast example and added udp unicast benchmark
 
 8.0.0
 -----

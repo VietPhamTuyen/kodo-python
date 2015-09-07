@@ -1,14 +1,11 @@
 {
-    "role" :                ["client"],
-    "ip_server":            ["127.0.0.1"],
-    "port_server" :         [41001],
-    "port_rx" :             [44444],
-    "port_tx" :             [44005],
+    "server_ip":            ["127.0.0.1"],
+    "server_port" :         [41001],
     "timeout":              [1.0],
     "direction":            ["client_to_server", "server_to_client"],
     "symbols" :             [16,64,128,256,512],
     "symbol_size" :         [100,500,1500],
     "max_redundancy" :      [200],
-    "rate_limit_kBps" :     [1000, 10000],
+    "rate_limit" :          [1000, 10000],
     "erasures" :            [0.1, 0.2, 0.3]
 }

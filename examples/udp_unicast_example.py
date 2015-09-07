@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description=main.__doc__)
 
     parser.add_argument(
-        '--port-server',
+        '--server-port',
         type=int,
         help='settings port on the server.',
         default=41001)
@@ -36,31 +36,19 @@ def main():
 
     subparsers.add_parser(
         'server',
-        description="UDP server for sending and receiving files.",
+        description="UDP server for sending and receiving coded data.",
         help='Start a server')
 
     client_parser = subparsers.add_parser(
         'client',
-        description="UDP client for sending and receiving files.",
+        description="UDP client for sending and receiving coded data.",
         help='Start a client')
 
     client_parser.add_argument(
-        '--ip-server',
+        '--server-ip',
         type=str,
         help='ip of the server.',
         default='127.0.0.1')
-
-    client_parser.add_argument(
-        '--port_tx',
-        type=int,
-        help='port used for data transmission.',
-        default=41011)
-
-    client_parser.add_argument(
-        '--port_rx',
-        type=int,
-        help='port used for data reception.',
-        default=41012)
 
     client_parser.add_argument(
         '--direction',
@@ -94,6 +82,18 @@ def main():
         help='timeout used for various sockets, in seconds.',
         default=1.)
 
+    client_parser.add_argument(
+        '--erasures',
+        type=float,
+        help="simulated erasure probability on the link as a floating-point "
+             "value between 0 and 1, where 0.25 is 25 percent packet loss", 
+             default=0.)
+
+    client_parser.add_argument(
+        '--rate-limit',
+        type=int,
+        help='maximum transmission rate in kilobytes per second.')
+
     # We have to use syg.argv for the dry-run parameter, otherwise a subcommand
     # is required.
     if '--dry-run' in sys.argv:
@@ -101,19 +101,17 @@ def main():
 
     args = parser.parse_args()
     settings = vars(args)
-
-    results = None
     if args.role == 'client':
-        addr = (settings['ip_server'], settings['port_server'])
         client = udp_unicast.Client(report_results=print_results)
         d = client.run_test(settings)
         d.addCallback(lambda x: udp_unicast.stop())
 
     else:
         server = udp_unicast.Server(report_results=print_results)
-        udp_unicast.reactor.listenUDP(settings['port_server'], server)
+        udp_unicast.reactor.listenUDP(settings['server_port'], server)
 
     udp_unicast.run()
+
 
 def print_results(results):
     print("Summary for {} udp unicast: ".format(results['role']))
@@ -122,5 +120,3 @@ def print_results(results):
 
 if __name__ == "__main__":
     main()
-
-

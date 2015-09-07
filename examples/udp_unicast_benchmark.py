@@ -25,7 +25,7 @@ except ImportError as err:
 
 def get_settings(parameter_space, repeat=1):
     """
-    Returns a iterator that yelds all possible combinations in a dictionary of
+    Returns a iterator that yields all possible combinations in a dictionary of
     parameter, where each parameter is given a list of possible values.
 
     the parameter space is repeated "repeat" times
@@ -80,7 +80,6 @@ def queue_clients(parameters_list, logname, log_format):
     for parameters in parameters_list:
         p = dict(parameters)
         yield client.run_test(p)
-        # completed_test contains the ID of the completed test case
 
         # sleep for a bit to ensure that sockets have time to close
         time.sleep(1)
@@ -113,18 +112,18 @@ def main():
 
     server_parser = subparsers.add_parser(
         'server',
-        description="UDP server for sending and receiving files.",
+        description="UDP server for sending and receiving coded data.",
         help='Start a server')
 
     server_parser.add_argument(
-        '--port_server',
+        '--server-port',
         type=int,
-        help='settings port on the server.',
+        help='the UDP port to use for the server',
         default=41001)
 
     client_parser = subparsers.add_parser(
         'client',
-        description="UDP client for sending and receiving files.",
+        description="UDP client for sending and receiving coded data.",
         help='Start a client')
 
     client_parser.add_argument(
@@ -156,7 +155,6 @@ def main():
 
         parameter_space = json.load(open(args.parameters_file))
 
-        # for run in range(args.runs):
         logname = "client_benchmark_log"
         settings = get_settings(parameter_space, args.runs)
 
@@ -172,12 +170,12 @@ def main():
         log_format = settings.pop('log_format')
         logname = 'server_benchmark_log'
 
-        print("Starting server on port " + str(settings['port_server']) +
+        print("Starting server on port " + str(settings['server_port']) +
               ", press ctrl+c to stop.")
 
         server = udp_unicast.Server(
                     report_results=lambda x: log(x, logname, log_format))
-        udp_unicast.reactor.listenUDP(settings['port_server'], server)
+        udp_unicast.reactor.listenUDP(settings['server_port'], server)
 
     else:
         print("Error: Please specify role")

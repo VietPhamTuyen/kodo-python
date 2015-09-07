@@ -30,7 +30,7 @@ except ImportError as err:
 random.seed()
 
 """
-    General workflow and Hierarchi of the classes in this file
+    General workflow and hierarchy of the classes in this file
 
     Server listens for test settings from Client on globally known port.
     On received settings, a client-specific port is opened.
@@ -46,13 +46,13 @@ random.seed()
 
     -   CLIENT TO SERVER: The server starts a ReceiveInstance on the new port,
         which begins its life begin transmitting an ACK to the client and
-        listens for incoming data. The server associates the RecvInstace with
+        listens for incoming data. The server associates the RecvInstance with
         the specified test ID.
         In case the ACK was lost, the client will (after a timeout) re-send the
         settings. An ACK for each received settings of this direction
         must be sent. When the Server re-receives these settings, the test-id
-        is recognised, and the RecvInstance is ordered to re-transmit the ACK.
-        The cycle may run indefinately (but certainly shouldnt), and is broken
+        is recognized, and the RecvInstance is ordered to re-transmit the ACK.
+        The cycle may run indefinitely (but certainly should not) and is broken
         when the client receives the ACK before the timeout. The timeout should
         be big enough to allow this.
         When data is decoded fully, an ACK(data) is sent to the client.
@@ -68,14 +68,13 @@ random.seed()
 
 
 def to_string(message):
-    if sys.version_info[0] == 2:
-        return message
-    else:
+    if sys.version_info[0] != 2:
         if isinstance(message, bytes):
-            return str(message, 'utf-8')
+            message = str(message, 'utf-8')
+    return message
 
 
-def to_buffer(message):
+def to_bytes(message):
     if sys.version_info[0] != 2:
         if isinstance(message, str):
             message = bytes(message, 'utf-8')
@@ -97,7 +96,7 @@ class Server(DatagramProtocol):
         associated with the test-id), the associated RecvInstance is ordered to
         retransmit the start-up ACK.
 
-    Server may run indefinetely, launching multiple test instances
+    Server may run indefinitely, launching multiple test instances
     """
 
     def __init__(self, report_results=print):
@@ -120,7 +119,7 @@ class Server(DatagramProtocol):
             return
 
         # Verify that all needed entries are in settings, otherwise discard
-        settings['ip_client'], settings['port_client'] = addr
+        settings['client_ip'], settings['client_port'] = addr
         settings['role'] = 'server'
 
         test_id = settings['test_id']
@@ -168,7 +167,7 @@ class Client(object):
         the data.
     -   SERVER_TO_CLIENT: A RecvInstance is launched in client mode, sending
         the test parameters to the server. The server will then start sending
-        data immidiately. The RecvInstance will re-transmit the settings if not
+        data immediately. The RecvInstance will re-transmit the settings if not
         data has been received before a timeout.
     """
 
@@ -177,8 +176,8 @@ class Client(object):
 
     @inlineCallbacks
     def run_test(self, settings):
-        server_ip = settings['ip_server']
-        server_port = settings['port_server']
+        server_ip = settings['server_ip']
+        server_port = settings['server_port']
         settings['test_id'] = uuid.uuid4().hex
         settings['role'] = 'client'
         settings['date'] = str(datetime.datetime.now())
@@ -207,7 +206,7 @@ class Client(object):
               settings['symbol_size']))
 
         yield on_finish
-        # yield doesnt return until its callback has emitted. Meanwhile the
+        # yield does not return until its callback has emitted. Meanwhile the
         # reactor event loop is free to process whatever task it may have.
         print("Client Finished")
 
@@ -215,7 +214,7 @@ class Client(object):
 class TestInstance(DatagramProtocol):
     """
     Base Class for TestInstanceSend and TestInstanceRecv.
-    Contains shared functionality for the two, and doesnt do anything itself
+    Contains shared functionality for the two, and does not do anything itself
     """
 
     def __init__(self, remote_addr, settings, client_mode):
@@ -243,13 +242,13 @@ class TestInstance(DatagramProtocol):
     def doHandshake(self):
         assert(self.client_mode)  # should only be called in client mode
         settings_string = json.dumps(self.settings)
-        server_addr = (self.settings['ip_server'],
-                       self.settings['port_server'])
+        server_addr = (self.settings['server_ip'],
+                       self.settings['server_port'])
         while not self.handshake_finished:
             timeout = Deferred()
             self.handshake_timeout = reactor.callLater(
                     self.settings['timeout'], timeout.callback, None)
-            self.transport.write(to_buffer(settings_string), server_addr)
+            self.transport.write(to_bytes(settings_string), server_addr)
             yield timeout
 
     def finishHandshake(self, addr):
@@ -292,9 +291,9 @@ class TestInstanceSend(TestInstance):
         self.transport.connect(*self.remote_addr)
         # start sending
         packet_interval = 0
+        rate_limit = self.settings.get('rate_limit', False)
 
-        if 'rate_limit_kBps' in self.settings:
-            rate_limit = self.settings['rate_limit_kBps']
+        if rate_limit:
             symbol_size = self.settings['symbol_size']
             packet_interval = symbol_size / float(1000 * rate_limit)
 
@@ -324,12 +323,11 @@ class TestInstanceSend(TestInstance):
         self.settings['time_last'] = time.time()
 
         if not self.done:
-            # print("sending packet {}".format(settings['packets_total']))
             packet = self.encoder.write_payload()
 
             while True:
                 try:
-                    self.transport.write(to_buffer(packet))
+                    self.transport.write(to_bytes(packet))
                     break
                 except socket.error as e:
                     err = e.args[0]
@@ -425,11 +423,11 @@ class TestInstanceRecv(TestInstance):
 
     def sendDataAck(self, addr):
         ack = self.settings['test_id'] + "_ack_data"
-        self.transport.write(to_buffer(ack), addr)
+        self.transport.write(to_bytes(ack), addr)
 
     def sendSettingsAck(self, addr):
         ack = self.settings['test_id'] + "_ack_settings"
-        self.transport.write(to_buffer(ack), addr)
+        self.transport.write(to_bytes(ack), addr)
 
 
 def run():
@@ -440,12 +438,11 @@ def stop():
     reactor.stop()
 
 
-if __name__ == '__main__':
-
+def main():
     settings = dict(
-        port_server=10000,
-        ip_server='127.0.0.1',
-        rate_limit_kBps=50,
+        server_port=10000,
+        server_ip='127.0.0.1',
+        rate_limit=50,
         symbols=16,
         symbol_size=1500,
         direction='client_to_server',
@@ -455,10 +452,13 @@ if __name__ == '__main__':
     )
 
     server = Server()
-    reactor.listenUDP(settings['port_server'], server)
+    reactor.listenUDP(settings['server_port'], server)
 
     client = Client()
     d = client.run_test(settings)
     d.addCallback(lambda ignore: stop())
 
     run()
+
+if __name__ == '__main__':
+    main()
