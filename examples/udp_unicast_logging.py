@@ -142,6 +142,8 @@ def test_cleanup():
             os.remove(filename)
 
 if __name__ == '__main__':
-    test()
-    test()  # run twice to check if files are appended properly
-    test_cleanup()
+    try:
+        test()
+        test()  # run twice to check if files are appended properly
+    finally:
+        test_cleanup()
