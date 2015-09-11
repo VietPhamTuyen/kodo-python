@@ -8,6 +8,10 @@ Latest
 ------
 * tbd
 
+8.0.2
+-----
+* Patch: Only execute the unit tests within the current project.
+
 8.0.1
 -----
 * Patch: Expose fulcrum stack.
