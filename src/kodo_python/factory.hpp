@@ -15,8 +15,7 @@
 
 namespace kodo_python
 {
-
-    template<template<class, class> class Coder>
+    template<template<class, class, class...> class Coder>
     struct extra_factory_methods
     {
         template<class FactoryClass>
@@ -26,7 +25,10 @@ namespace kodo_python
         }
     };
 
-    template<template<class, class> class Coder, class Field, class TraceTag>
+    template<
+        template<class, class, class...> class Coder,
+        class Field, class TraceTag
+    >
     void factory(const std::string& stack)
     {
         using boost::python::arg;

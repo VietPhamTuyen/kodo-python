@@ -60,7 +60,7 @@ def main():
             # For an encoder the rank specifies the number of symbols
             # it has available for encoding
             rank = encoder.rank()
-            encoder.set_symbol(rank, symbol_storage[rank])
+            encoder.set_const_symbol(rank, symbol_storage[rank])
             print("Symbol {} added to the encoder".format(rank))
 
         if encoder.rank() == 0:

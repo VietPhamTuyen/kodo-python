@@ -50,6 +50,10 @@ namespace kodo_python
 #ifdef STEINWURF_KODO_VERSION
         version += std::string(STEINWURF_KODO_VERSION);
 #endif
+        version += std::string("\n\tmeta: ");
+#ifdef STEINWURF_META_VERSION
+        version += std::string(STEINWURF_META_VERSION);
+#endif
         version += std::string("\n\tplatform: ");
 #ifdef STEINWURF_PLATFORM_VERSION
         version += std::string(STEINWURF_PLATFORM_VERSION);

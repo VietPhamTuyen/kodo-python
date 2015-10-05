@@ -35,7 +35,7 @@ def main():
 
     # Assign the data buffer to the encoder so that we can
     # produce encoded symbols
-    encoder.set_symbols(data_in)
+    encoder.set_const_symbols(data_in)
 
     print("Processing")
     packet_number = 0

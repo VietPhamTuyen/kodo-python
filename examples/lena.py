@@ -107,7 +107,7 @@ def main():
     data_in = image.tobytes()[-encoder.block_size():]
 
     # Set the converted image data
-    encoder.set_symbols(data_in)
+    encoder.set_const_symbols(data_in)
 
     # Create an image viwer and run the following code in a try catch;
     # this prevents the program from locking up, as the finally clause will

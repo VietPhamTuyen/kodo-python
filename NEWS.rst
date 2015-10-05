@@ -6,7 +6,11 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Upgrade to waf-tools 3
+* Minor: Upgrade to boost 2
+* Major: Upgrade to kodo 32
+* Major: Renamed ``set_symbol`` to ``set_const_symbol``.
+* Major: Renamed ``set_symbols`` to ``set_const_symbols``.
 
 8.0.2
 -----

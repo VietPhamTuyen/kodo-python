@@ -68,7 +68,7 @@ def main():
 
         # Assign the data buffer to the encoder so that we may start
         # to produce encoded symbols from it
-        encoder.set_symbols(data_in)
+        encoder.set_const_symbols(data_in)
         while not decoder.is_complete():
             # Encode a packet into the payload buffer
             packet = encoder.write_payload()

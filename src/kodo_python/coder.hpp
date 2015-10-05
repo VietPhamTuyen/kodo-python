@@ -162,7 +162,10 @@ namespace kodo_python
         }
     };
 
-    template<template<class, class> class Coder, class Field, class TraceTag>
+    template<
+        template<class, class, class...> class Coder,
+        class Field, class TraceTag
+    >
     auto coder(const std::string& name) ->
         boost::python::class_<Coder<Field, TraceTag>, boost::noncopyable>
     {
