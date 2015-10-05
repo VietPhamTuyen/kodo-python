@@ -214,7 +214,7 @@ class EncodeStateViewer(StateViewer):
 
     def trace_callback(self, zone, message):
         """Callback to be used with the encoder trace API."""
-        if zone == "set_symbols":
+        if zone == "set_const_symbols":
             for line in reversed(message.split('\n')):
                 elements = line.split()
                 if len(elements) > 1 and elements[1] == 'I:':

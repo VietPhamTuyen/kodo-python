@@ -94,7 +94,7 @@ class TestEncodeDecode(unittest.TestCase):
 
         # Assign the data buffer to the encoder so that we can
         # produce encoded symbols
-        encoder.set_symbols(data_in)
+        encoder.set_const_symbols(data_in)
 
         while not decoder.is_complete():
             # Generate an encoded packet

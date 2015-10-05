@@ -174,7 +174,7 @@ def send_data(settings, role):
 
     encoder = encoder_factory.build()
     data_in = os.urandom(encoder.block_size())
-    encoder.set_symbols(data_in)
+    encoder.set_const_symbols(data_in)
 
     send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

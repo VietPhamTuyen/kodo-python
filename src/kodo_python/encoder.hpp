@@ -21,19 +21,19 @@
 namespace kodo_python
 {
     template<class Encoder>
-    void set_symbols(Encoder& encoder, const std::string& data)
+    void set_const_symbols(Encoder& encoder, const std::string& data)
     {
         auto storage = sak::const_storage(
             (uint8_t*)data.c_str(), (uint32_t)data.length());
-        encoder.set_symbols(storage);
+        encoder.set_const_symbols(storage);
     }
 
     template<class Encoder>
-    void set_symbol(Encoder& encoder, uint32_t index, const std::string& data)
+    void set_const_symbol(Encoder& encoder, uint32_t index, const std::string& data)
     {
         auto storage = sak::const_storage(
             (uint8_t*)data.c_str(), (uint32_t)data.length());
-        encoder.set_symbol(index, storage);
+        encoder.set_const_symbol(index, storage);
     }
 
     template<class Encoder>
@@ -85,7 +85,7 @@ namespace kodo_python
         }
     };
 
-    template<template<class, class> class Coder>
+    template<template<class, class, class...> class Coder>
     struct extra_encoder_methods
     {
         template<class EncoderClass>
@@ -95,7 +95,10 @@ namespace kodo_python
         }
     };
 
-    template<template<class, class> class Coder, class Field, class TraceTag>
+    template<
+        template<class, class, class...> class Coder,
+        class Field, class TraceTag
+    >
     void encoder(const std::string& stack)
     {
         using boost::python::arg;
@@ -111,11 +114,13 @@ namespace kodo_python
             "Encode a symbol.\n\n"
             "\t:returns: The encoded symbol.\n"
         )
-        .def("set_symbols", &set_symbols<encoder_type>, arg("symbols"),
+        .def("set_const_symbols", &set_const_symbols<encoder_type>,
+            arg("symbols"),
             "Set the symbols to be encoded.\n\n"
             "\t:param symbols: The symbols to be encoded.\n"
         )
-        .def("set_symbol", &set_symbol<encoder_type>, args("index", "symbol"),
+        .def("set_const_symbol", &set_const_symbol<encoder_type>,
+            args("index", "symbol"),
             "Set a symbol to be encoded.\n\n"
             "\t:param index: The index of the symbol in the coding block.\n"
             "\t:param symbol: The actual data of that symbol.\n");

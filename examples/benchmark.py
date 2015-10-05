@@ -49,7 +49,7 @@ def run_coding_test(algorithm, field, symbols, symbol_size):
     start = time.clock()
 
     # Copy the input data to the encoder
-    encoder.set_symbols(data_in)
+    encoder.set_const_symbols(data_in)
 
     # Generate coded symbols with the encoder
     for i in range(payload_count):
