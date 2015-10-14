@@ -45,6 +45,11 @@ def configure(conf):
 
 def build(bld):
 
+    # Ensure that Python was configured properly in the configure step of
+    # the boost wscript (boost-python needs to be configured in the boost repo)
+    if not bld.env['BUILD_PYTHON']:
+        bld.fatal('Python was not configured properly')
+
     bld.load("wurf_common_tools")
 
     bld.env.append_unique(
