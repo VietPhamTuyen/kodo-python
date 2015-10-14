@@ -42,10 +42,6 @@ def configure(conf):
 
     conf.load("wurf_common_tools")
 
-    # Ensure that Python is configured properly
-    if not conf.env['BUILD_PYTHON']:
-        conf.fatal('Python was not configured properly')
-
 
 def build(bld):
 
