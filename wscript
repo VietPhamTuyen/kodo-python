@@ -5,7 +5,7 @@ import os
 from waflib.TaskGen import feature, after_method
 
 APPNAME = 'kodo-python'
-VERSION = '9.0.0'
+VERSION = '9.0.1'
 
 import waflib.extras.wurf_options
 
