@@ -107,6 +107,19 @@ Then you can import the module in your Python script::
 
   >>> import kodo
 
+Special Options
+...............
+
+With the ``enable_codecs`` option, you can configure kodo-python to only enable
+some desired codecs and disable all others. For example::
+
+    python waf configure --enable_codecs=full_vector
+
+Run ``python waf --help`` to list the available codecs. You can even
+select multiple codecs with a comma-separated list::
+
+    python waf configure --enable_codecs=full_vector,on_the_fly,nocode
+
 Compilation Issues on Linux
 ...........................
 

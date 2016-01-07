@@ -3,6 +3,9 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
+#if !defined(KODO_PYTHON_DISABLE_RLNC) && \
+    !defined(KODO_PYTHON_DISABLE_SLIDING_WINDOW)
+
 #include <kodo_rlnc/sliding_window_encoder.hpp>
 #include <kodo_rlnc/sliding_window_decoder.hpp>
 
@@ -82,3 +85,5 @@ namespace kodo_python
         create_decoder<sliding_window_decoder>("SlidingWindow");
     }
 }
+
+#endif

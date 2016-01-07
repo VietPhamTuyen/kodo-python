@@ -3,6 +3,8 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
+#if !defined(KODO_PYTHON_DISABLE_NOCODE)
+
 #include <kodo_core/nocode/carousel_decoder.hpp>
 #include <kodo_core/nocode/carousel_encoder.hpp>
 
@@ -47,3 +49,5 @@ namespace kodo_python
                                    no_field>("NoCode");
     }
 }
+
+#endif

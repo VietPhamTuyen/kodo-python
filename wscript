@@ -8,8 +8,7 @@ from waflib.TaskGen import feature, after_method
 APPNAME = 'kodo-python'
 VERSION = '9.0.1'
 
-codecs = ['nocode', 'full_vector', 'sparse_full_vector',
-          'on_the_fly', 'sliding_window',
+codecs = ['nocode', 'full_vector', 'on_the_fly', 'sliding_window',
           'perpetual', 'fulcrum']
 
 

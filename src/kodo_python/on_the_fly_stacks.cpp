@@ -3,6 +3,9 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
+#if !defined(KODO_PYTHON_DISABLE_RLNC) && \
+    !defined(KODO_PYTHON_DISABLE_ON_THE_FLY)
+
 #include <kodo_rlnc/on_the_fly_codes.hpp>
 
 #include "create_helpers.hpp"
@@ -17,3 +20,5 @@ namespace kodo_python
         create_decoder<on_the_fly_decoder>("OnTheFly");
     }
 }
+
+#endif

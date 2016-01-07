@@ -3,6 +3,9 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
+#if !defined(KODO_PYTHON_DISABLE_RLNC) && \
+    !defined(KODO_PYTHON_DISABLE_PERPETUAL)
+
 #include <kodo_rlnc/perpetual_codes.hpp>
 
 #include "create_helpers.hpp"
@@ -73,3 +76,5 @@ namespace kodo_python
         create_decoder<perpetual_decoder>("Perpetual");
     }
 }
+
+#endif

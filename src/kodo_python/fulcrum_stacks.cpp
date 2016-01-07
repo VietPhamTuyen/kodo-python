@@ -3,6 +3,8 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
+#if !defined(KODO_PYTHON_DISABLE_FULCRUM)
+
 #include <kodo_fulcrum/fulcrum_codes.hpp>
 
 #include "create_helpers.hpp"
@@ -116,3 +118,5 @@ namespace kodo_python
         create_decoder<fulcrum_combined_decoder>("Fulcrum");
     }
 }
+
+#endif

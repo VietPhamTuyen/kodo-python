@@ -3,6 +3,9 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
+#if !defined(KODO_PYTHON_DISABLE_RLNC) && \
+    !defined(KODO_PYTHON_DISABLE_FULL_VECTOR)
+
 #include <kodo_rlnc/full_vector_codes.hpp>
 
 #include "create_helpers.hpp"
@@ -46,3 +49,5 @@ namespace kodo_python
         create_encoder<sparse_full_vector_encoder>("SparseFullVector");
     }
 }
+
+#endif
