@@ -13,7 +13,7 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_set_systematic_off.hpp>
+#include <kodo_core/has_set_systematic_off.hpp>
 
 #include "coder.hpp"
 #include "resolve_field_name.hpp"
@@ -85,7 +85,7 @@ namespace kodo_python
         }
     };
 
-    template<template<class, class, class...> class Coder>
+    template<template<class, class> class Coder>
     struct extra_encoder_methods
     {
         template<class EncoderClass>
@@ -96,7 +96,7 @@ namespace kodo_python
     };
 
     template<
-        template<class, class, class...> class Coder,
+        template<class, class> class Coder,
         class Field, class TraceTag
     >
     void encoder(const std::string& stack)
@@ -126,7 +126,7 @@ namespace kodo_python
             "\t:param symbol: The actual data of that symbol.\n");
 
         (systematic_encoder_methods<
-            kodo::has_set_systematic_off<encoder_type>::value>(encoder_class));
+            kodo_core::has_set_systematic_off<encoder_type>::value>(encoder_class));
 
         (extra_encoder_methods<Coder>(encoder_class));
     }

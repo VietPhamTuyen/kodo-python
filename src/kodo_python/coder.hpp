@@ -11,12 +11,12 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_rank.hpp>
+#include <kodo_core/has_rank.hpp>
 
-#include <kodo/has_is_symbol_pivot.hpp>
-#include <kodo/has_set_zone_prefix.hpp>
-#include <kodo/has_set_trace_stdout.hpp>
-#include <kodo/has_set_trace_callback.hpp>
+#include <kodo_core/has_is_symbol_pivot.hpp>
+#include <kodo_core/has_set_zone_prefix.hpp>
+#include <kodo_core/has_set_trace_stdout.hpp>
+#include <kodo_core/has_set_trace_callback.hpp>
 
 namespace kodo_python
 {
@@ -163,7 +163,7 @@ namespace kodo_python
     };
 
     template<
-        template<class, class, class...> class Coder,
+        template<class, class> class Coder,
         class Field, class TraceTag
     >
     auto coder(const std::string& name) ->
@@ -193,17 +193,17 @@ namespace kodo_python
         );
 
         (is_symbol_pivot_method<
-            kodo::has_is_symbol_pivot<coder_type>::value>(coder_class));
+            kodo_core::has_is_symbol_pivot<coder_type>::value>(coder_class));
 
-        (rank_method<kodo::has_rank<coder_type>::value>(coder_class));
+        (rank_method<kodo_core::has_rank<coder_type>::value>(coder_class));
 
         // Trace related
         (set_zone_prefix_method<
-            kodo::has_set_zone_prefix<coder_type>::value>(coder_class));
+            kodo_core::has_set_zone_prefix<coder_type>::value>(coder_class));
         (set_trace_stdout_method<
-            kodo::has_set_trace_stdout<coder_type>::value>(coder_class));
+            kodo_core::has_set_trace_stdout<coder_type>::value>(coder_class));
         (set_trace_callback_method<
-            kodo::has_set_trace_callback<coder_type>::value>(coder_class));
+            kodo_core::has_set_trace_callback<coder_type>::value>(coder_class));
 
         return coder_class;
     }

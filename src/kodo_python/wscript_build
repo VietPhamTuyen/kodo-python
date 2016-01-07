@@ -16,11 +16,13 @@ bld(
     linkflags=extra_linkflags,
     use=[
         'STEINWURF_VERSION',
-        'boost_filesystem',
         'boost_includes',
         'boost_python',
+        'boost_filesystem',
         'boost_system',
-        'fifi',
-        'kodo_includes',
+        'kodo_core_includes',
+        'kodo_rlnc_includes',
+        'kodo_fulcrum_includes',
+        'KODO_PYTHON_COMMON'
     ]
 )

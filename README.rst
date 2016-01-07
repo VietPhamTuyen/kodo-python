@@ -1,5 +1,20 @@
-kodo-python
-===========
+License
+-------
+
+A valid Kodo license is required if you wish to use this project.
+
+Please request a license by **filling out the license request** form_.
+
+Kodo is available under a research- and education-friendly license,
+you can see the details here_.
+
+If you try to configure without a valid license, then you will get an error!
+
+.. _form: http://steinwurf.com/license/
+.. _here: http://steinwurf.com/research-license/
+
+About
+-----
 
 kodo-python contains a set of high-level Python bindings for the Kodo Network
 Coding C++ library. The bindings provide access to basic functionality provided
@@ -9,20 +24,6 @@ sample applications showing the usage of the Python API.
 .. image:: http://buildbot.steinwurf.dk/svgstatus?project=kodo-python
     :target: http://buildbot.steinwurf.dk/stats?projects=kodo-python
     :alt: Buildbot status
-.. image:: https://badge.fury.io/py/kodo.svg
-    :target: http://badge.fury.io/py/kodo
-.. image:: https://pypip.in/download/kodo/badge.svg
-    :target: https://pypi.python.org/pypi/kodo
-    :alt: Downloads
-.. image:: https://pypip.in/py_versions/kodo/badge.svg
-    :target: https://pypi.python.org/pypi/kodo
-    :alt: Supported Python versions
-.. image:: https://pypip.in/format/kodo/badge.svg
-    :target: https://pypi.python.org/pypi/kodo
-    :alt: Download format
-.. image:: https://pypip.in/license/kodo/badge.svg
-    :target: https://pypi.python.org/pypi/kodo
-    :alt: License
 
 If you have any questions or suggestions about this library, please contact
 us at our developer mailing list (hosted at Google Groups):
@@ -31,19 +32,6 @@ us at our developer mailing list (hosted at Google Groups):
 
 .. contents:: Table of Contents:
    :local:
-
-License
--------
-
-A valid license is required if you wish to use and install this library. Please
-request a license by **filling out the license request** form_.
-
-This project is available under a research- and education-friendly license,
-see the details in the `LICENSE.rst file
-<https://github.com/steinwurf/kodo-python/blob/master/LICENSE.rst>`_.
-
-.. _form: http://steinwurf.com/license/
-
 
 Requirements
 ------------
@@ -68,8 +56,8 @@ First, acquire the required packages from your package management system::
 
 If you are using Python 3, you'll need to install ``libpython3-dev`` instead.
 
-MacOSX
-......
+Mac OSX
+.......
 
 Install the latest XCode and Command Line Tools from the Mac Store.
 
@@ -81,10 +69,10 @@ Homebrew.
 Windows
 .......
 
-Install Python 2.7 (32-bit) and Visual Studio Express 2013 for Windows Desktop.
+Install Python 2.7 (32-bit) and Visual Studio Express 2015 for Windows Desktop.
 Then set the ``VS90COMNTOOLS`` environment variable to::
 
-  C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Tools\
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\
 
 so that Python distutils can detect your new compiler.
 
@@ -92,8 +80,7 @@ so that Python distutils can detect your new compiler.
 Building From Source
 --------------------
 
-It is recommended to build the Python bindings from source (the other option
-is installing with pip as described below).
+It is recommended to build the Python bindings from source.
 
 First, clone the project::
 
@@ -120,6 +107,19 @@ Then you can import the module in your Python script::
 
   >>> import kodo
 
+Special Options
+...............
+
+With the ``enable_codecs`` option, you can configure kodo-python to only enable
+some desired codecs and disable all others. For example::
+
+    python waf configure --enable_codecs=full_vector
+
+Run ``python waf --help`` to list the available codecs. You can even
+select multiple codecs with a comma-separated list::
+
+    python waf configure --enable_codecs=full_vector,on_the_fly,nocode
+
 Compilation Issues on Linux
 ...........................
 
@@ -134,7 +134,7 @@ build step::
 With this change, a fast compilation is possible with 2 GB RAM.
 
 This issue is specific to g++ (which is the default compiler on Linux), but
-the RAM usage and the compilation time could be much better with clang.
+the RAM usage and the compilation time can be much better with clang.
 The code produced by clang is also fast.
 
 If the compilation does not work with g++, then you can install clang like
@@ -145,11 +145,11 @@ this (on Ubuntu and Debian)::
 Then you should configure the project with the appropriate mkspec. Use the
 following command on 32-bit Linux::
 
-    python waf configure --options=cxx_mkspec=cxx_clang35_x86
+    python waf configure --cxx_mkspec=cxx_clang35_x86
 
 Or use this one on 64-bit Linux::
 
-    python waf configure --options=cxx_mkspec=cxx_clang35_x64
+    python waf configure --cxx_mkspec=cxx_clang35_x64
 
 Compiling on the Raspberry Pi
 .............................
@@ -157,39 +157,3 @@ Compiling on the Raspberry Pi
 The detailed instructions for compiling the project on the Raspberry Pi
 are found in our `Raspberry guide
 <https://github.com/steinwurf/kodo-python/blob/master/RASPBERRY_GUIDE.rst>`_.
-
-
-Pip Package
------------
-
-We also provide a pip package for the installation of kodo-python with a
-single command.
-
-If you don't have pip installed, then you can
-`follow this guide <https://pip.pypa.io/en/latest/installing.html>`_.
-
-Of course, you also need to install the required tools specified above.
-
-Note that the pip package might not contain the latest version of kodo-python,
-and it might not work on all systems. In fact, pip will also build the project
-from source, download its dependencies, configure the compiler, but these
-details are largely hidden from you. Debugging pip errors could be difficult,
-so please build the project from source if pip does not work for you.
-
-Linux/MacOSX
-............
-
-Install the package with this command::
-
-  sudo pip install kodo
-
-Windows
-.......
-
-To enable the use of pip from the command line, ensure that the ``Scripts``
-subdirectory of your Python installation is available on the system ``PATH``.
-(This is not done automatically.)
-
-Install the package with this command::
-
-  pip install kodo

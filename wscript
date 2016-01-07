@@ -2,12 +2,14 @@
 # encoding: utf-8
 
 import os
+import waflib.extras.wurf_options
 from waflib.TaskGen import feature, after_method
 
 APPNAME = 'kodo-python'
 VERSION = '9.0.1'
 
-import waflib.extras.wurf_options
+codecs = ['nocode', 'full_vector', 'on_the_fly', 'sliding_window',
+          'perpetual', 'fulcrum']
 
 
 def options(opt):
@@ -33,14 +35,75 @@ def resolve(ctx):
         major=2))
 
     ctx.add_dependency(resolve.ResolveVersion(
-        name='kodo',
-        git_repository='github.com/steinwurf/kodo.git',
-        major=32))
+        name='kodo-core',
+        git_repository='github.com/steinwurf/kodo-core.git',
+        major=2))
+
+    ctx.add_dependency(resolve.ResolveVersion(
+        name='kodo-rlnc',
+        git_repository='github.com/steinwurf/kodo-rlnc.git',
+        major=2),
+        optional=True)
+
+    ctx.add_dependency(resolve.ResolveVersion(
+        name='kodo-fulcrum',
+        git_repository='github.com/steinwurf/kodo-fulcrum.git',
+        major=2),
+        optional=True)
+
+    opts = ctx.opt.add_option_group('kodo-python options')
+
+    opts.add_option(
+        '--disable_rlnc', default=None, dest='disable_rlnc',
+        action='store_true', help="Disable the basic RLNC codecs")
+
+    opts.add_option(
+        '--disable_fulcrum', default=None, dest='disable_fulcrum',
+        action='store_true', help="Disable the Fulcrum RLNC codec")
+
+    opts.add_option(
+        '--enable_codecs', default=None, dest='enable_codecs',
+        help="Enable the chosen codec or codecs, and disable all others. "
+             "A comma-separated list of these values: {0}".format(codecs))
 
 
 def configure(conf):
 
     conf.load("wurf_common_tools")
+
+    conf.env['DEFINES_KODO_PYTHON_COMMON'] = []
+
+    disabled_codec_groups = 0
+
+    if conf.has_tool_option('disable_rlnc') or \
+       not conf.has_dependency_path('kodo-rlnc'):
+        conf.env['DEFINES_KODO_PYTHON_COMMON'] += ['KODO_PYTHON_DISABLE_RLNC']
+        disabled_codec_groups += 1
+    if conf.has_tool_option('disable_fulcrum') or \
+       not conf.has_dependency_path('kodo-fulcrum'):
+        conf.env['DEFINES_KODO_PYTHON_COMMON'] += \
+            ['KODO_PYTHON_DISABLE_FULCRUM']
+        disabled_codec_groups += 1
+
+    if disabled_codec_groups == 2:
+        conf.fatal('All codec groups are disabled or unavailable. Please make '
+                   'sure that you enable at least one codec group and you '
+                   'have access to the corresponding repositories!')
+
+    if conf.has_tool_option('enable_codecs'):
+        enabled = conf.get_tool_option('enable_codecs').split(',')
+
+        # Validate the chosen codecs
+        for codec in enabled:
+            if codec not in codecs:
+                conf.fatal('Invalid codec: "{0}". Please use the following '
+                           'codec names: {1}'.format(codec, codecs))
+
+        # Disable the codecs that were not selected
+        for codec in codecs:
+            if codec not in enabled:
+                conf.env['DEFINES_KODO_PYTHON_COMMON'] += \
+                    ['KODO_PYTHON_DISABLE_{0}'.format(codec.upper())]
 
 
 def build(bld):

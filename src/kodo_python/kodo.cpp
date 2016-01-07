@@ -20,12 +20,30 @@ namespace kodo_python
 
     void create_stacks()
     {
-        create_full_vector_stacks();
-        create_on_the_fly_stacks();
-        create_sliding_window_stacks();
-        create_perpertual_stacks();
+#if !defined(KODO_PYTHON_DISABLE_NOCODE)
         create_carousel_stacks();
+#endif
+
+#if !defined(KODO_PYTHON_DISABLE_RLNC)
+
+#if !defined(KODO_PYTHON_DISABLE_FULL_VECTOR)
+        create_full_vector_stacks();
+#endif
+#if !defined(KODO_PYTHON_DISABLE_ON_THE_FLY)
+        create_on_the_fly_stacks();
+#endif
+#if !defined(KODO_PYTHON_DISABLE_SLIDING_WINDOW)
+        create_sliding_window_stacks();
+#endif
+#if !defined(KODO_PYTHON_DISABLE_PERPETUAL)
+        create_perpertual_stacks();
+#endif
+
+#endif // !defined(KODO_PYTHON_DISABLE_RLNC)
+
+#if !defined(KODO_PYTHON_DISABLE_FULCRUM)
         create_fulcrum_stacks();
+#endif
     }
 
     std::string version()
@@ -46,9 +64,17 @@ namespace kodo_python
 #ifdef STEINWURF_FIFI_VERSION
         version += std::string(STEINWURF_FIFI_VERSION);
 #endif
-        version += std::string("\n\tkodo: ");
-#ifdef STEINWURF_KODO_VERSION
-        version += std::string(STEINWURF_KODO_VERSION);
+        version += std::string("\n\tkodo-fulcrum: ");
+#ifdef STEINWURF_KODO_FULCRUM_VERSION
+        version += std::string(STEINWURF_KODO_FULCRUM_VERSION);
+#endif
+        version += std::string("\n\tkodo-core: ");
+#ifdef STEINWURF_KODO_CORE_VERSION
+        version += std::string(STEINWURF_KODO_CORE_VERSION);
+#endif
+        version += std::string("\n\tkodo-rlnc: ");
+#ifdef STEINWURF_KODO_RLNC_VERSION
+        version += std::string(STEINWURF_KODO_RLNC_VERSION);
 #endif
         version += std::string("\n\tmeta: ");
 #ifdef STEINWURF_META_VERSION

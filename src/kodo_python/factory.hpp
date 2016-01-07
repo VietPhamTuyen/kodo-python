@@ -10,12 +10,12 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_is_complete.hpp>
+#include <kodo_core/has_is_complete.hpp>
 #include "resolve_field_name.hpp"
 
 namespace kodo_python
 {
-    template<template<class, class, class...> class Coder>
+    template<template<class, class> class Coder>
     struct extra_factory_methods
     {
         template<class FactoryClass>
@@ -26,7 +26,7 @@ namespace kodo_python
     };
 
     template<
-        template<class, class, class...> class Coder,
+        template<class, class> class Coder,
         class Field, class TraceTag
     >
     void factory(const std::string& stack)
@@ -40,7 +40,7 @@ namespace kodo_python
 
         std::string field = resolve_field_name<Field>();
         std::string coder =
-            kodo::has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
+            kodo_core::has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
         std::string kind = coder + std::string("Factory");
         std::string name = stack + kind + field;
 
@@ -88,7 +88,7 @@ namespace kodo_python
         );
 
         std::string max_block_size_desc;
-        if (kodo::has_is_complete<stack_type>::value)
+        if (kodo_core::has_is_complete<stack_type>::value)
         {
             max_block_size_desc =
             "Return the maximum amount of data decoded in bytes.\n\n"

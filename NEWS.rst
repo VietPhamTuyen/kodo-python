@@ -6,7 +6,11 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Depend on kodo-core, kodo-rlnc and kodo-fulcrum instead of kodo
+  (kodo has been split to multiple repositories).
+* Minor: Added the ``enable_codecs`` option to only enable specific codecs
+  when configuring kodo-python. This option is useful to build a smaller
+  library.
 
 9.0.1
 -----

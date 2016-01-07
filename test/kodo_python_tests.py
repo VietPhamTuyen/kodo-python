@@ -12,7 +12,7 @@ import unittest
 import kodo
 
 test_sets = [
-    # Full RLNC
+    # FullVector
     (kodo.FullVectorEncoderFactoryBinary,
      kodo.FullVectorDecoderFactoryBinary),
     (kodo.FullVectorEncoderFactoryBinary4,
@@ -22,7 +22,7 @@ test_sets = [
     (kodo.FullVectorEncoderFactoryBinary16,
      kodo.FullVectorDecoderFactoryBinary16),
 
-    # Sparse Full RLNC
+    # SparseFullVector
     (kodo.SparseFullVectorEncoderFactoryBinary,
      kodo.FullVectorDecoderFactoryBinary),
     (kodo.SparseFullVectorEncoderFactoryBinary4,
@@ -32,7 +32,7 @@ test_sets = [
     (kodo.SparseFullVectorEncoderFactoryBinary16,
      kodo.FullVectorDecoderFactoryBinary16),
 
-    # On The Fly
+    # OnTheFly
     (kodo.OnTheFlyEncoderFactoryBinary,
      kodo.OnTheFlyDecoderFactoryBinary),
     (kodo.OnTheFlyEncoderFactoryBinary4,
@@ -42,7 +42,7 @@ test_sets = [
     (kodo.OnTheFlyEncoderFactoryBinary16,
      kodo.OnTheFlyDecoderFactoryBinary16),
 
-    # Sliding Window
+    # SlidingWindow
     (kodo.SlidingWindowEncoderFactoryBinary,
      kodo.SlidingWindowDecoderFactoryBinary),
     (kodo.SlidingWindowEncoderFactoryBinary4,
@@ -51,6 +51,28 @@ test_sets = [
      kodo.SlidingWindowDecoderFactoryBinary8),
     (kodo.SlidingWindowEncoderFactoryBinary16,
      kodo.SlidingWindowDecoderFactoryBinary16),
+
+    # Perpetual
+    (kodo.PerpetualEncoderFactoryBinary,
+     kodo.PerpetualDecoderFactoryBinary),
+    (kodo.PerpetualEncoderFactoryBinary4,
+     kodo.PerpetualDecoderFactoryBinary4),
+    (kodo.PerpetualEncoderFactoryBinary8,
+     kodo.PerpetualDecoderFactoryBinary8),
+    (kodo.PerpetualEncoderFactoryBinary16,
+     kodo.PerpetualDecoderFactoryBinary16),
+
+    # Carousel
+    (kodo.NoCodeEncoderFactory,
+     kodo.NoCodeDecoderFactory),
+
+    # Fulcrum
+    (kodo.FulcrumEncoderFactoryBinary4,
+     kodo.FulcrumDecoderFactoryBinary4),
+    (kodo.FulcrumEncoderFactoryBinary8,
+     kodo.FulcrumDecoderFactoryBinary8),
+    (kodo.FulcrumEncoderFactoryBinary16,
+     kodo.FulcrumDecoderFactoryBinary16),
 ]
 
 
