@@ -3,11 +3,11 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
-#include <kodo/nocode/carousel_decoder.hpp>
-#include <kodo/nocode/carousel_encoder.hpp>
+#include <kodo_core/nocode/carousel_decoder.hpp>
+#include <kodo_core/nocode/carousel_encoder.hpp>
 
-#include <kodo/pool_factory.hpp>
-#include <kodo/rebind_factory.hpp>
+#include <kodo_core/pool_factory.hpp>
+#include <kodo_core/rebind_factory.hpp>
 
 #include "create_helpers.hpp"
 
@@ -15,27 +15,27 @@ namespace kodo_python
 {
     template<class Field, class TraceTag>
     class carousel_encoder_wrapper : public
-        kodo::nocode::carousel_encoder<TraceTag>
+        kodo_core::nocode::carousel_encoder<TraceTag>
     {
     public:
-        using factory = kodo::rebind_factory<
-            kodo::nocode::carousel_encoder<TraceTag>,
+        using factory = kodo_core::rebind_factory<
+            kodo_core::nocode::carousel_encoder<TraceTag>,
             carousel_encoder_wrapper<Field, TraceTag>>;
     };
 
     template<class Field, class TraceTag>
     class carousel_decoder_wrapper : public
-        kodo::nocode::carousel_decoder<TraceTag>
+        kodo_core::nocode::carousel_decoder<TraceTag>
     {
     public:
-        using factory = kodo::rebind_factory<
-            kodo::nocode::carousel_encoder<TraceTag>,
+        using factory = kodo_core::rebind_factory<
+            kodo_core::nocode::carousel_encoder<TraceTag>,
             carousel_decoder_wrapper<Field, TraceTag>>;
 
     public:
         uint32_t symbols_uncoded()
         {
-            return kodo::nocode::carousel_decoder<TraceTag>::rank();
+            return kodo_core::nocode::carousel_decoder<TraceTag>::rank();
         }
     };
 

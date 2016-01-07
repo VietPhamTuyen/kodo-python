@@ -3,14 +3,13 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
-#include <kodo/rlnc/sliding_window_encoder.hpp>
-#include <kodo/rlnc/sliding_window_decoder.hpp>
+#include <kodo_rlnc/sliding_window_encoder.hpp>
+#include <kodo_rlnc/sliding_window_decoder.hpp>
 
 #include "create_helpers.hpp"
 
 namespace kodo_python
 {
-
     struct sliding_window_coder_methods
     {
         template<class CoderClass>
@@ -35,7 +34,7 @@ namespace kodo_python
     }
 
     template<>
-    struct extra_encoder_methods<kodo::rlnc::sliding_window_encoder>
+    struct extra_encoder_methods<kodo_rlnc::sliding_window_encoder>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
@@ -61,7 +60,7 @@ namespace kodo_python
     }
 
     template<>
-    struct extra_decoder_methods<kodo::rlnc::sliding_window_decoder>
+    struct extra_decoder_methods<kodo_rlnc::sliding_window_decoder>
     {
         template<class DecoderClass>
         extra_decoder_methods(DecoderClass& decoder_class)
@@ -77,11 +76,9 @@ namespace kodo_python
 
     void create_sliding_window_stacks()
     {
-        using namespace kodo::rlnc;
+        using namespace kodo_rlnc;
 
         create_encoder<sliding_window_encoder>("SlidingWindow");
         create_decoder<sliding_window_decoder>("SlidingWindow");
     }
 }
-
-

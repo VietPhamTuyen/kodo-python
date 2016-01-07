@@ -3,14 +3,14 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
-#include <kodo/rlnc/full_vector_codes.hpp>
+#include <kodo_rlnc/full_vector_codes.hpp>
 
 #include "create_helpers.hpp"
 
 namespace kodo_python
 {
     template<>
-    struct extra_encoder_methods<kodo::rlnc::sparse_full_vector_encoder>
+    struct extra_encoder_methods<kodo_rlnc::sparse_full_vector_encoder>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
@@ -38,7 +38,7 @@ namespace kodo_python
 
     void create_full_vector_stacks()
     {
-        using namespace kodo::rlnc;
+        using namespace kodo_rlnc;
 
         create_encoder<full_vector_encoder>("FullVector");
         create_decoder<full_vector_decoder>("FullVector");

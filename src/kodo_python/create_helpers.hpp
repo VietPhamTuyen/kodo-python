@@ -12,7 +12,7 @@
 #include <fifi/binary8.hpp>
 #include <fifi/binary16.hpp>
 
-#include <kodo/enable_trace.hpp>
+#include <kodo_core/enable_trace.hpp>
 
 #include "encoder.hpp"
 #include "decoder.hpp"
@@ -25,18 +25,18 @@ namespace kodo_python
     void create_factory_and_encoder(const std::string& stack)
     {
         // First create the factory type
-        factory<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
+        factory<Coder, Field, meta::typelist<kodo_core::enable_trace>>(stack);
         // Then create the corresponding encoder type
-        encoder<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
+        encoder<Coder, Field, meta::typelist<kodo_core::enable_trace>>(stack);
     }
 
     template<template<class, class, class...> class Coder, class Field>
     void create_factory_and_decoder(const std::string& stack)
     {
         // First create the factory type
-        factory<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
+        factory<Coder, Field, meta::typelist<kodo_core::enable_trace>>(stack);
         // Then create the corresponding decoder type
-        decoder<Coder, Field, meta::typelist<kodo::enable_trace>>(stack);
+        decoder<Coder, Field, meta::typelist<kodo_core::enable_trace>>(stack);
     }
 
     template<template<class, class, class...> class Coder>

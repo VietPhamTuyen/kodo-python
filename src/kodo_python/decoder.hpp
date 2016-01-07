@@ -14,8 +14,8 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-#include <kodo/has_partial_decoding_tracker.hpp>
-#include <kodo/has_write_payload.hpp>
+#include <kodo_core/has_partial_decoding_tracker.hpp>
+#include <kodo_core/has_write_payload.hpp>
 
 #include <sak/storage.hpp>
 
@@ -62,24 +62,24 @@ namespace kodo_python
     }
 
     template<bool HasPartialDecodingTracker>
-    struct is_partial_complete_method
+    struct is_partially_complete_method
     {
         template<class DecoderClass>
-        is_partial_complete_method(DecoderClass& decoder_class)
+        is_partially_complete_method(DecoderClass& decoder_class)
         {
             (void) decoder_class;
         }
     };
 
     template<>
-    struct is_partial_complete_method<true>
+    struct is_partially_complete_method<true>
     {
         template<class DecoderClass>
-        is_partial_complete_method(DecoderClass& decoder_class)
+        is_partially_complete_method(DecoderClass& decoder_class)
         {
             decoder_class
-            .def("is_partial_complete",
-                &DecoderClass::wrapped_type::is_partial_complete,
+            .def("is_partially_complete",
+                &DecoderClass::wrapped_type::is_partially_complete,
                 "Check whether the decoding matrix is partially decoded.\n\n"
                 "\t:returns: True if the decoding matrix is partially "
                 "decoded.\n");
@@ -160,10 +160,10 @@ namespace kodo_python
         );
 
         (write_payload_method<
-            kodo::has_write_payload<decoder_type>::value>(decoder_class));
+            kodo_core::has_write_payload<decoder_type>::value>(decoder_class));
 
-        (is_partial_complete_method<
-            kodo::has_partial_decoding_tracker<decoder_type>::value>(
+        (is_partially_complete_method<
+            kodo_core::has_partial_decoding_tracker<decoder_type>::value>(
                 decoder_class));
 
         (extra_decoder_methods<Coder>(decoder_class));

@@ -3,13 +3,12 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
-#include <kodo/rlnc/fulcrum_codes.hpp>
+#include <kodo_fulcrum/fulcrum_codes.hpp>
 
 #include "create_helpers.hpp"
 
 namespace kodo_python
 {
-
     struct fulcrum_coder_methods
     {
         template<class CoderClass>
@@ -70,7 +69,7 @@ namespace kodo_python
     };
 
     template<>
-    struct extra_encoder_methods<kodo::rlnc::fulcrum_encoder>
+    struct extra_encoder_methods<kodo_fulcrum::fulcrum_encoder>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
@@ -80,7 +79,7 @@ namespace kodo_python
     };
 
     template<>
-    struct extra_decoder_methods<kodo::rlnc::fulcrum_combined_decoder>
+    struct extra_decoder_methods<kodo_fulcrum::fulcrum_combined_decoder>
     {
         template<class DecoderClass>
         extra_decoder_methods(DecoderClass& decoder_class)
@@ -90,7 +89,7 @@ namespace kodo_python
     };
 
     template<>
-    struct extra_factory_methods<kodo::rlnc::fulcrum_encoder>
+    struct extra_factory_methods<kodo_fulcrum::fulcrum_encoder>
     {
         template<class FactoryClass>
         extra_factory_methods(FactoryClass& factory_class)
@@ -100,7 +99,7 @@ namespace kodo_python
     };
 
     template<>
-    struct extra_factory_methods<kodo::rlnc::fulcrum_combined_decoder>
+    struct extra_factory_methods<kodo_fulcrum::fulcrum_combined_decoder>
     {
         template<class FactoryClass>
         extra_factory_methods(FactoryClass& factory_class)
@@ -111,7 +110,7 @@ namespace kodo_python
 
     void create_fulcrum_stacks()
     {
-        using namespace kodo::rlnc;
+        using namespace kodo_fulcrum;
 
         create_encoder<fulcrum_encoder>("Fulcrum");
         create_decoder<fulcrum_combined_decoder>("Fulcrum");

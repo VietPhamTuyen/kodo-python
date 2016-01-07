@@ -3,7 +3,7 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
-#include <kodo/rlnc/on_the_fly_codes.hpp>
+#include <kodo_rlnc/on_the_fly_codes.hpp>
 
 #include "create_helpers.hpp"
 
@@ -11,7 +11,7 @@ namespace kodo_python
 {
     void create_on_the_fly_stacks()
     {
-        using namespace kodo::rlnc;
+        using namespace kodo_rlnc;
 
         create_encoder<on_the_fly_encoder>("OnTheFly");
         create_decoder<on_the_fly_decoder>("OnTheFly");

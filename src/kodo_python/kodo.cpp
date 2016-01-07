@@ -46,9 +46,17 @@ namespace kodo_python
 #ifdef STEINWURF_FIFI_VERSION
         version += std::string(STEINWURF_FIFI_VERSION);
 #endif
-        version += std::string("\n\tkodo: ");
-#ifdef STEINWURF_KODO_VERSION
-        version += std::string(STEINWURF_KODO_VERSION);
+        version += std::string("\n\tkodo-fulcrum: ");
+#ifdef STEINWURF_KODO_FULCRUM_VERSION
+        version += std::string(STEINWURF_KODO_FULCRUM_VERSION);
+#endif
+        version += std::string("\n\tkodo-core: ");
+#ifdef STEINWURF_KODO_CORE_VERSION
+        version += std::string(STEINWURF_KODO_CORE_VERSION);
+#endif
+        version += std::string("\n\tkodo-rlnc: ");
+#ifdef STEINWURF_KODO_RLNC_VERSION
+        version += std::string(STEINWURF_KODO_RLNC_VERSION);
 #endif
         version += std::string("\n\tmeta: ");
 #ifdef STEINWURF_META_VERSION

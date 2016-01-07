@@ -3,14 +3,14 @@
 // See accompanying file LICENSE.rst or
 // http://www.steinwurf.com/licensing
 
-#include <kodo/rlnc/perpetual_codes.hpp>
+#include <kodo_rlnc/perpetual_codes.hpp>
 
 #include "create_helpers.hpp"
 
 namespace kodo_python
 {
     template<>
-    struct extra_encoder_methods<kodo::rlnc::perpetual_encoder>
+    struct extra_encoder_methods<kodo_rlnc::perpetual_encoder>
     {
         template<class EncoderClass>
         extra_encoder_methods(EncoderClass& encoder_class)
@@ -67,7 +67,7 @@ namespace kodo_python
 
     void create_perpertual_stacks()
     {
-        using namespace kodo::rlnc;
+        using namespace kodo_rlnc;
 
         create_encoder<perpetual_encoder>("Perpetual");
         create_decoder<perpetual_decoder>("Perpetual");
