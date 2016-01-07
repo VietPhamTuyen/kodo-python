@@ -111,7 +111,7 @@ namespace kodo_python
         }
     };
 
-    template<template<class, class, class...> class Coder>
+    template<template<class, class> class Coder>
     struct extra_decoder_methods
     {
         template<class DecoderClass>
@@ -122,7 +122,7 @@ namespace kodo_python
     };
 
     template<
-        template<class, class, class...> class Coder,
+        template<class, class> class Coder,
         class Field, class TraceTag
     >
     void decoder(const std::string& stack)

@@ -163,7 +163,7 @@ namespace kodo_python
     };
 
     template<
-        template<class, class, class...> class Coder,
+        template<class, class> class Coder,
         class Field, class TraceTag
     >
     auto coder(const std::string& name) ->
