@@ -45,11 +45,11 @@ def main():
 
     encoder = encoder_factory.build()
 
-    # recoder_factory = kodo.FullVectorRecoderFactoryBinary(
-    #     max_symbols=symbols,
-    #     max_symbol_size=symbol_size)
+    recoder_factory = kodo.FullVectorRecoderFactoryBinary(
+        max_symbols=symbols,
+        max_symbol_size=symbol_size)
 
-    # recoder = recoder_factory.build()
+    recoder = recoder_factory.build()
 
     decoder_factory = kodo.FullVectorDecoderFactoryBinary(
         max_symbols=symbols,
@@ -72,15 +72,15 @@ def main():
         # Encode a packet into the payload buffer
         packet = encoder.write_payload()
 
-        # Pass that packet to decoder1
-        # recoder.read_payload(packet)
+        # Pass that packet to the recoder
+        recoder.read_payload(packet)
 
         # Now produce a new recoded packet from the current
         # decoding buffer, and place it into the payload buffer
-        # packet = recoder.write_payload()
+        recoded_packet = recoder.write_payload()
 
-        # Pass the recoded packet to decoder2
-        decoder.read_payload(packet)
+        # Pass the recoded packet to the decoder
+        decoder.read_payload(recoded_packet)
 
     # The decoder should now be complete,
     # copy the symbols from the decoders
