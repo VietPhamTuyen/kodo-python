@@ -37,8 +37,8 @@ def main():
     symbols = 42
     symbol_size = 160
 
-    # In the following we will make an encoder/decoder factory.
-    # The factories are used to build actual encoders/decoders
+    # In the following we will make an encoder/recoder/decoder factory.
+    # The factories are used to build actual encoders/recoders/decoders
     encoder_factory = kodo.FullVectorEncoderFactoryBinary(
         max_symbols=symbols,
         max_symbol_size=symbol_size)
@@ -76,7 +76,7 @@ def main():
         recoder.read_payload(packet)
 
         # Now produce a new recoded packet from the current
-        # decoding buffer, and place it into the payload buffer
+        # buffer, and place it into the payload buffer
         recoded_packet = recoder.write_payload()
 
         # Pass the recoded packet to the decoder
