@@ -29,7 +29,7 @@ namespace kodo_python
         template<class, class> class Coder,
         class Field, class TraceTag
     >
-    void factory(const std::string& stack)
+    void factory(const std::string& stack, const std::string& coder)
     {
         using boost::python::arg;
         using boost::python::args;
@@ -39,8 +39,6 @@ namespace kodo_python
         using factory_type = typename stack_type::factory;
 
         std::string field = resolve_field_name<Field>();
-        std::string coder =
-            kodo_core::has_is_complete<stack_type>::value ? "Decoder" : "Encoder";
         std::string kind = coder + std::string("Factory");
         std::string name = stack + kind + field;
 

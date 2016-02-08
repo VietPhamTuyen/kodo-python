@@ -45,6 +45,7 @@ namespace kodo_python
 
         create_encoder<full_vector_encoder>("FullVector");
         create_decoder<full_vector_decoder>("FullVector");
+        create_recoder<full_vector_recoder>("FullVector");
 
         create_encoder<sparse_full_vector_encoder>("SparseFullVector");
     }
