@@ -151,8 +151,33 @@ namespace kodo_python
             "performance reasons, choose to not keep track of the exact\n"
             "status of the decoding matrix.\n"
             "It is however guaranteed that at least this amount of uncoded\n"
-            "symbols exist.\n"
+            "symbols exist.\n\n"
             "\t:returns: The number of symbols which have been uncoded.\n"
+        )
+        .def("is_symbol_uncoded", &decoder_type::is_symbol_uncoded,
+            arg("index"),
+            "Check if the symbol at given index is uncoded.\n\n"
+            "This may return false for symbols that are actually uncoded,\n"
+            "but never true for symbols that are not uncoded.\n"
+            "As with the symbols_uncoded() function the reason for this is\n"
+            "that some algorithms do not, for performance reasons, keep track\n"
+            "of the exact status of the decoding matrix.\n\n"
+            "\t:param index: Index of the symbol to check.\n"
+            "\t:return: True if the symbol is uncoded, and otherwise false.\n"
+        )
+        .def("is_symbol_missing", &decoder_type::is_symbol_missing,
+            arg("index"),
+            "Check if the symbol at given index is missing.\n\n"
+            "\t:param index: Index of the symbol to check.\n"
+            "\t:return: True if the symbol is missing otherwise false.\n"
+        )
+        .def("is_symbol_partially_decoded",
+            &decoder_type::is_symbol_partially_decoded,
+            arg("index"),
+            "Check if the symbol at given index is partially decoded.\n\n"
+            "\t:param index: Index of the symbol to check.\n"
+            "\t:return: True if the symbol is partially decoded otherwise\n"
+            "\t         false.\n"
         )
         .def("copy_from_symbols", &copy_from_symbols<decoder_type>,
             "Return the decoded symbols.\n\n"
