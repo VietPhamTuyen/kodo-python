@@ -76,6 +76,18 @@ def main():
         # Packet got through - pass that packet to the decoder
         decoder.read_payload(packet)
         print("Decoder received packet")
+        print("Encoder rank = {}".format(encoder.rank()))
+        print("Decoder rank = {}".format(decoder.rank()))
+        uncoded_symbol_indces = []
+        for i in range(decoder.symbols()):
+            if decoder.is_symbol_uncoded(i):
+                uncoded_symbol_indces.append(str(i))
+
+        print("Decoder uncoded = {} ({}) symbols".format(
+            decoder.symbols_uncoded(),
+            " ".join(uncoded_symbol_indces)))
+        print("Decoder partially decoded = {}".format(
+            decoder.symbols_partially_decoded()))
 
     print("Processing finished")
     # The decoder is complete, now copy the symbols from the decoder

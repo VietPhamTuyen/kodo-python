@@ -6,9 +6,11 @@ every change, see the Git log.
 
 Latest
 ------
-* Minor: Added decoder functions; ``is_symbol_uncoded``, ``is_symbol_missing``,
-  and ``is_symbol_partially_decoded``.
-* Patch: Updated documentation
+* Minor: Added decoder functions: ``copy_from_symbol``, ``is_symbol_missing``,
+  ``is_symbol_partially_decoded``, ``is_symbol_uncoded``, ``symbols_missing``,
+  ``symbols_partially_decoded``.
+* Patch: Updated documentation.
+
 10.0.0
 ------
 * Major: Depend on kodo-core, kodo-rlnc and kodo-fulcrum instead of kodo
